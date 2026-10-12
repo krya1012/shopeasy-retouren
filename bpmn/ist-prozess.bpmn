@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_Ist" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:collaboration id="Collab_Ist">
+    <bpmn:participant id="Participant_Ist" name="ShopEasy GmbH – Retourenabwicklung (Ist-Prozess)" processRef="Process_Ist" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Ist" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_Kunde" name="Kund:in">
+        <bpmn:flowNodeRef>s_web</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_mkt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_mail</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_ship</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Service" name="Kundenservice / Sachbearbeitung">
+        <bpmn:flowNodeRef>t_mkt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_mail</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_erp</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_label</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_send</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_dec</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_esc</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_stock</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_m</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_comm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_report</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Lager" name="Lager (WMS)">
+        <bpmn:flowNodeRef>ev_wait</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_gr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_reject</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Buch" name="Buchhaltung">
+        <bpmn:flowNodeRef>t_refund</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="s_web" name="Retoure im Webshop-Formular angemeldet">
+      <bpmn:outgoing>f1</bpmn:outgoing>
+      <bpmn:messageEventDefinition />
+    </bpmn:startEvent>
+    <bpmn:startEvent id="s_mkt" name="Retoure im Marktplatz-Tool angemeldet (Amazon/Zalando)">
+      <bpmn:outgoing>f2</bpmn:outgoing>
+      <bpmn:messageEventDefinition />
+    </bpmn:startEvent>
+    <bpmn:startEvent id="s_mail" name="Retoure formlos per E-Mail angemeldet">
+      <bpmn:outgoing>f3</bpmn:outgoing>
+      <bpmn:messageEventDefinition />
+    </bpmn:startEvent>
+    <bpmn:manualTask id="t_mkt" name="Marktplatz-Portal sichten, Daten abtippen">
+      <bpmn:documentation>Eigene API je Marktplatz, keine Anbindung an das ERP (Medienbruch).</bpmn:documentation>
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f4</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="t_mail" name="E-Mail lesen, Daten nachfragen, abtippen">
+      <bpmn:documentation>Unstrukturierte Anmeldung; fehlende Angaben werden per E-Mail nachgefragt.</bpmn:documentation>
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f5</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="t_erp" name="Anmeldung im ERP manuell erfassen &amp; prüfen">
+      <bpmn:documentation>Mehrfache manuelle Datenpflege; Prüfung nach Erfahrung der Sachbearbeiter:in.</bpmn:documentation>
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:incoming>f4</bpmn:incoming>
+      <bpmn:incoming>f5</bpmn:incoming>
+      <bpmn:outgoing>f6</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="t_label" name="Retourenlabel manuell im Versandtool erstellen">
+      <bpmn:incoming>f6</bpmn:incoming>
+      <bpmn:outgoing>f7</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="t_send" name="Label per E-Mail an Kund:in senden">
+      <bpmn:incoming>f7</bpmn:incoming>
+      <bpmn:outgoing>f8</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:task id="t_ship" name="Ware zurücksenden (kein Status-Tracking)">
+      <bpmn:documentation>Weder Kund:in noch ShopEasy sehen den Status der Sendung.</bpmn:documentation>
+      <bpmn:incoming>f8</bpmn:incoming>
+      <bpmn:outgoing>f9</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="ev_wait" name="Paket trifft im Lager ein">
+      <bpmn:incoming>f9</bpmn:incoming>
+      <bpmn:outgoing>f10</bpmn:outgoing>
+      <bpmn:messageEventDefinition />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:manualTask id="t_gr" name="Wareneingang &amp; Zustandsprüfung im WMS erfassen (oft verzögert)">
+      <bpmn:documentation>Zustand: neuwertig / beschädigt / getragen. Subjektiv, Erfassung zeitversetzt.</bpmn:documentation>
+      <bpmn:incoming>f10</bpmn:incoming>
+      <bpmn:outgoing>f11</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="t_dec" name="Annahme/Ablehnung entscheiden">
+      <bpmn:documentation>Entscheidung nicht dokumentiert und nicht regelbasiert.</bpmn:documentation>
+      <bpmn:incoming>f11</bpmn:incoming>
+      <bpmn:incoming>f16</bpmn:incoming>
+      <bpmn:outgoing>f12</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:exclusiveGateway id="gw1" name="Ergebnis?">
+      <bpmn:incoming>f12</bpmn:incoming>
+      <bpmn:outgoing>f13</bpmn:outgoing>
+      <bpmn:outgoing>f14</bpmn:outgoing>
+      <bpmn:outgoing>f15</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:manualTask id="t_esc" name="Grenzfall per E-Mail eskalieren &amp; dokumentieren">
+      <bpmn:documentation>Dokumentation nur im E-Mail-Postfach.</bpmn:documentation>
+      <bpmn:incoming>f15</bpmn:incoming>
+      <bpmn:outgoing>f16</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="t_stock" name="Bestandsbuchung im ERP">
+      <bpmn:incoming>f13</bpmn:incoming>
+      <bpmn:outgoing>f17</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="t_reject" name="Rückversand / Entsorgung / Spende veranlassen">
+      <bpmn:incoming>f14</bpmn:incoming>
+      <bpmn:outgoing>f19</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="t_refund" name="Rückerstattung manuell: Zahlungsdienstleister bzw. Gutschein im CRM">
+      <bpmn:documentation>Manuelle Buchung; größter Anteil an der Durchlaufzeit von 8–12 Tagen.</bpmn:documentation>
+      <bpmn:incoming>f17</bpmn:incoming>
+      <bpmn:outgoing>f18</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:exclusiveGateway id="gw_m">
+      <bpmn:incoming>f18</bpmn:incoming>
+      <bpmn:incoming>f19</bpmn:incoming>
+      <bpmn:outgoing>f20</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:manualTask id="t_comm" name="Kund:in per E-Mail informieren (verzögert)">
+      <bpmn:documentation>Häufige Nachfragen der Kund:innen.</bpmn:documentation>
+      <bpmn:incoming>f20</bpmn:incoming>
+      <bpmn:outgoing>f21</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="t_report" name="Monatliches Reporting in Excel erstellen">
+      <bpmn:documentation>Retourenquote, Bearbeitungsdauer, Gründe – manuell zusammengestellt.</bpmn:documentation>
+      <bpmn:incoming>f21</bpmn:incoming>
+      <bpmn:outgoing>f22</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:endEvent id="end" name="Retoure abgeschlossen">
+      <bpmn:incoming>f22</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="s_web" targetRef="t_erp" />
+    <bpmn:sequenceFlow id="f2" sourceRef="s_mkt" targetRef="t_mkt" />
+    <bpmn:sequenceFlow id="f3" sourceRef="s_mail" targetRef="t_mail" />
+    <bpmn:sequenceFlow id="f4" sourceRef="t_mkt" targetRef="t_erp" />
+    <bpmn:sequenceFlow id="f5" sourceRef="t_mail" targetRef="t_erp" />
+    <bpmn:sequenceFlow id="f6" sourceRef="t_erp" targetRef="t_label" />
+    <bpmn:sequenceFlow id="f7" sourceRef="t_label" targetRef="t_send" />
+    <bpmn:sequenceFlow id="f8" sourceRef="t_send" targetRef="t_ship" />
+    <bpmn:sequenceFlow id="f9" sourceRef="t_ship" targetRef="ev_wait" />
+    <bpmn:sequenceFlow id="f10" sourceRef="ev_wait" targetRef="t_gr" />
+    <bpmn:sequenceFlow id="f11" sourceRef="t_gr" targetRef="t_dec" />
+    <bpmn:sequenceFlow id="f12" sourceRef="t_dec" targetRef="gw1" />
+    <bpmn:sequenceFlow id="f13" name="Annahme" sourceRef="gw1" targetRef="t_stock" />
+    <bpmn:sequenceFlow id="f14" name="Ablehnung" sourceRef="gw1" targetRef="t_reject" />
+    <bpmn:sequenceFlow id="f15" name="Grenzfall" sourceRef="gw1" targetRef="t_esc" />
+    <bpmn:sequenceFlow id="f16" name="erneut entscheiden" sourceRef="t_esc" targetRef="t_dec" />
+    <bpmn:sequenceFlow id="f17" sourceRef="t_stock" targetRef="t_refund" />
+    <bpmn:sequenceFlow id="f18" sourceRef="t_refund" targetRef="gw_m" />
+    <bpmn:sequenceFlow id="f19" sourceRef="t_reject" targetRef="gw_m" />
+    <bpmn:sequenceFlow id="f20" sourceRef="gw_m" targetRef="t_comm" />
+    <bpmn:sequenceFlow id="f21" sourceRef="t_comm" targetRef="t_report" />
+    <bpmn:sequenceFlow id="f22" sourceRef="t_report" targetRef="end" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_Ist">
+    <bpmndi:BPMNPlane id="Plane_Ist" bpmnElement="Collab_Ist">
+      <bpmndi:BPMNShape id="Participant_Ist_di" bpmnElement="Participant_Ist" isHorizontal="true">
+        <dc:Bounds x="0" y="0" width="2680" height="820" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Kunde_di" bpmnElement="Lane_Kunde" isHorizontal="true">
+        <dc:Bounds x="30" y="0" width="2650" height="240" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Service_di" bpmnElement="Lane_Service" isHorizontal="true">
+        <dc:Bounds x="30" y="240" width="2650" height="260" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Lager_di" bpmnElement="Lane_Lager" isHorizontal="true">
+        <dc:Bounds x="30" y="500" width="2650" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Buch_di" bpmnElement="Lane_Buch" isHorizontal="true">
+        <dc:Bounds x="30" y="660" width="2650" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_web_di" bpmnElement="s_web">
+        <dc:Bounds x="172" y="22" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_mkt_di" bpmnElement="s_mkt">
+        <dc:Bounds x="172" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_mail_di" bpmnElement="s_mail">
+        <dc:Bounds x="172" y="182" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_mkt_di" bpmnElement="t_mkt">
+        <dc:Bounds x="275" y="250" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_mail_di" bpmnElement="t_mail">
+        <dc:Bounds x="275" y="410" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_erp_di" bpmnElement="t_erp">
+        <dc:Bounds x="465" y="330" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_label_di" bpmnElement="t_label">
+        <dc:Bounds x="635" y="330" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_send_di" bpmnElement="t_send">
+        <dc:Bounds x="795" y="330" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_ship_di" bpmnElement="t_ship">
+        <dc:Bounds x="955" y="80" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ev_wait_di" bpmnElement="ev_wait">
+        <dc:Bounds x="1132" y="562" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_gr_di" bpmnElement="t_gr">
+        <dc:Bounds x="1245" y="540" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_dec_di" bpmnElement="t_dec">
+        <dc:Bounds x="1415" y="330" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw1_di" bpmnElement="gw1" isMarkerVisible="true">
+        <dc:Bounds x="1595" y="345" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_esc_di" bpmnElement="t_esc">
+        <dc:Bounds x="1725" y="250" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_stock_di" bpmnElement="t_stock">
+        <dc:Bounds x="1725" y="330" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_reject_di" bpmnElement="t_reject">
+        <dc:Bounds x="1725" y="540" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_refund_di" bpmnElement="t_refund">
+        <dc:Bounds x="1895" y="700" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_m_di" bpmnElement="gw_m" isMarkerVisible="true">
+        <dc:Bounds x="2075" y="345" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_comm_di" bpmnElement="t_comm">
+        <dc:Bounds x="2195" y="330" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_report_di" bpmnElement="t_report">
+        <dc:Bounds x="2365" y="330" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_di" bpmnElement="end">
+        <dc:Bounds x="2552" y="352" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="f1_di" bpmnElement="f1">
+        <di:waypoint x="208" y="40" />
+        <di:waypoint x="430" y="40" />
+        <di:waypoint x="430" y="370" />
+        <di:waypoint x="465" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f2_di" bpmnElement="f2">
+        <di:waypoint x="208" y="120" />
+        <di:waypoint x="241.5" y="120" />
+        <di:waypoint x="241.5" y="290" />
+        <di:waypoint x="275" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f3_di" bpmnElement="f3">
+        <di:waypoint x="208" y="200" />
+        <di:waypoint x="241.5" y="200" />
+        <di:waypoint x="241.5" y="450" />
+        <di:waypoint x="275" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f4_di" bpmnElement="f4">
+        <di:waypoint x="385" y="290" />
+        <di:waypoint x="430" y="290" />
+        <di:waypoint x="430" y="370" />
+        <di:waypoint x="465" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f5_di" bpmnElement="f5">
+        <di:waypoint x="385" y="450" />
+        <di:waypoint x="430" y="450" />
+        <di:waypoint x="430" y="370" />
+        <di:waypoint x="465" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f6_di" bpmnElement="f6">
+        <di:waypoint x="575" y="370" />
+        <di:waypoint x="635" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f7_di" bpmnElement="f7">
+        <di:waypoint x="745" y="370" />
+        <di:waypoint x="795" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f8_di" bpmnElement="f8">
+        <di:waypoint x="905" y="370" />
+        <di:waypoint x="930" y="370" />
+        <di:waypoint x="930" y="120" />
+        <di:waypoint x="955" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f9_di" bpmnElement="f9">
+        <di:waypoint x="1065" y="120" />
+        <di:waypoint x="1098.5" y="120" />
+        <di:waypoint x="1098.5" y="580" />
+        <di:waypoint x="1132" y="580" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f10_di" bpmnElement="f10">
+        <di:waypoint x="1168" y="580" />
+        <di:waypoint x="1245" y="580" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f11_di" bpmnElement="f11">
+        <di:waypoint x="1355" y="580" />
+        <di:waypoint x="1385" y="580" />
+        <di:waypoint x="1385" y="370" />
+        <di:waypoint x="1415" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f12_di" bpmnElement="f12">
+        <di:waypoint x="1525" y="370" />
+        <di:waypoint x="1595" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f13_di" bpmnElement="f13">
+        <di:waypoint x="1645" y="370" />
+        <di:waypoint x="1725" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f14_di" bpmnElement="f14">
+        <di:waypoint x="1620" y="395" />
+        <di:waypoint x="1620" y="580" />
+        <di:waypoint x="1725" y="580" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f15_di" bpmnElement="f15">
+        <di:waypoint x="1620" y="345" />
+        <di:waypoint x="1620" y="290" />
+        <di:waypoint x="1725" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f16_di" bpmnElement="f16">
+        <di:waypoint x="1780" y="250" />
+        <di:waypoint x="1780" y="225" />
+        <di:waypoint x="1470" y="225" />
+        <di:waypoint x="1470" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f17_di" bpmnElement="f17">
+        <di:waypoint x="1835" y="370" />
+        <di:waypoint x="1865" y="370" />
+        <di:waypoint x="1865" y="740" />
+        <di:waypoint x="1895" y="740" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f18_di" bpmnElement="f18">
+        <di:waypoint x="2005" y="740" />
+        <di:waypoint x="2100" y="740" />
+        <di:waypoint x="2100" y="395" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f19_di" bpmnElement="f19">
+        <di:waypoint x="1835" y="580" />
+        <di:waypoint x="2100" y="580" />
+        <di:waypoint x="2100" y="395" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f20_di" bpmnElement="f20">
+        <di:waypoint x="2125" y="370" />
+        <di:waypoint x="2195" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f21_di" bpmnElement="f21">
+        <di:waypoint x="2305" y="370" />
+        <di:waypoint x="2365" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f22_di" bpmnElement="f22">
+        <di:waypoint x="2475" y="370" />
+        <di:waypoint x="2552" y="370" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
