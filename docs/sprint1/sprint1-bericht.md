@@ -43,8 +43,15 @@ Die Wahl der Umsetzungsart je Aktivität (mit Begründung, verworfener Alternati
 | RPA | Bestand im ERP buchen/korrigieren |
 | KI | E-Mail auslesen, Retourengrund klassifizieren, Betrugsscore |
 
+## Prüfung mit Camunda 8 (lokal, Version 8.10.4)
+- **Lint** (`c8ctl bpmn lint`): keine Fehler. Hinweise nur zum Stil: Aufgaben mit mehreren Eingängen (`fake-join`, hier bewusst ein impliziter XOR-Merge), ein Label an einem Fluss ohne Gateway und zwei sich berührende Elemente im Ist-Modell.
+- **Deploy der Dateien unverändert:** beide Modelle sind schema-gültig. Camunda lehnt sie nur ab, weil sie als fachliche Modelle nicht ausführbar sind („Must contain at least one executable process“). Dabei fiel ein Schemafehler im Ist-Modell auf (Datenassoziation ohne Ziel), der behoben wurde.
+- **Testläufe auf ausführbaren Prüfkopien** (mit Zeebe-Erweiterungen für Task-Typen, Nachrichten, Fehlercodes und Bedingungen; die Kopien liegen nicht im Repo, die Konfiguration für den Betrieb folgt in Sprint 4): Soll-Modell 13 Läufe (Standard, Ablehnung, Verdacht bestätigt und nicht bestätigt, Kanal E-Mail und Marktplatz, Label- und Zahlungsfehler in beiden Reihenfolgen, Grenzfall angenommen und abgelehnt, Ablehnung nach Zustandsprüfung, Timeout), Ist-Modell 5 Läufe. Alle Instanzen endeten `COMPLETED`, ohne Incidents und über den erwarteten Pfad.
+- **Gegenprobe:** Das Soll-Modell vor der Korrektur lehnte Camunda ab (Bedingungen an User Tasks), und mit dem dreifachen Join blieb eine Instanz nach Bestandsbuchung und Rückerstattung hängen (Deadlock). Beides ist im aktuellen Modell behoben.
+
 ## Offene Punkte
-- Modelle in Camunda Modeler öffnen und das Layout prüfen. Die Diagramme wurden aus `tools/gen_bpmn.py` erzeugt und mit bpmn-js zu PNG gerendert; die Darstellung im Modeler kann in Details abweichen.
+- Modelle im Camunda Modeler öffnen, das Layout prüfen und dort weiterpflegen: Der Modeler ist ab jetzt die Quelle. Den Erstentwurf der Dateien und der Diagramme hat Claude Code per Skript geschrieben, weil die KI den Modeler nicht bedienen kann (siehe `AI-USAGE.md`). Nach Änderungen die PNGs im Modeler neu exportieren; die jetzigen PNGs wurden mit bpmn-js gerendert und können in Details abweichen.
+- Zwei kleine Korrekturen aus dem Lint, im Modeler: im Ist-Modell `t_esc` ein paar Pixel nach oben schieben (berührt `t_stock`) und das Label „erneut entscheiden“ an der Verbindung `t_esc` → `t_dec` entfernen (Labels an Flüssen sind nur an Gateway-Ausgängen vorgesehen).
 - Startpunkt der „8–12 Tage“ mit dem Dozenten klären (ab Anmeldung oder ab Wareneingang); K1a und K1b decken beide Varianten ab.
 - Annahmen prüfen: Versandtool und Zahlungsdienstleister haben eine API, das ERP nicht.
 - Aktivitätsnamen des KPI-Katalogs mit der Log-Datei aus Sprint 3 abgleichen.

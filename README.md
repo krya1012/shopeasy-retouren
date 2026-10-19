@@ -18,7 +18,7 @@ Ziel: Konzept und Prototypen für die digitalisierte Retourenabwicklung der Shop
 
 - [Project Charter](docs/00-project-charter.md)
 - [Sprint-1-Bericht](docs/sprint1/sprint1-bericht.md) mit Diagrammen: [Ist-Prozess](docs/sprint1/ist-prozess.png), [Soll-Prozess](docs/sprint1/soll-prozess.png)
-- BPMN-Dateien erzeugen: `python3 tools/gen_bpmn.py bpmn` (Diagramme als PNG: `npx bpmn-to-image bpmn/ist-prozess.bpmn:docs/sprint1/ist-prozess.png`)
+- Die Modelle in `bpmn/` werden im Camunda Modeler gepflegt; die Diagramme in `docs/sprint1/` werden dort exportiert (Datei → Export as Image).
 - [KI-Nutzung (Pflichtdokumentation)](AI-USAGE.md)
 
 ## Hinweis

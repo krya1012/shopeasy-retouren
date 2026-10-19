@@ -65,7 +65,14 @@
       <bpmn:documentation>Eigene API je Marktplatz, keine Anbindung an das ERP (Medienbruch).</bpmn:documentation>
       <bpmn:incoming>f1</bpmn:incoming>
       <bpmn:outgoing>f4</bpmn:outgoing>
-      <bpmn:dataInputAssociation id="Assoc_DS_mkt"><bpmn:sourceRef>DS_mkt</bpmn:sourceRef></bpmn:dataInputAssociation>
+      <bpmn:ioSpecification id="IoSpec_t_mkt">
+        <bpmn:dataInput id="Input_DS_mkt" />
+        <bpmn:inputSet id="InputSet_t_mkt">
+          <bpmn:dataInputRefs>Input_DS_mkt</bpmn:dataInputRefs>
+        </bpmn:inputSet>
+        <bpmn:outputSet id="OutputSet_t_mkt" />
+      </bpmn:ioSpecification>
+      <bpmn:dataInputAssociation id="Assoc_DS_mkt"><bpmn:sourceRef>DS_mkt</bpmn:sourceRef><bpmn:targetRef>Input_DS_mkt</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:task>
     <bpmn:task id="t_mail" name="E-Mail lesen, Daten nachfragen, abtippen">
       <bpmn:documentation>Unstrukturierte Anmeldung; fehlende Angaben werden per E-Mail nachgefragt.</bpmn:documentation>
@@ -78,7 +85,14 @@
       <bpmn:incoming>f4</bpmn:incoming>
       <bpmn:incoming>f5</bpmn:incoming>
       <bpmn:outgoing>f6</bpmn:outgoing>
-      <bpmn:dataInputAssociation id="Assoc_DS_web"><bpmn:sourceRef>DS_web</bpmn:sourceRef></bpmn:dataInputAssociation>
+      <bpmn:ioSpecification id="IoSpec_t_erp">
+        <bpmn:dataInput id="Input_DS_web" />
+        <bpmn:inputSet id="InputSet_t_erp">
+          <bpmn:dataInputRefs>Input_DS_web</bpmn:dataInputRefs>
+        </bpmn:inputSet>
+        <bpmn:outputSet id="OutputSet_t_erp" />
+      </bpmn:ioSpecification>
+      <bpmn:dataInputAssociation id="Assoc_DS_web"><bpmn:sourceRef>DS_web</bpmn:sourceRef><bpmn:targetRef>Input_DS_web</bpmn:targetRef></bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="Assoc_DS_erp1"><bpmn:targetRef>DS_erp1</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:task>
     <bpmn:exclusiveGateway id="gw_ok" name="Anmeldung gültig?">
