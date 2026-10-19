@@ -8,7 +8,7 @@ Aus der Aufgabenstellung bekannt sind nur zwei Ist-Werte: **Retourenquote 25–3
 
 | Nr. | KPI | Definition | Benötigte Daten | Schwachstelle | Ziel |
 |---|---|---|---|---|---|
-| K1 | Durchlaufzeit | Zeit von der Retourenanmeldung bis zum Abschluss des Retourenfalls | Retouren-ID, Zeitpunkt Anmeldung, Zeitpunkt Abschluss | W5, W6, W12 (Wartezeiten) | senken (Ist laut Aufgabe 8–12 Tage) |
+| K1 | Durchlaufzeit | Zeit von der Retourenanmeldung bis zum Abschluss des Retourenfalls | Retouren-ID, Zeitpunkt Anmeldung, Zeitpunkt Abschluss | W1 (je Kanal), W5, W6, W12 (Wartezeiten) | senken (Ist laut Aufgabe 8–12 Tage) |
 | K2 | Bearbeitungszeit nach Wareneingang | Zeit vom Eingang im Lager bis zur Annahme-/Ablehnungsentscheidung | Zeitpunkt Wareneingang, Zeitpunkt Entscheidung | W7, W8 | senken |
 | K3 | Grenzfallquote | Anteil der Retourenfälle, die eskalieren und in E-Mails dokumentiert werden | Retouren-ID, Eskalationen, E-Mails | W9, W16 | senken |
 | K4 | Fehlerquote | Anteil der Retouren, bei denen ein Bearbeitungsfehler passiert ist (siehe Abschnitt 2) | Retouren-ID, Fehlerkennzeichnung | W2, W3, W4, W11 (Fehlerquellen) | senken |
