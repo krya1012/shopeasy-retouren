@@ -1,6 +1,6 @@
 # Project Charter – ShopEasy Retourenabwicklung (ENTWURF)
 
-> Stand 19.10.2026. Die Kommunikationsregeln sind als Vorschlag übernommen und im Team zu bestätigen. Product Owner und Erwartungen trägt das Team ein (mit `_…_` markierte Felder).
+> Stand 19.10.2026. Die Kommunikationsregeln sind als Vorschlag übernommen und im Team zu bestätigen. Die Erwartungen trägt das Team ein (mit `_…_` markierte Felder).
 
 ## 1. Projektname und Beschreibung
 **ShopEasy Retouren digital.** Der teilweise manuelle, medienbruchbehaftete Retourenprozess der ShopEasy GmbH (Retourenquote 25–35 %, Rückerstattung nach 8–12 Tagen) wird als digitales Konzept entworfen und zentrale Bausteine werden prototypisch umgesetzt (BPMN, REST/gRPC/Messaging, Process Mining, Camunda-Workflow, RPA, AI-Agent).
@@ -21,7 +21,7 @@ Der Kurs sieht zwei Rollen vor (Agile Vorlesung, Folie „Team und Rollen“): P
 
 | Rolle | Person | Aufgabe |
 |---|---|---|
-| Product Owner | _Name eintragen_ | Product Backlog pflegen, Kontakt zum Dozenten, Abgabetermine im Blick behalten |
+| Product Owner | Eduard Ede Moser | Product Backlog pflegen, Kontakt zum Dozenten, Abgabetermine im Blick behalten |
 | Mitarbeitende | Eduard Ede Moser, Christian Sticker, Yaraslau Krautsou | bearbeiten alle Sprints gemeinsam |
 
 Der Product Owner arbeitet wie die anderen als Mitarbeiter:in mit. Wechsel des Product Owners: _eintragen (gleichbleibend oder z. B. pro Sprint)_.
