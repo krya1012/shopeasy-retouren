@@ -4,7 +4,8 @@
 - `bpmn/ist-prozess.bpmn` – Ist-Prozess, drei Eingangskanäle (Webshop, Marktplatz, E-Mail), vier Lanes
 - `bpmn/soll-prozess.bpmn` – Soll-Prozess mit Umsetzungsart je Aktivität
 - `docs/sprint1/schwachstellenanalyse.md`
-- `docs/sprint1/kpi-katalog.md`
+- `docs/sprint1/kpi-katalog.md` – 8 Kern-KPIs (u. a. Durchlaufzeit, Fehlerquote in drei Teilen) und 9 Zusatz-KPIs, mit Event-Log-Schema, Zuordnung zu den Modellelementen und Vorlage für Sprint 3
+- `docs/sprint1/soll-prozess-realisierung.md` – Begründung der Umsetzungsart je Soll-Aktivität
 
 ## Ist-Prozess
 Die zehn Schritte der Aufgabenstellung sind in vier Lanes modelliert (Kund:in, Kundenservice, Lager, Buchhaltung). Die drei Startereignisse münden über kanalspezifische manuelle Schritte in die Erfassung im ERP. Die Entscheidung hat die Ausgänge Annahme, Ablehnung und Grenzfall; Grenzfälle laufen per E-Mail-Eskalation zurück in die Entscheidung. Alle Schritte sind manuell, daher `manualTask`. Die beteiligten Systeme aus der Aufgabenstellung (Webshop-Frontend, Marktplatz-Portale, ERP, WMS, CRM, Zahlungsdienstleister, E-Mail-Postfach, Excel) sind als Datenspeicher an den Aufgaben modelliert, die sie nutzen; zusätzlich das Versandtool aus Schritt 3. Bei der Rückerstattung (Schritt 8) entscheidet ein Gateway zwischen Geld über den Zahlungsdienstleister und Gutschein im CRM.
