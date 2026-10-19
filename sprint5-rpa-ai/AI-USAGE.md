@@ -1,6 +1,6 @@
 # KI-Nutzung – Sprint 5 (RPA (UiPath) und AI-Agent (n8n), 8.12.2026–12.1.2027)
 
-Laut Aufgabenstellung führt undokumentierte KI-Nutzung zum Nicht-Bestehen. Jeder Eintrag: Datum, Werkzeug, Co-Autor:in, Zweck, Prüfstatus. Übersicht über alle Sprints: [AI-USAGE.md](../AI-USAGE.md).
+Laut Aufgabenstellung führt undokumentierte KI-Nutzung zum Nicht-Bestehen. Jeder Eintrag: Datum, Werkzeug, Co-Autor:in, Zweck, Prüfstatus. Übersicht über alle Sprints: [AI-USAGE.md](../AI-USAGE.md). GitHub-Repository: [https://github.com/krya1012/shopeasy-retouren](https://github.com/krya1012/shopeasy-retouren), diese Datei: [sprint5-rpa-ai/AI-USAGE.md](https://github.com/krya1012/shopeasy-retouren/blob/main/sprint5-rpa-ai/AI-USAGE.md).
 
 **Co-Autorenschaft:** Einträge mit Claude Code entstehen in Sitzungen von **Yaraslau Krautsou** (Co-Autor von Claude Code). Andere Personen stehen je Eintrag in der Spalte „Co-Autor:in“.
 **Modell:** Claude Code mit der Einstellung `opusplan` (Claude Opus 5.5 im Planungsmodus, sonst Claude Sonnet 5.5), sofern nicht anders eingetragen.
