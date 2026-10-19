@@ -19,7 +19,7 @@ Aus der Aufgabenstellung bekannt sind nur zwei Ist-Werte: **Retourenquote 25–3
 | K9 | Rückversandquote | Anteil der abgeschlossenen Retourenfälle, bei denen die Ware an den Kunden zurückgesendet wurde | Retouren-ID, dokumentierter Rückversand | W16 | beobachten |
 | K10 | Entsorgungsquote | Anteil der abgeschlossenen Retourenfälle, bei denen die Ware entsorgt wurde | Retouren-ID, dokumentierte Entsorgung | W16 | beobachten |
 | K11 | Spendenquote | Anteil der abgeschlossenen Retourenfälle, bei denen die Ware gespendet wurde | Retouren-ID, dokumentierte Spende | W16 | beobachten |
-| K12 | Zeit bis zur Rückerstattung (Ergänzung) | Zeit von der Entscheidung „Annahme“ bis zur Rückerstattung | Zeitpunkt Entscheidung, Zeitpunkt Rückerstattung | W12 (Platz 1 der Priorisierung) | senken |
+| K12 | Zeit bis zur Rückerstattung (Ergänzung) | Zeit von der Entscheidung „Annahme“ bis zur Rückerstattung | Zeitpunkt Entscheidung, Zeitpunkt Rückerstattung | W12 (Haupttreiber der Durchlaufzeit) | senken |
 | K13 | Zeit bis zum Label (Ergänzung) | Zeit von der Retourenanmeldung bis zum Versand des Labels an die Kund:in | Zeitpunkt Anmeldung, Zeitpunkt Label versendet | W5, W13 | senken |
 
 ## 2. Fehlerquote (K4)
