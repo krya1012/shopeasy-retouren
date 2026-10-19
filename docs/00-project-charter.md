@@ -1,6 +1,6 @@
 # Project Charter – ShopEasy Retourenabwicklung (ENTWURF)
 
-> Entwurf: Mit `TODO` markierte Felder muss das Team gemeinsam festlegen.
+> Stand 19.10.2026. Die Kommunikationsregeln sind als Vorschlag übernommen und im Team zu bestätigen. Rollen und Erwartungen trägt das Team ein (mit `_…_` markierte Felder).
 
 ## 1. Projektname und Beschreibung
 **ShopEasy Retouren digital.** Der teilweise manuelle, medienbruchbehaftete Retourenprozess der ShopEasy GmbH (Retourenquote 25–35 %, Rückerstattung nach 8–12 Tagen) wird als digitales Konzept entworfen und zentrale Bausteine werden prototypisch umgesetzt (BPMN, REST/gRPC/Messaging, Process Mining, Camunda-Workflow, RPA, AI-Agent).
@@ -19,12 +19,12 @@
 ## 4. Rollen und Verantwortlichkeiten
 | Rolle | Person | Aufgabe |
 |---|---|---|
-| Projektleitung / Koordination | TODO | Termine, ILIAS-Abgaben |
-| BPM / Modellierung | TODO | Sprint 1, 3 |
-| Integration | TODO | Sprint 2 |
-| Workflow | TODO | Sprint 4 |
-| RPA / AI | TODO | Sprint 5 |
-| Dokumentation | TODO | Sprint 6 |
+| Projektleitung / Koordination | _Name eintragen_ | Termine, ILIAS-Abgaben |
+| BPM / Modellierung | _Name eintragen_ | Sprint 1, 3 |
+| Integration | _Name eintragen_ | Sprint 2 |
+| Workflow | _Name eintragen_ | Sprint 4 |
+| RPA / AI | _Name eintragen_ | Sprint 5 |
+| Dokumentation | _Name eintragen_ | Sprint 6 |
 
 Jede Person ist bei mindestens einem Sprint Hauptverantwortliche:r; Beiträge bleiben über Commits nachvollziehbar.
 
@@ -32,10 +32,11 @@ Jede Person ist bei mindestens einem Sprint Hauptverantwortliche:r; Beiträge bl
 Abgaben jeweils bis 11:30 in ILIAS: 20.10. (S1), 3.11. (S2), 17.11. (S3), 8.12. (S4), 12.1. (S5), 26.1. (S6).
 
 ## 6. Kommunikationsregeln
-- Meeting-Takt: TODO (Vorschlag: 1× pro Woche, 30 Min.)
-- Tools: GitHub (Code/Doku), TODO (Chat)
-- Antwortzeit: TODO (Vorschlag: 24 h)
-- Kurzprotokoll pro Meeting im Repo oder Chat
+- Meeting-Takt: 1× pro Woche, 30 Minuten
+- Tools: GitHub (Code/Doku), WhatsApp (Chat)
+- Antwortzeit: innerhalb von 24 Stunden
+- Kurzprotokoll pro Meeting im Chat oder im Repo
+- Jede Person committet unter ihrem eigenen GitHub-Konto, damit Beiträge nachvollziehbar sind.
 
 ## 7. Entscheidungsregeln
 Konsens; bei Uneinigkeit Mehrheitsentscheid, bei Gleichstand entscheidet die Projektleitung. Fachliche Änderungen an abgestimmten Artefakten nur mit Info an das Team.
@@ -45,7 +46,13 @@ Konsens; bei Uneinigkeit Mehrheitsentscheid, bei Gleichstand entscheidet die Pro
 **Annahmen:** Event-Log für Sprint 3 wird vom Dozenten bereitgestellt; alle Tools sind kostenlos/Lizenz verfügbar.
 
 ## Teamerwartungen
-TODO: Ziele und Erwartungen der einzelnen Mitglieder (Notenziel, Zeitbudget) gemeinsam sammeln.
+Jede Person trägt ihre eigenen Angaben ein (Projektregel: Ziele und Erwartungen gemeinsam klären).
+
+| Person | Notenziel | Stunden pro Woche | Besonderheiten (z. B. Prüfungsphasen) |
+|---|---|---|---|
+| _Name eintragen_ | _eintragen_ | _eintragen_ | _eintragen_ |
+| _Name eintragen_ | _eintragen_ | _eintragen_ | _eintragen_ |
+| _Name eintragen_ | _eintragen_ | _eintragen_ | _eintragen_ |
 
 ## Regeln zur KI-Nutzung
 Jede KI-Nutzung wird in `AI-USAGE.md` dokumentiert. Die persönliche Zusammenfassung in Sprint 6 entsteht ohne KI.
