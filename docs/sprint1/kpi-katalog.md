@@ -21,6 +21,7 @@ Angenommene Aktivitätsnamen im Event-Log (an die tatsächliche Log-Datei anpass
 | K13 | Erstattung vor Zustandsprüfung | Fälle, in denen `Rückerstattung` vor `Zustand erfasst` liegt (Regelverstoß) | Sprint 3 | 0 | W7, W12 |
 | K14 | Nicht eingegangene Retouren | Fälle mit `Label erstellt`, aber ohne `Wareneingang` nach 21 Tagen | Sprint 3 | Beobachtung | W6 |
 | K15 | Kundenanfragen zum Status | Anzahl Rückfragen je 100 Fälle (E-Mail-Postfach, falls im Log) | „häufig“ | −50 % | W13 |
+| K16 | Retourenaufkommen je Tag | Anzahl Fälle mit `Wareneingang` je Kalendertag und Wochentag; Spitze geteilt durch Durchschnitt | Sprint 3 | Basis für Schichtplanung, kein Zielwert | W15 |
 
 ## Hinweise
 - K1–K4 sind die Kern-KPIs für den Vergleich Ist/Soll.
