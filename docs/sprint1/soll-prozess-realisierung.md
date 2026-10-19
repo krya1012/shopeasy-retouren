@@ -65,7 +65,25 @@ Von 19 Aufgaben laufen 13 automatisch, eine ist hybrid. Von den 5 rein menschlic
 | W16 | `t_decide` |
 | W14, W15 | **nur als Anmerkung** (`Ann_1`, `Ann_2`): Reporting aus Status-Events und Aufkommen für die Schichtplanung. Eigene Aktivitäten dafür entstehen erst mit Process Mining und Workflow (Sprint 3 und 4). |
 
-## 4. Risiken der Automatisierung
+## 4. Ablaufsteuerung, Teilnehmer und Systeme
+
+**Gateways (Camunda 8 erlaubt Bedingungen nur an Gateways, deshalb folgt auf jede Entscheidung einer Person ein Gateway)**
+
+| ID | Gateway | Zweck |
+|---|---|---|
+| `gw1` | Prüfergebnis? | Ausgang der DMN-Prüfung: zulässig, unzulässig oder Verdacht |
+| `gw_m1` | Verdacht bestätigt? | Entscheidung aus `t_man1`: weiter (Variable `verdachtBestaetigt = false`) oder ablehnen |
+| `gw_evt` | Ereignisbasiert | wartet auf Wareneingang (`ev_arrive`) oder Ablauf der 21 Tage (`ev_timeout`) |
+| `gw2` | Ergebnis? | Ausgang der DMN-Entscheidung: Annahme, Ablehnung oder Grenzfall |
+| `gw_m2` | Angenommen? | Entscheidung aus `t_man2` (Variable `angenommen`) |
+| `gw_par` / `gw_pj` | Parallel | Bestandsbuchung und Rückerstattung laufen gleichzeitig; der Join erwartet genau zwei Zweige |
+| `gw_rm` | XOR-Merge | führt `t_refund` und `t_refund_man` zusammen, damit nur ein Token den parallelen Join erreicht (ohne `gw_rm` käme es zum Deadlock) |
+
+**Externe Teilnehmer (eingeklappte Pools, Kommunikation über Nachrichtenflüsse):** Kund:in und Marktplatz (Amazon, Zalando). Die Kund:in meldet per Webshop oder E-Mail an und erhält Ablehnung, Label, Status und Ergebnis. Der Rückversand und das Eintreffen des Pakets (`ev_arrive`) sind Nachrichten der Kund:in; der Marktplatz liefert die Retourenmeldung per REST (`s_mkt`).
+
+**Datenspeicher im Soll-Modell** (nur dort, wo ein Service oder Roboter ein System anspricht): Retouren-Datenbank (`t_create`), WMS (`t_gr`, gRPC-Service), ERP-System (`t_stock`, RPA). Versandtool, Zahlungsdienstleister und CRM werden über APIs angesprochen (`t_label`, `t_refund`) und im Diagramm nicht einzeln gezeigt.
+
+## 5. Risiken der Automatisierung
 
 - **KI-Fehlklassifikation:** Der Score ist nur Entscheidungshilfe, die Entscheidung treffen Regeln und Menschen. In Sprint 5 wird die Qualität an Testfällen geprüft.
 - **RPA bricht bei Änderungen der Oberfläche:** Fallback ist eine Aufgabe für die Sachbearbeitung.
