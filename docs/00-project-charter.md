@@ -24,7 +24,7 @@ Der Kurs sieht zwei Rollen vor (Agile Vorlesung, Folie „Team und Rollen“): P
 | Product Owner | Eduard Ede Moser | Product Backlog pflegen, Kontakt zum Dozenten, Abgabetermine im Blick behalten |
 | Mitarbeitende | Eduard Ede Moser, Christian Sticker, Yaraslau Krautsou | bearbeiten alle Sprints gemeinsam |
 
-Der Product Owner arbeitet wie die anderen als Mitarbeiter:in mit. Wechsel des Product Owners: _eintragen (gleichbleibend oder z. B. pro Sprint)_.
+Der Product Owner arbeitet wie die anderen als Mitarbeiter:in mit. Die Rollen wechseln pro Sprint. Sprint 1: Product Owner Eduard Ede Moser; Reihenfolge der weiteren Sprints: _eintragen_.
 Beiträge bleiben über Commits unter dem eigenen GitHub-Konto nachvollziehbar.
 
 ## 5. Zeitrahmen und Meilensteine
