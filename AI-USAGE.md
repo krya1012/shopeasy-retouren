@@ -6,3 +6,4 @@ Die 2-seitige persönliche Zusammenfassung (Sprint 6) wird ohne KI erstellt.
 | Datum | Werkzeug | Zweck / Artefakt | Manuell geprüft/geändert |
 |---|---|---|---|
 | 2026-10-12 | Claude Code | Analyse der Aufgabenstellung, Repo-Grundgerüst, Entwurf Project Charter, Sprint-1-Artefakte (Ist-/Soll-BPMN, Schwachstellen, KPI-Katalog) | TODO: durch Team prüfen und anpassen, hier eintragen was geändert wurde |
+| 2026-10-19 | Claude Code | Abgleich der Aufgabenstellung mit dem Ist-Modell; Skript `tools/gen_bpmn.py` (erzeugt beide BPMN-Dateien und prüft das Layout); Ist-Modell um Datenspeicher für die Systeme und das Gateway „Erstattungsart?“ ergänzt | TODO: Modelle im Camunda Modeler gesichtet und Layout angepasst? Eintragen. |
