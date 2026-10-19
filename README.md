@@ -7,7 +7,7 @@ Ziel: Konzept und Prototypen für die digitalisierte Retourenabwicklung der Shop
 
 | Sprint | Zeitraum | Inhalt | Ordner |
 |---|---|---|---|
-| 1 | 6.–20.10. | BPM: Ist-/Soll-BPMN, Schwachstellen, KPI-Katalog | `bpmn/`, `docs/sprint1/` |
+| 1 | 6.–20.10. | BPM: Ist-/Soll-BPMN, Schwachstellen, KPI-Katalog | `sprint1-bpm/` |
 | 2 | 20.10.–3.11. | Integration: REST-Mock, gRPC, Messaging | `sprint2-integration/` |
 | 3 | 3.–17.11. | Process Mining (Celonis) | `sprint3-mining/` |
 | 4 | 17.11.–8.12. | Ausführbarer Workflow (Camunda) | `sprint4-workflow/` |
@@ -17,8 +17,8 @@ Ziel: Konzept und Prototypen für die digitalisierte Retourenabwicklung der Shop
 ## Weitere Dokumente
 
 - [Project Charter](docs/00-project-charter.md)
-- [Sprint-1-Bericht](docs/sprint1/sprint1-bericht.md) mit Diagrammen: [Ist-Prozess](docs/sprint1/ist-prozess.png), [Soll-Prozess](docs/sprint1/soll-prozess.png)
-- Die Modelle in `bpmn/` werden im Camunda Modeler gepflegt; die Diagramme in `docs/sprint1/` werden dort exportiert (Datei → Export as Image).
+- [Sprint-1-Bericht](sprint1-bpm/sprint1-bericht.md) mit Diagrammen: [Ist-Prozess](sprint1-bpm/ist-prozess.png), [Soll-Prozess](sprint1-bpm/soll-prozess.png)
+- Die Modelle in `sprint1-bpm/` werden im Camunda Modeler gepflegt; die Diagramme (PNG) werden dort exportiert (Datei → Export as Image).
 - [KI-Nutzung (Pflichtdokumentation)](AI-USAGE.md)
 
 ## Hinweis

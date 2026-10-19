@@ -1,6 +1,6 @@
 # Schwachstellenanalyse Ist-Prozess
 
-Bezug: `bpmn/ist-prozess.bpmn` (Spalte „Element“ nennt die IDs im Diagramm).
+Bezug: `sprint1-bpm/ist-prozess.bpmn` (Spalte „Element“ nennt die IDs im Diagramm).
 Typen: **MB** Medienbruch · **WZ** Wartezeit · **FQ** Fehlerquelle · **DE** doppelte Dateneingabe · **IN** Intransparenz · **MI** Missbrauchsrisiko.
 Priorität: Auswirkung (A) und Aufwand zur Behebung (E) jeweils h/m/n (hoch/mittel/niedrig). Das ist eine Einschätzung des Teams; echte Messwerte liefert erst Sprint 3.
 

@@ -1,11 +1,11 @@
 # Sprint 1 – Business Process Management (Abgabe 20.10., 11:30)
 
 ## Inhalt der Abgabe
-- `bpmn/ist-prozess.bpmn` – Ist-Prozess, drei Eingangskanäle (Webshop, Marktplatz, E-Mail), drei Lanes und zwei externe Pools (Kund:in, Marktplatz); Bild: [`ist-prozess.png`](ist-prozess.png)
-- `bpmn/soll-prozess.bpmn` – Soll-Prozess mit Umsetzungsart je Aktivität; Bild: [`soll-prozess.png`](soll-prozess.png)
-- `docs/sprint1/schwachstellenanalyse.md`
-- `docs/sprint1/kpi-katalog.md` – Kern-KPIs K1–K8 (u. a. Durchlaufzeit gesamt und intern, Fehlerquote in drei Teilen) und Zusatz-KPIs K9–K19, mit Event-Log-Schema, Zuordnung zu den Modellelementen und Vorlage für Sprint 3
-- `docs/sprint1/soll-prozess-realisierung.md` – Begründung der Umsetzungsart je Soll-Aktivität
+- `sprint1-bpm/ist-prozess.bpmn` – Ist-Prozess, drei Eingangskanäle (Webshop, Marktplatz, E-Mail), drei Lanes und zwei externe Pools (Kund:in, Marktplatz); Bild: [`ist-prozess.png`](ist-prozess.png)
+- `sprint1-bpm/soll-prozess.bpmn` – Soll-Prozess mit Umsetzungsart je Aktivität; Bild: [`soll-prozess.png`](soll-prozess.png)
+- `sprint1-bpm/schwachstellenanalyse.md`
+- `sprint1-bpm/kpi-katalog.md` – Kern-KPIs K1–K8 (u. a. Durchlaufzeit gesamt und intern, Fehlerquote in drei Teilen) und Zusatz-KPIs K9–K19, mit Event-Log-Schema, Zuordnung zu den Modellelementen und Vorlage für Sprint 3
+- `sprint1-bpm/soll-prozess-realisierung.md` – Begründung der Umsetzungsart je Soll-Aktivität
 
 ![Ist-Prozess](ist-prozess.png)
 
@@ -30,7 +30,7 @@ Die beteiligten Systeme aus der Aufgabenstellung (Webshop-Frontend, Marktplatz-P
 
 ![Soll-Prozess](soll-prozess.png)
 
-Die Wahl der Umsetzungsart je Aktivität (mit Begründung, verworfener Alternative und Fehlerfall) steht in `docs/sprint1/soll-prozess-realisierung.md`. Von 19 Aufgaben laufen 13 automatisch, eine ist hybrid (Mensch + gRPC-Service), fünf sind menschlich (davon drei Ausnahmepfade).
+Die Wahl der Umsetzungsart je Aktivität (mit Begründung, verworfener Alternative und Fehlerfall) steht in `sprint1-bpm/soll-prozess-realisierung.md`. Von 19 Aufgaben laufen 13 automatisch, eine ist hybrid (Mensch + gRPC-Service), fünf sind menschlich (davon drei Ausnahmepfade).
 
 ## Umsetzungsarten im Soll-Prozess
 

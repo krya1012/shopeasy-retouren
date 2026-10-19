@@ -1,6 +1,6 @@
 # Soll-Prozess: Realisierung der Schritte
 
-Bezug: `bpmn/soll-prozess.bpmn` (Spalte „ID“ nennt die Elemente im Diagramm) und `docs/sprint1/schwachstellenanalyse.md` (W-Nummern).
+Bezug: `sprint1-bpm/soll-prozess.bpmn` (Spalte „ID“ nennt die Elemente im Diagramm) und `sprint1-bpm/schwachstellenanalyse.md` (W-Nummern).
 
 ## 1. Entscheidungsregeln
 
