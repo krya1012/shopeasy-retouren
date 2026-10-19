@@ -406,6 +406,13 @@ def build_soll():
     m.annots.append(dict(id="Ann_1", x=2700, y=110, w=360, h=90,
                          text="Alle Statuswechsel werden als Events publiziert → Echtzeit-Dashboard und Process Mining ersetzen das manuelle monatliche Excel-Reporting."))
     m.assocs.append(("Ann_1", "t_end_notify"))
+    # W15: Tracking/Aufkommen fuer Schichtplanung, W13: Status bei jedem Statuswechsel
+    m.annots.append(dict(id="Ann_2", x=1180, y=110, w=360, h=90,
+                         text="Tracking-Events und erwartetes Retourenaufkommen je Tag fließen in die Schichtplanung des Lagers (W15). Kosten der Sendungsverfolgung gegen Nutzen abwägen."))
+    m.assocs.append(("Ann_2", "t_notify"))
+    m.annots.append(dict(id="Ann_3", x=300, y=100, w=240, h=100,
+                         text="Statusnachricht an Kund:in bei jedem Statuswechsel: angelegt, Label, eingegangen, Entscheidung, erstattet (W13)."))
+    m.assocs.append(("Ann_3", "t_create"))
 
     f = m.flow
     f("f1", "s_web", "t_create", route=("hvh", 284))

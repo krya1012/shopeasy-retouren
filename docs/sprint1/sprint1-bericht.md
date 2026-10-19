@@ -20,6 +20,8 @@ Die zehn Schritte der Aufgabenstellung sind in vier Lanes modelliert (Kund:in, K
 8. Fehlerbehandlung: Ausfall der Versand-API und fehlgeschlagene Zahlung führen zu manuellen Aufgaben.
 9. Events ersetzen das manuelle Excel-Reporting.
 
+Die Wahl der Umsetzungsart je Aktivität (mit Begründung, verworfener Alternative und Fehlerfall) steht in `docs/sprint1/soll-prozess-realisierung.md`. Von 19 Aufgaben laufen 13 automatisch, eine ist hybrid (Mensch + gRPC-Service), fünf sind menschlich (davon drei Ausnahmepfade).
+
 ## Umsetzungsarten im Soll-Prozess
 
 | Art | Aktivitäten |

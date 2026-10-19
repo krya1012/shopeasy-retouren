@@ -283,7 +283,11 @@
     <bpmn:sequenceFlow id="f40" sourceRef="t_reject" targetRef="t_end_notify" />
     <bpmn:sequenceFlow id="f41" sourceRef="t_end_notify" targetRef="end" />
     <bpmn:textAnnotation id="Ann_1"><bpmn:text>Alle Statuswechsel werden als Events publiziert → Echtzeit-Dashboard und Process Mining ersetzen das manuelle monatliche Excel-Reporting.</bpmn:text></bpmn:textAnnotation>
+    <bpmn:textAnnotation id="Ann_2"><bpmn:text>Tracking-Events und erwartetes Retourenaufkommen je Tag fließen in die Schichtplanung des Lagers (W15). Kosten der Sendungsverfolgung gegen Nutzen abwägen.</bpmn:text></bpmn:textAnnotation>
+    <bpmn:textAnnotation id="Ann_3"><bpmn:text>Statusnachricht an Kund:in bei jedem Statuswechsel: angelegt, Label, eingegangen, Entscheidung, erstattet (W13).</bpmn:text></bpmn:textAnnotation>
     <bpmn:association id="Assoc_1" sourceRef="Ann_1" targetRef="t_end_notify" />
+    <bpmn:association id="Assoc_2" sourceRef="Ann_2" targetRef="t_notify" />
+    <bpmn:association id="Assoc_3" sourceRef="Ann_3" targetRef="t_create" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_Soll">
     <bpmndi:BPMNPlane id="Plane_Soll" bpmnElement="Collab_Soll">
@@ -415,6 +419,12 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Ann_1_di" bpmnElement="Ann_1">
         <dc:Bounds x="2700" y="110" width="360" height="90" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Ann_2_di" bpmnElement="Ann_2">
+        <dc:Bounds x="1180" y="110" width="360" height="90" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Ann_3_di" bpmnElement="Ann_3">
+        <dc:Bounds x="300" y="100" width="240" height="100" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="f1_di" bpmnElement="f1">
         <di:waypoint x="208" y="60" />
@@ -615,6 +625,14 @@
       <bpmndi:BPMNEdge id="Assoc_1_di" bpmnElement="Assoc_1">
         <di:waypoint x="2880" y="200" />
         <di:waypoint x="2880" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_2_di" bpmnElement="Assoc_2">
+        <di:waypoint x="1360" y="200" />
+        <di:waypoint x="1360" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_3_di" bpmnElement="Assoc_3">
+        <di:waypoint x="420" y="200" />
+        <di:waypoint x="420" y="360" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
