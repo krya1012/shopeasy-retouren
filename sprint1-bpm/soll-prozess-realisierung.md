@@ -107,5 +107,5 @@ Von 22 Aufgaben laufen 16 automatisch (73 %). **Im Normalfall (Webshop, Annahme)
 - **RPA bricht bei Änderungen der Oberfläche:** Fallback ist eine Aufgabe für die Sachbearbeitung.
 - **Annahmen:** Das Versandtool und der Zahlungsdienstleister haben Schnittstellen, das ERP nicht. Das ist mit dem Dozenten bzw. dem Team zu bestätigen.
 - **Daten für die Regeln:** Die DMN-Prüfung nutzt die Kundenhistorie. Für die Mock-Umgebung müssen wenige Kennzahlen (Anzahl Retouren, Retourenquote) festgelegt werden.
-- **Reporting braucht Ereignisdaten:** Das Dashboard setzt voraus, dass Status-Events und Camunda-Ereignisse mit Zeitstempel und Fall-ID geschrieben werden (siehe Log-Schema im KPI-Katalog).
+- **Reporting braucht Ereignisdaten:** Das Dashboard setzt voraus, dass Status-Events und Camunda-Ereignisse mit Zeitstempel und Fall-ID geschrieben werden (siehe „Benötigte Daten“ im KPI-Katalog).
 - **Kosten der Sendungsverfolgung** (W15): Nutzen gegen Aufwand abwägen, bevor sie umgesetzt wird.

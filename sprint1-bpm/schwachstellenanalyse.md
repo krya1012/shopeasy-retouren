@@ -32,12 +32,12 @@ Der Fall wartet darauf, dass eine Person ihn bearbeitet oder dass die Kund:in di
 
 | Nr. | Stelle (von → nach) | intern / extern | beeinflussbar | zugehörige W | KPI (Sprint 3) | Beleg |
 |---|---|---|---|---|---|---|
-| Z1 | Anmeldung → Label erstellt (Erfassung im ERP, Label im Versandtool) | intern | ja | W3, W5 | K9 | A (Schritte 2–3 manuell), H (Wartezeit) |
-| Z2 | Label gesendet → Paket im Lager (Rückversand) | extern (Kund:in, Versand) | nein, nur sichtbar machen | W6, W15 | K14 | A (Schritt 4) |
+| Z1 | Anmeldung → Label erstellt (Erfassung im ERP, Label im Versandtool) | intern | ja | W3, W5 | K13 | A (Schritte 2–3 manuell), H (Wartezeit) |
+| Z2 | Label gesendet → Paket im Lager (Rückversand) | extern (Kund:in, Versand) | nein, nur sichtbar machen | W6, W15 | K1 | A (Schritt 4) |
 | Z3 | Paket im Lager → Zustand erfasst | intern | ja | W7 | K2 | A (Schritt 5 „oft verzögert“) |
-| Z4 | Zustand erfasst → Entscheidung (inkl. Eskalation) | intern | ja | W8, W9, W16 | K4 | A (Schritt 6), H (Liegezeit) |
-| Z5 | Entscheidung „Annahme“ → Rückerstattung | intern | ja | W12 | K3 | A (Schritt 8, 8–12 Tage) |
-| Z6 | Ergebnis → Information an die Kund:in | intern | ja | W13 | K8 | A (Schritt 9 „verzögert“) |
+| Z4 | Zustand erfasst → Entscheidung (inkl. Eskalation) | intern | ja | W8, W9, W16 | K2, K3 | A (Schritt 6), H (Liegezeit) |
+| Z5 | Entscheidung „Annahme“ → Rückerstattung | intern | ja | W12 | K12 | A (Schritt 8, 8–12 Tage) |
+| Z6 | Ergebnis → Information an die Kund:in | intern | ja | W13 | K1, K13 | A (Schritt 9 „verzögert“) |
 
 Der Rückversand (Z2) ist Transportzeit der Kund:in und nicht abstellbar. Beeinflussbar sind die Liegezeiten Z1 und Z3 bis Z6.
 
@@ -109,11 +109,11 @@ Schnelle Gewinne (geringer Aufwand): W4, W5, W9, W13, W16.
 
 | Nr. | Hypothese | W | KPI |
 |---|---|---|---|
-| H1 | Innerhalb von ShopEasy (ab Wareneingang) liegt der größte Zeitanteil zwischen Zustandserfassung und Rückerstattung. | W7, W12 | K1b, K2, K3 |
-| H2 | Fälle aus dem E-Mail-Kanal haben mehr Schleifen und längere Durchlaufzeiten als Webshop-Fälle. | W2 | K7, K5b |
-| H3 | Grenzfälle und Rückfragen erzeugen Varianten mit hoher Durchlaufzeit. | W9 | K4, K5b |
-| H4 | Das Aufkommen im Wareneingang schwankt je Wochentag deutlich. | W15 | K15 |
-| H5 | Der Rückversand der Kund:in macht einen großen Teil der 8–12 Tage aus. | W6 | K1a gegenüber K1b |
+| H1 | Innerhalb von ShopEasy (ab Wareneingang) liegt der größte Zeitanteil zwischen Zustandserfassung und Rückerstattung. | W7, W12 | K2, K12 |
+| H2 | Fälle aus dem E-Mail-Kanal haben mehr Schleifen und längere Durchlaufzeiten als Webshop-Fälle. | W2 | K1 und K4 je Kanal |
+| H3 | Grenzfälle und Rückfragen erzeugen Varianten mit hoher Durchlaufzeit. | W9 | K3, K1 |
+| H4 | Das Aufkommen im Wareneingang schwankt je Wochentag deutlich. | W15 | Auswertung Wareneingänge je Wochentag (kein KPI) |
+| H5 | Der Rückversand der Kund:in macht einen großen Teil der 8–12 Tage aus. | W6 | K1 gegenüber K2 + K12 |
 
 H5 klärt zugleich, ab wann die „8–12 Tage“ der Aufgabe zählen (ab Anmeldung oder ab Wareneingang).
 
