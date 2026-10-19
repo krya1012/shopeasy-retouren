@@ -31,7 +31,7 @@ Die Perspektive folgt den Kennzahlenfamilien der Vorlesung (Dumas): Effektivitä
 | K3 | Zeit Entscheidung → Rückerstattung | Zeit | Median und 90. Perzentil, nur Fälle mit Annahme | `Entscheidung` → `Rückerstattung` | Stunden | Event-Log | ja | W12 | ≤ 24 Stunden |
 | K4 | Eskalationsquote | Qualität | Fälle mit Aktivität `Eskalation` geteilt durch alle Fälle mit `Entscheidung` | – | % | Event-Log | ja | W8, W9, W16 | ≤ 5 % |
 | K5 | Fehlerquote (drei Teile, siehe Abschnitt 3) | Qualität | K5a Erfassungsfehler, K5b Nacharbeit, K5c Fehlentscheidung | – | % | Event-Log, Ersatzmessung | ggf. | W2, W3, W8, W11 | je ≤ 2 % |
-| K6 | Automatisierungsgrad | Kosten | Anteil der Aktivitäten, deren Ressource ein System oder Bot ist, an allen Aktivitäten | – | % | Event-Log (Ressource) | ggf. | W16, alle | ≥ 60 % (im Soll-Modell: 13 von 19 Aufgaben automatisch) |
+| K6 | Automatisierungsgrad | Kosten | Anteil der Aktivitäten, deren Ressource ein System oder Bot ist, an allen Aktivitäten | – | % | Event-Log (Ressource) | ggf. | W16, alle | ≥ 60 % (im Soll-Modell: 16 von 22 Aufgaben automatisch, im Normalfall 11 von 12) |
 | K7 | Kanalverteilung und Durchlaufzeit je Kanal | Effektivität | Anteil der Fälle je Kanal; K1a und K1b getrennt je Kanal | `Retoure angemeldet` (Kanal) | % und Tage | Event-Log | ja | W1, W2 | Ziel: E-Mail-Kanal nicht langsamer als Webshop |
 | K8 | Zeit bis zur ersten Statusnachricht an den Kunden | Effektivität | Median der Zeit bis zur ersten Nachricht an den Kunden | `Retoure angemeldet` → erste Aktivität `Label versendet` oder `Kunde informiert` | Stunden | Event-Log | ggf. | W6, W13 | ≤ 1 Stunde |
 
@@ -58,7 +58,7 @@ Die Fehlerquote wird in drei Teile zerlegt, weil „Fehler“ sonst nicht eindeu
 | K15 | Retourenaufkommen je Tag | Fälle mit `Wareneingang` je Kalendertag und Wochentag; Spitze geteilt durch Durchschnitt | – | Anzahl | ja | W15 | Basis für Schichtplanung, kein Zielwert |
 | K16 | Kundenanfragen zum Status | Anzahl Rückfragen je 100 Fälle | – | Anzahl | nein (E-Mail-Postfach) | W13 | Vorschlag: halbieren |
 | K17 | Retourenquote | Retouren geteilt durch Bestellungen im Zeitraum | – | % | nein (braucht Bestelldaten) | Reporting | Beobachtung (Ist: 25–35 % laut Aufgabe) |
-| K18 | Bearbeitungsaufwand je Retoure | Mittelwert der Aktivitäten je Fall, deren Ressource eine Person ist. Geschätzte Kosten = Anzahl × Minuten je Aktivität × Stundensatz (beides Annahmen, in Sprint 3 abgleichen) | – | Anzahl, € (geschätzt) | ggf. (Ressource) | W3, W9, W11, W12, W16 | Beobachtung; im Soll-Modell sind 6 von 19 Aufgaben mit Mensch besetzt, davon 3 reine Ausnahmepfade |
+| K18 | Bearbeitungsaufwand je Retoure | Mittelwert der Aktivitäten je Fall, deren Ressource eine Person ist. Geschätzte Kosten = Anzahl × Minuten je Aktivität × Stundensatz (beides Annahmen, in Sprint 3 abgleichen) | – | Anzahl, € (geschätzt) | ggf. (Ressource) | W3, W9, W11, W12, W16 | Beobachtung; im Soll-Modell sind 6 von 22 Aufgaben menschlich, im Normalfall (Webshop, Annahme) nur die Zustandsprüfung |
 | K19 | Änderungsaufwand für neue Regel oder neuen Kanal | qualitativ: Änderung einer DMN-Tabelle bzw. eines Startereignisses statt Codeänderung | – | Aufwand (Stunden, geschätzt) | nein | W1, W4, W16 | Nachweis in Sprint 4 (Regel ändern, Testlauf wiederholen) |
 
 ### Zuordnung zu den Kennzahlenfamilien
@@ -82,8 +82,9 @@ Die Namen in der ersten Spalte sind angenommen und werden mit dem tatsächlichen
 | `Anmeldung geprüft` | `t_erp`, `gw_ok` | `t_rule` |
 | `Label erstellt` | `t_label` | `t_label` |
 | `Label versendet` | `t_send` | `t_notify` |
+| `Wareneingang bestätigt` | – | `t_notify_in` |
 | `Wareneingang` | `ev_wait` | `ev_arrive` |
-| `Zustand erfasst` | `t_gr` | `t_gr` |
+| `Zustand erfasst` | `t_gr` | `t_gr_rec` |
 | `Entscheidung` | `t_dec` | `t_decide` |
 | `Eskalation` | `t_esc` | `t_man2` |
 | `Bestand gebucht` | `t_stock` | `t_stock` |
