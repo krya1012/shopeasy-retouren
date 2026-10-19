@@ -12,15 +12,15 @@ Ziel: Konzept und Prototypen für die digitalisierte Retourenabwicklung der Shop
 | 3 | 3.–17.11. | Process Mining (Celonis) | `sprint3-mining/` |
 | 4 | 17.11.–8.12. | Ausführbarer Workflow (Camunda) | `sprint4-workflow/` |
 | 5 | 8.12.–12.1. | RPA (UiPath) & AI-Agent (n8n) | `sprint5-rpa-ai/` |
-| 6 | 12.–26.1. | Zusammenführung & Dokumentation | `docs/` |
+| 6 | 12.–26.1. | Zusammenführung & Dokumentation | `sprint6-abschluss/` |
 
 ## Weitere Dokumente
 
 - [Project Charter](docs/00-project-charter.md)
 - [Sprint-1-Bericht](sprint1-bpm/sprint1-bericht.md) mit Diagrammen: [Ist-Prozess](sprint1-bpm/ist-prozess.png), [Soll-Prozess](sprint1-bpm/soll-prozess.png)
 - Die Modelle in `sprint1-bpm/` werden im Camunda Modeler gepflegt; die Diagramme (PNG) werden dort exportiert (Datei → Export as Image).
-- [KI-Nutzung (Pflichtdokumentation)](AI-USAGE.md)
+- [KI-Nutzung (Pflichtdokumentation)](AI-USAGE.md): Übersicht, je Sprint eine Datei `AI-USAGE.md` im Sprint-Ordner
 
 ## Hinweis
 
-Jede Nutzung von KI-Werkzeugen wird in `AI-USAGE.md` dokumentiert.
+Jede Nutzung von KI-Werkzeugen wird in der `AI-USAGE.md` des jeweiligen Sprints dokumentiert (Übersicht: `AI-USAGE.md`).

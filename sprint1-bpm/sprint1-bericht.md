@@ -4,7 +4,7 @@
 - `sprint1-bpm/ist-prozess.bpmn` – Ist-Prozess, drei Eingangskanäle (Webshop, Marktplatz, E-Mail), drei Lanes und zwei externe Pools (Kund:in, Marktplatz); Bild: [`ist-prozess.png`](ist-prozess.png)
 - `sprint1-bpm/soll-prozess.bpmn` – Soll-Prozess mit Umsetzungsart je Aktivität; Bild: [`soll-prozess.png`](soll-prozess.png)
 - `sprint1-bpm/schwachstellenanalyse.md`
-- `sprint1-bpm/kpi-katalog.md` – Kern-KPIs K1–K8 (u. a. Durchlaufzeit gesamt und intern, Fehlerquote in drei Teilen) und Zusatz-KPIs K9–K19, mit Event-Log-Schema, Zuordnung zu den Modellelementen und Vorlage für Sprint 3
+- `sprint1-bpm/kpi-katalog.md` – Kern-KPIs K1–K8 (u. a. Durchlaufzeit gesamt und intern, Fehlerquote in drei Teilen) und Zusatz-KPIs K9–K21, mit Event-Log-Schema, Zuordnung zu den Modellelementen und Vorlage für Sprint 3
 - `sprint1-bpm/soll-prozess-realisierung.md` – Begründung der Umsetzungsart je Soll-Aktivität
 
 ![Ist-Prozess](ist-prozess.png)
@@ -52,8 +52,8 @@ Die Wahl der Umsetzungsart je Aktivität (mit Begründung, verworfener Alternati
 - **Gegenprobe:** Das Soll-Modell vor der Korrektur lehnte Camunda ab (Bedingungen an User Tasks), und mit dem dreifachen Join blieb eine Instanz nach Bestandsbuchung und Rückerstattung hängen (Deadlock). Beides ist im aktuellen Modell behoben.
 
 ## Offene Punkte
-- Modelle im Camunda Modeler öffnen, das Layout prüfen und dort weiterpflegen: Der Modeler ist ab jetzt die Quelle. Den Erstentwurf der Dateien hat Claude Code per Skript geschrieben, spätere Änderungen (u. a. Datenspeicher, Anmerkungen und Gateways im Ist-Modell) direkt im XML der Datei, weil die KI den Modeler nicht bedienen kann (siehe `AI-USAGE.md`). Nach Änderungen die PNGs im Modeler neu exportieren; die jetzigen PNGs wurden mit bpmn-js gerendert und können in Details abweichen.
+- Modelle im Camunda Modeler öffnen, das Layout prüfen und dort weiterpflegen: Der Modeler ist ab jetzt die Quelle. Den Erstentwurf der Dateien hat Claude Code per Skript geschrieben, spätere Änderungen (u. a. Datenspeicher, Anmerkungen und Gateways im Ist-Modell) direkt im XML der Datei, weil die KI den Modeler nicht bedienen kann (siehe `sprint1-bpm/AI-USAGE.md`). Nach Änderungen die PNGs im Modeler neu exportieren; die jetzigen PNGs wurden mit bpmn-js gerendert und können in Details abweichen.
 - Startpunkt der „8–12 Tage“ mit dem Dozenten klären (ab Anmeldung oder ab Wareneingang); K1a und K1b decken beide Varianten ab.
 - Annahmen prüfen: Versandtool und Zahlungsdienstleister haben eine API, das ERP nicht.
 - Aktivitätsnamen des KPI-Katalogs mit der Log-Datei aus Sprint 3 abgleichen.
-- Team prüft alle Inhalte und trägt Änderungen in `AI-USAGE.md` ein.
+- Team prüft alle Inhalte und trägt Änderungen in `sprint1-bpm/AI-USAGE.md` ein.

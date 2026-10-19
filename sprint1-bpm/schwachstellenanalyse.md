@@ -6,7 +6,7 @@ Bezug: `sprint1-bpm/ist-prozess.bpmn`. Die W-Nummern stehen dort als Anmerkungen
 
 **Beleg:** **A** = steht in der Aufgabenstellung (Schritt 1–10 des Ausgangsszenarios, Systemliste oder „Bekannte Schwachstellen“ 1–6 in der Reihenfolge von S. 5). **H** = Annahme, abgeleitet; sie ist im Team oder mit dem Dozenten zu bestätigen.
 
-**Priorität:** Auswirkung (A) und Aufwand zur Behebung (E) jeweils h/m/n (hoch/mittel/niedrig). Das ist ein **Vorschlag der KI, im Team abzustimmen** (siehe Prüfliste in `AI-USAGE.md`); echte Messwerte liefert erst Sprint 3.
+**Priorität:** Auswirkung (A) und Aufwand zur Behebung (E) jeweils h/m/n (hoch/mittel/niedrig). Das ist ein **Vorschlag der KI, im Team abzustimmen** (siehe Prüfliste in `sprint1-bpm/AI-USAGE.md`); echte Messwerte liefert erst Sprint 3.
 
 ## 1. Übersicht nach Kategorien
 

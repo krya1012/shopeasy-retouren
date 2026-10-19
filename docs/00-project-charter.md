@@ -54,4 +54,4 @@ Jede Person trägt ihre eigenen Angaben ein (Projektregel: Ziele und Erwartungen
 | Yaraslau Krautsou | _eintragen_ | _eintragen_ | _eintragen_ |
 
 ## Regeln zur KI-Nutzung
-Jede KI-Nutzung wird in `AI-USAGE.md` dokumentiert. Die persönliche Zusammenfassung in Sprint 6 entsteht ohne KI.
+Jede KI-Nutzung wird in der `AI-USAGE.md` des jeweiligen Sprints dokumentiert (Übersicht: `AI-USAGE.md`). Die persönliche Zusammenfassung in Sprint 6 entsteht ohne KI.
