@@ -1,12 +1,12 @@
 # Schwachstellenanalyse Ist-Prozess
 
-Grundlage ist das Dokument „Prozess Analyse der Shop Easy GmbH“ von Eduard Ede Moser. Seine Texte stehen hier fast wörtlich (nur Rechtschreibung angepasst), die Gliederung folgt der Zusammenfassung in seinem Dokument (siehe `AI-USAGE.md`).
+Grundlage ist das Dokument „Prozess Analyse der Shop Easy GmbH“ von Eduard Moser. (siehe `AI-USAGE.md`).
 
 Unter jedem Text steht **„Im Ist-Modell“**: die zugehörigen Schwachstellen mit ihrer Nummer (W1–W17, so stehen sie als Hinweise in `ist-prozess.bpmn`), der Kategorie und dem **Namen des Schritts im Diagramm**. Die Maßnahmen im Soll-Prozess stehen in `soll-prozess-realisierung.md`.
 
 **Kategorien** (Vorgabe der Aufgabe): **Medienbruch** (Daten wechseln das System und werden abgetippt), **Wartezeit** (der Fall wartet), **Fehlerquelle** (Fehler oder unklare Entscheidungen sind möglich).
 
-**„Ergänzung (Aufgabe)“** markiert Punkte, die nicht in Edes Dokument stehen, aber in der Aufgabenstellung oder im Ist-Diagramm vorkommen.
+**„Ergänzung (Aufgabe)“** markiert Punkte, die den Automatisierungs Prozess ergänzen sollten, aber nicht in der Aufgabenstellung oder im Ist-Diagramm vorkommen.
 
 ## 1. Retoureneingang
 
@@ -32,7 +32,7 @@ Dann gibt es den Zeitpunkt, an dem die Kleidung/Produkte durch den Kunden zurüc
 
 **Im Ist-Modell**
 - **W6**, Medienbruch: Kein Tracking, ShopEasy erfährt erst im Lager vom Paket. Schritt: „Paket trifft im Lager ein“.
-- **W15**, Wartezeit: Das Aufkommen ist nicht planbar, die Schichtplanung berücksichtigt Spitzentage nicht. Schritt: „Paket trifft im Lager ein“.
+- **W15**, Wartezeit: Das Aufkommen ist schlecht planbar, es kann sein das die Schichtplanung Spitzentage nicht nerücksichtigt. Schritt: „Paket trifft im Lager ein“.
 - **W7**, Wartezeit und Fehlerquelle: Öffnen und Bewerten der Ware ist Handarbeit. Ergänzung (Aufgabe): Die Erfassung im WMS erfolgt oft verzögert und die Bewertung ist subjektiv. Schritt: „Zustand prüfen (neuwertig / beschädigt / getragen), im WMS erfassen“.
 
 ## 4. Prüfung der Retoure
@@ -72,7 +72,7 @@ Das Dokumentieren in E-Mails ist leider nicht sehr gut auswertbar und muss desha
 
 In dem Prozess gibt es viele manuelle Tätigkeiten, die man automatisieren könnte. Manuelle Tätigkeiten können häufig zu Fehlern bei der Übertragung führen. Es kann auch zu Fehleinschätzungen durch falsches Lesen oder Verrutschen in Spalten kommen. Diese Arbeiten sollten besser automatisiert werden.
 
-Retourengrundanalyse muss noch in den Prozess eingefügt werden. Noch mal prüfen, ob der Hauptretourengrund zu klein ist, möglicherweise die Größe der Artikelbeschreibung anpassen.
+(Retourengrundanalyse muss noch in den Prozess eingefügt werden.  zB Noch prüfen, ob der Hauptretourengrund zu klein ist, möglicherweise die Größe der Artikelbeschreibung anpassen.)
 
 **Im Ist-Modell**
 - **W17**, Medienbruch: Der Retourengrund wird nicht strukturiert erfasst und ausgewertet (Freitext aus den Kanälen). Schritte: die drei Startereignisse „Retoure im Webshop-Formular angemeldet“, „Retoure im Marktplatz-Tool angemeldet“, „Retoure formlos per E-Mail angemeldet“.
