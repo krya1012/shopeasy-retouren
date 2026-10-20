@@ -9,4 +9,11 @@ Einträge sofort beim Einsatz der KI anlegen, nicht erst zur Abgabe.
 
 | Datum | Werkzeug | Co-Autor:in | Zweck / Artefakt | Prüfstatus (Team) |
 |---|---|---|---|---|
-| – | – | – | Noch keine KI-Nutzung in diesem Sprint eingetragen | – |
+| 20.10.2026 | Claude Code (Opus 5.5 im Planungsmodus, Sonnet 5.5) | Yaraslau Krautsou | `aufgabenanalyse.md`: Analyse der Sprint-2-Aufgabe (PDF) und der `.proto`, Abgleich mit dem Soll-Prozess, Vorschläge für Zustandsregeln, gRPC-Fehler und Statusübergänge, Fragen an den Dozenten | offen – siehe Prüfliste |
+
+## Prüfliste Sprint 2 (Team)
+
+Hier steht erst ein Ergebnis, wenn jemand die Inhalte wirklich geprüft hat.
+
+1. `aufgabenanalyse.md`: Alle lesen sie und prüfen, ob sie die Aufgabe (PDF) richtig wiedergibt. Die Vorschläge in Abschnitt 5 (Regeln, Fehler, Statusübergänge) sind Vorschläge der KI und müssen vom Team abgestimmt werden.
+2. Die Fragen in Abschnitt 7 stellt Yaraslau Krautsou dem Dozenten (oder jemand anderes aus dem Team).
