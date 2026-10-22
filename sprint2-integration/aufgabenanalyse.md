@@ -120,14 +120,14 @@ Bei der Umsetzung ergänzt (ebenfalls Vorschlag): `IN_REVIEW → APPROVED | REJE
 - Die drei Entscheidungen des gRPC-Service entsprechen den drei Wegen nach dem Gateway „Ergebnis?“ (`gw2`): Annahme, Ablehnung, Grenzfall. Ein Grenzfall geht zu „Grenzfall prüfen & Entscheidung dokumentieren“ (`t_man2`).
 - Die Messaging-Schritte (`t_notify`, `t_notify_in`, `t_end_notify`) senden Statusnachrichten.
 
-**Passt nicht ganz** (die Modelle bleiben unverändert, siehe Frage 5):
+**Passt nicht ganz** (die Modelle bleiben unverändert; sie sind unsere eigene Arbeit, das Team entscheidet und passt sie in Sprint 4 an, wenn der ausführbare Workflow entsteht):
 - In `soll-prozess-realisierung.md` „bucht“ der gRPC-Service den Zustand im WMS (`t_gr_rec`) und liefert die Nachricht „Paket eingetroffen“ (`ev_arrive`). Laut Aufgabe **bewertet** er den Zustand und gibt eine Empfehlung. Die Entscheidung trifft weiterhin die Regel `t_decide`.
 - Der REST-Mock wird laut Aufgabe **abgerufen** (der Workflow holt die Meldungen). Das Modell zeigt eine eingehende Nachricht.
 - Vorschlag: Die Modelle ändern wir erst in Sprint 4, wenn der ausführbare Workflow entsteht. Bis dahin steht die Abweichung hier.
 
 ## 7. Fragen an den Dozenten
 
-Die Fragen 1 bis 3 hat der Dozent beantwortet, die Fragen 4 bis 7 sind noch offen.
+Die Fragen 1 bis 3 hat der Dozent beantwortet, die Fragen 4 bis 6 sind noch offen.
 
 1. Die Bewertungsfolie nennt „Payment“ und „Rechnungen“. Dürfen wir die Aspekte sinngemäß übertragen: Event für den Status einer Retoure statt Payment, Zustandsprüfung eines Artikels statt Rechnungserfassung?
    **Antwort: Das ist eine alte Folie, einfach ignorieren.**
@@ -136,9 +136,8 @@ Die Fragen 1 bis 3 hat der Dozent beantwortet, die Fragen 4 bis 7 sind noch offe
 3. REST-Mock: Das Beispiel zeigt nur Retourenmeldungen. Für die Bestelldaten (Abfrage über die `orderId`) haben wir ein eigenes Format entworfen. Gibt es Vorgaben, oder ist es frei?
    **Antwort: Wir können ein eigenes, sinnvolles Format wählen.**
 4. Entkopplung: Der Consumer hält den Status in einem eigenen Speicher und ruft den REST-Mock nicht auf. Verbunden werden die Systeme erst im Workflow (Sprint 4). Ist das gewünscht, oder soll der Consumer den Status schon jetzt im REST-Mock aktualisieren?
-5. BPMN-Modelle aus Sprint 1: Der gRPC-Service bewertet laut Aufgabe den Zustand, im Soll-Prozess steht er als „Zustand im WMS buchen“. Der REST-Mock wird abgerufen, das Modell zeigt eine eingehende Nachricht. Dürfen wir die Modelle erst in Sprint 4 anpassen, wenn der ausführbare Workflow entsteht?
-6. Abgabe und Vorstellung: Wie sollen wir die Szenarien zeigen (automatisierte Tests, Video, Live-Demo)? Was laden wir in ILIAS hoch, reicht der Link zum GitHub-Repository? Unter welchem GitHub-Namen laden wir den Dozenten als Mitglied ein? Und wer von uns stellt was vor (das klären wir im Team)?
-7. Aus Sprint 1, noch offen: Ab wann zählt die Retourenfrist „8–12 Tage“, und in Kalender- oder Werktagen?
+5. Abgabe und Vorstellung: Wie sollen wir die Szenarien zeigen (automatisierte Tests, Video, Live-Demo)? Was laden wir in ILIAS hoch, reicht der Link zum GitHub-Repository? Unter welchem GitHub-Namen laden wir den Dozenten als Mitglied ein? Und wer von uns stellt was vor (das klären wir im Team)?
+6. Aus Sprint 1, noch offen: Ab wann zählt die Retourenfrist „8–12 Tage“, und in Kalender- oder Werktagen?
 
 ## 8. Offen im Team
 
