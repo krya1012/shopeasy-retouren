@@ -1,0 +1,19 @@
+plugins {
+    id 'org.springframework.boot' version '4.1.1'
+}
+
+dependencies {
+    implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Der Client läuft getrennt vom Server: ./gradlew :rest-mock:runClient
+tasks.register('runClient', JavaExec) {
+    group = 'application'
+    description = 'Startet den REST-Client (der Server muss laufen).'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'de.shopeasy.restmock.client.RestClientDemo'
+}

@@ -1,0 +1,50 @@
+plugins {
+    id 'application'
+    id 'com.google.protobuf' version '0.10.0'
+}
+
+def grpcVersion = '1.85.1'
+def protobufVersion = '4.36.2'
+
+dependencies {
+    implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // für @Generated im erzeugten Code
+
+    testImplementation "io.grpc:grpc-inprocess:${grpcVersion}"
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+    }
+    generateProtoTasks {
+        all().configureEach { task ->
+            task.plugins {
+                grpc {}
+            }
+        }
+    }
+}
+
+application {
+    mainClass = 'de.shopeasy.grpc.server.ConditionServer'
+}
+
+// Der Client läuft getrennt vom Server: ./gradlew :grpc-service:runClient
+tasks.register('runClient', JavaExec) {
+    group = 'application'
+    description = 'Startet den gRPC-Client (der Server muss laufen).'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'de.shopeasy.grpc.client.GrpcClientDemo'
+}

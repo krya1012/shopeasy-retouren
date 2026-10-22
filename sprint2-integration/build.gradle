@@ -1,0 +1,24 @@
+// Gemeinsame Einstellungen für alle vier Module.
+subprojects {
+    apply plugin: 'java'
+
+    group = 'de.shopeasy'
+    version = '1.0'
+
+    repositories {
+        mavenCentral()
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+    }
+}

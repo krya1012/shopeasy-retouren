@@ -1,5 +1,10 @@
 syntax = "proto3";
 
+// Einzige Änderung gegenüber der Vorgabe des Dozenten: Java-Optionen, damit der Code in einem
+// Paket erzeugt wird. Service, Nachrichten und Felder sind unverändert (siehe README.md im Ordner sprint2-integration).
+option java_package = "de.shopeasy.grpc";
+option java_multiple_files = true;
+
 // ---------------------------------------------------------------------------
 // ArtikelzustandsPrüfservice
 //

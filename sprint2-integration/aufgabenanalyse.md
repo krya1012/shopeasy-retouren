@@ -1,6 +1,6 @@
 # Sprint 2: Analyse der Aufgabe
 
-Quellen: `Aufgabe DvG WS26_Sprint 2.pdf` (Prof. Heberle) und `article_condition_service.proto` (beide in diesem Ordner). Abgabe: **3.11.2026, 11:30 Uhr in ILIAS**.
+Quellen: `Aufgabe DvG WS26_Sprint 2.pdf` (Prof. Heberle) und `article_condition_service.proto` (jetzt in `grpc-service/src/main/proto/`, dort nur um zwei Java-Optionen ergänzt). Die Umsetzung steht in der [README](README.md). Abgabe: **3.11.2026, 11:30 Uhr in ILIAS**.
 
 Alles mit „Vorschlag“ ist ein Vorschlag der KI und muss im Team abgestimmt werden (Prüfliste in `AI-USAGE.md`).
 
@@ -105,6 +105,8 @@ RECEIVED → INSPECTED → ACCEPTED | REJECTED | MANUAL_REVIEW
 ACCEPTED → REFUNDED → CLOSED
 ```
 
+Bei der Umsetzung ergänzt (ebenfalls Vorschlag): `IN_REVIEW → APPROVED | REJECTED`, `MANUAL_REVIEW → ACCEPTED | REJECTED`, `REJECTED | EXPIRED → CLOSED`. Sonst gäbe es für Grenzfälle und abgelehnte Retouren keinen Weg zum Ende.
+
 - Eine Nachricht je Statuswechsel, mit `eventId`, `returnId`, `oldStatus`, `newStatus`, `occurredAt`.
 - Ein Topic für Status-Updates, aus dem mehrere Empfänger lesen können (Kundeninformation, Reporting). Das trennt die Systeme voneinander.
 - Fehler: Nachrichten, die der Consumer nicht versteht, landen in einer eigenen Fehler-Queue. Der Producer wiederholt das Senden, wenn der Broker nicht erreichbar ist.
@@ -133,6 +135,6 @@ ACCEPTED → REFUNDED → CLOSED
 
 ## 8. Offen im Team
 
-- Programmiersprache und Broker (RabbitMQ oder ActiveMQ) festlegen. Dabei gilt: Wir müssen den Code erklären können.
-- Aufgaben verteilen: REST-Mock, gRPC-Service, Messaging.
+- Programmiersprache und Broker: **Java (Spring Boot) und RabbitMQ**, festgelegt von Yaraslau Krautsou am 22.10.2026. Die Zustimmung des Teams steht noch aus. Wir müssen den Code erklären können.
+- Aufgaben verteilen: Der Code für alle drei Programme liegt vor (Claude Code, Co-Autor Yaraslau Krautsou). Offen ist, wer ihn liest, ausprobiert und später vorstellt (siehe Prüfliste in `AI-USAGE.md`).
 - Prüfen, ob die Statusübergänge in 5.3 und die Regeln in 5.1 passen.
