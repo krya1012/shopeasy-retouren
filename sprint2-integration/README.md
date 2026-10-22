@@ -42,7 +42,7 @@ Beschreibung der Schnittstelle (OpenAPI): http://localhost:8080/v3/api-docs, Obe
 | `GET /api/v1/orders/{orderId}` | Bestelldaten (404, wenn unbekannt) |
 | `PATCH /api/v1/returns/{returnId}` mit `{"status":"APPROVED"}` | Status ändern, `updatedAt` wird neu gesetzt |
 
-Das Format ist das aus der Aufgabe (Folie 9): Die Liste steckt im Feld `data`, die erste Testretoure `RET-2026-00457` ist genau das Beispiel der Folie. Einzelabruf und Bestellung liefern ein einzelnes Objekt ohne `data`. Fehler kommen als `ProblemDetail` (RFC 9457) mit passendem Statuscode: 404 für Unbekanntes, 400 für ungültigen Status oder Filter. Es gibt sechs Testretouren im Speicher (`ReturnStore`); nach einem Neustart sind die Daten wieder im Ausgangszustand. Die Bestelldaten (`orderId`) sind eine Annahme, die Aufgabe nennt dafür kein Format (Frage 3 an den Dozenten).
+Das Format ist das aus der Aufgabe (Folie 9): Die Liste steckt im Feld `data`, die erste Testretoure `RET-2026-00457` ist genau das Beispiel der Folie. Einzelabruf und Bestellung liefern ein einzelnes Objekt ohne `data`. Fehler kommen als `ProblemDetail` (RFC 9457) mit passendem Statuscode: 404 für Unbekanntes, 400 für ungültigen Status oder Filter. Es gibt sechs Testretouren im Speicher (`ReturnStore`); nach einem Neustart sind die Daten wieder im Ausgangszustand. Die Bestelldaten (`orderId`) haben ein eigenes Format. Die Aufgabe nennt keins, der Dozent hat bestätigt, dass wir ein eigenes, sinnvolles Format wählen dürfen.
 
 ## 2. gRPC-Service
 
@@ -59,7 +59,7 @@ Der Client kann auch einzelne Abfragen machen (Server muss laufen; andere Adress
 ./gradlew :grpc-service:runClient --args="get RET-2026-00457 SH-BLZ-042-M"
 ```
 
-Die Schnittstelle ist die `.proto` des Dozenten (`grpc-service/src/main/proto/article_condition_service.proto`). **Einzige Änderung:** zwei Zeilen `option java_...`, damit der erzeugte Code in einem Paket liegt. Service, Nachrichten und Felder sind unverändert (Frage 2 an den Dozenten bleibt offen).
+Die Schnittstelle ist die `.proto` des Dozenten (`grpc-service/src/main/proto/article_condition_service.proto`). **Einzige Änderung:** zwei Zeilen `option java_...`, damit der erzeugte Code in einem Paket liegt. Service, Nachrichten und Felder sind unverändert. Der Dozent hat bestätigt, dass das so passt.
 
 Regeln der Prüfung (Vorschlag, im Team abzustimmen):
 
@@ -184,9 +184,9 @@ Geprüft gegen `Aufgabe DvG WS26_Sprint 2.pdf`, Folie für Folie:
 |---|---|---|
 | 8 | drei Komponenten, Message Broker | erfüllt: vier Programme, RabbitMQ |
 | 9 | Liste mit Filter, Einzelabruf, Bestellung, Status ändern, Format, Client | erfüllt, Format wie im Beispiel (`data`) |
-| 10 | gRPC nach der `.proto`, Client, Simulation, Szenarien, Fehler | erfüllt; Änderung an der `.proto` nur Java-Optionen, Rücksprache offen |
+| 10 | gRPC nach der `.proto`, Client, Simulation, Szenarien, Fehler | erfüllt; Änderung an der `.proto` nur Java-Optionen, vom Dozenten bestätigt |
 | 11 | Statusübergänge, Producer, Consumer, Topics/Queues | erfüllt |
-| X | Messaging und gRPC: Fehler, doppelte Events, Struktur | erfüllt und getestet; die Folie spricht von „Payment“ und „Rechnungen“, das übertragen wir sinngemäß (Frage 1 an den Dozenten) |
+| X | Messaging und gRPC: Fehler, doppelte Events, Struktur | erfüllt und getestet; die Folie spricht von „Payment“ und „Rechnungen“, laut Dozent ist sie alt und wird ignoriert; die Fehlerfälle setzen wir trotzdem um |
 | 12 | Best Practices, KI dokumentieren | REST mit Versionspfad, Plural, Statuscodes, ProblemDetail und OpenAPI; KI in `AI-USAGE.md` |
 
 Bewusste Grenzen:

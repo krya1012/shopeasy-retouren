@@ -46,7 +46,7 @@ Aus der Folie „Aspekte Messaging und gRPC“:
 | gRPC | saubere und sinnvolle Schnittstellenbeschreibung, Struktur des Codes |
 | gRPC, Fehler | passende Fehler im Service (z. B. doppelte Anfrage, falsche Daten), Fehlerbehandlung im Client |
 
-**Auffällig:** Die Folie spricht von „Payment“ und „Rechnungen“, unsere Aufgabe handelt aber von Retouren. Wir übertragen es sinngemäß: Event für den Status einer Retoure statt Payment, Zustandsprüfung statt Rechnungserfassung. Das fragen wir den Dozenten (Frage 1).
+**Auffällig:** Die Folie spricht von „Payment“ und „Rechnungen“, unsere Aufgabe handelt aber von Retouren. **Antwort des Dozenten (Frage 1): Das ist eine alte Folie, wir ignorieren sie.** Die Fehlerfälle (nicht zugestellt, nicht verstanden, doppelte Events, doppelte Anfrage, falsche Daten) setzen wir trotzdem um, weil sie zu Messaging und gRPC allgemein gehören.
 
 **Weitere Regeln aus der Aufgabe:**
 - Standards und Best Practices von Prof. Zimmermann anwenden.
@@ -125,11 +125,16 @@ Bei der Umsetzung ergänzt (ebenfalls Vorschlag): `IN_REVIEW → APPROVED | REJE
 - Der REST-Mock wird laut Aufgabe **abgerufen** (der Workflow holt die Meldungen). Das Modell zeigt eine eingehende Nachricht.
 - Vorschlag: Die Modelle ändern wir erst in Sprint 4, wenn der ausführbare Workflow entsteht. Bis dahin steht die Abweichung hier.
 
-## 7. Offene Fragen an den Dozenten
+## 7. Fragen an den Dozenten
+
+Die Fragen 1 bis 3 hat der Dozent beantwortet, die Fragen 4 bis 7 sind noch offen.
 
 1. Die Bewertungsfolie nennt „Payment“ und „Rechnungen“. Dürfen wir die Aspekte sinngemäß übertragen: Event für den Status einer Retoure statt Payment, Zustandsprüfung eines Artikels statt Rechnungserfassung?
+   **Antwort: Das ist eine alte Folie, einfach ignorieren.**
 2. Änderungen an der `.proto`: Wir haben nur zwei Java-Optionen ergänzt (`java_package`, `java_multiple_files`). Ist das in Ordnung? Die Stapelprüfung hat kein Fehlerfeld je Position. Wir lehnen bei einem Fehler den ganzen Stapel ab und nennen die Position in der Meldung. Reicht das, oder sollen wir ein Fehlerfeld je Position ergänzen?
+   **Antwort: Ja, das passt.**
 3. REST-Mock: Das Beispiel zeigt nur Retourenmeldungen. Für die Bestelldaten (Abfrage über die `orderId`) haben wir ein eigenes Format entworfen. Gibt es Vorgaben, oder ist es frei?
+   **Antwort: Wir können ein eigenes, sinnvolles Format wählen.**
 4. Entkopplung: Der Consumer hält den Status in einem eigenen Speicher und ruft den REST-Mock nicht auf. Verbunden werden die Systeme erst im Workflow (Sprint 4). Ist das gewünscht, oder soll der Consumer den Status schon jetzt im REST-Mock aktualisieren?
 5. BPMN-Modelle aus Sprint 1: Der gRPC-Service bewertet laut Aufgabe den Zustand, im Soll-Prozess steht er als „Zustand im WMS buchen“. Der REST-Mock wird abgerufen, das Modell zeigt eine eingehende Nachricht. Dürfen wir die Modelle erst in Sprint 4 anpassen, wenn der ausführbare Workflow entsteht?
 6. Abgabe und Vorstellung: Wie sollen wir die Szenarien zeigen (automatisierte Tests, Video, Live-Demo)? Was laden wir in ILIAS hoch, reicht der Link zum GitHub-Repository? Unter welchem GitHub-Namen laden wir den Dozenten als Mitglied ein? Und wer von uns stellt was vor (das klären wir im Team)?
