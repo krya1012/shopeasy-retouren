@@ -27,6 +27,7 @@ public class GrpcClientDemo {
             Benutzung:
               check <returnId> <sku> <ZUSTAND> [tags=true|false]
                 ZUSTAND: AS_NEW, MINOR_WEAR, VISIBLY_WORN, DAMAGED, MISSING_TAGS, MISSING_PARTS
+                         (UNSPECIFIED ist ungültig und zeigt den Fehler INVALID_ARGUMENT)
               get <returnId> <sku>
               (ohne Argumente: Demo mit allen Szenarien)""";
 
@@ -65,7 +66,8 @@ public class GrpcClientDemo {
                 }
                 ObservedCondition condition;
                 try {
-                    condition = ObservedCondition.valueOf(args[3]);
+                    condition = ObservedCondition.valueOf(
+                            args[3].equals("UNSPECIFIED") ? "OBSERVED_CONDITION_UNSPECIFIED" : args[3]);
                 } catch (IllegalArgumentException e) {
                     return false;
                 }

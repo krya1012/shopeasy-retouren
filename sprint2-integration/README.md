@@ -15,7 +15,9 @@ Der Code ist mit Claude Code entstanden (Co-Autor Yaraslau Krautsou) und noch **
 - Java 21 oder neuer. Gradle wird über `./gradlew` geladen, eine eigene Installation ist nicht nötig.
 - Für das Messaging ein Container-Programm (Podman oder Docker).
 
-Alle Tests: `./gradlew test`. Alles bauen: `./gradlew build`.
+Alle Tests: `./gradlew test` (mit `--rerun` läuft sie neu und zeigt jeden Test mit Namen). Alles bauen: `./gradlew build`.
+
+**Vorführung (20 Minuten):** Der Ablauf Schritt für Schritt steht in [vorfuehrung.md](vorfuehrung.md).
 
 ## 1. REST-Mock
 

@@ -20,5 +20,10 @@ subprojects {
 
     tasks.withType(Test).configureEach {
         useJUnitPlatform()
+        // Jeden Test mit Namen ausgeben (gut für die Vorführung): ./gradlew test --rerun
+        testLogging {
+            events 'passed', 'failed', 'skipped'
+            exceptionFormat 'full'
+        }
     }
 }

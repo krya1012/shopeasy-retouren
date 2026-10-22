@@ -136,7 +136,7 @@ Die Fragen 1 bis 3 hat der Dozent beantwortet, die Fragen 4 bis 6 sind noch offe
 3. REST-Mock: Das Beispiel zeigt nur Retourenmeldungen. Für die Bestelldaten (Abfrage über die `orderId`) haben wir ein eigenes Format entworfen. Gibt es Vorgaben, oder ist es frei?
    **Antwort: Wir können ein eigenes, sinnvolles Format wählen.**
 4. Entkopplung: Der Consumer hält den Status in einem eigenen Speicher und ruft den REST-Mock nicht auf. Verbunden werden die Systeme erst im Workflow (Sprint 4). Ist das gewünscht, oder soll der Consumer den Status schon jetzt im REST-Mock aktualisieren?
-5. Abgabe und Vorstellung: Wie sollen wir die Szenarien zeigen (automatisierte Tests, Video, Live-Demo)? Was laden wir in ILIAS hoch, reicht der Link zum GitHub-Repository? Unter welchem GitHub-Namen laden wir den Dozenten als Mitglied ein? Und wer von uns stellt was vor (das klären wir im Team)?
+5. Abgabe: Wir zeigen die Szenarien live im 20-Minuten-Termin (Ablauf in `vorfuehrung.md`). Was laden wir in ILIAS hoch, reicht der Link zum GitHub-Repository? Unter welchem GitHub-Namen laden wir den Dozenten als Mitglied ein?
 6. Aus Sprint 1, noch offen: Ab wann zählt die Retourenfrist „8–12 Tage“, und in Kalender- oder Werktagen?
 
 ## 8. Offen im Team
@@ -144,3 +144,4 @@ Die Fragen 1 bis 3 hat der Dozent beantwortet, die Fragen 4 bis 6 sind noch offe
 - Programmiersprache und Broker: **Java (Spring Boot) und RabbitMQ**, festgelegt von Yaraslau Krautsou am 22.10.2026. Die Zustimmung des Teams steht noch aus. Wir müssen den Code erklären können.
 - Aufgaben verteilen: Der Code für alle drei Programme liegt vor (Claude Code, Co-Autor Yaraslau Krautsou). Offen ist, wer ihn liest, ausprobiert und später vorstellt (siehe Prüfliste in `AI-USAGE.md`).
 - Prüfen, ob die Statusübergänge in 5.3 und die Regeln in 5.1 passen.
+- Vorstellung im 20-Minuten-Termin: Wer zeigt welchen Teil, steht noch offen (Tabelle in `vorfuehrung.md`). Das Team spielt die Vorführung vorher einmal komplett durch.

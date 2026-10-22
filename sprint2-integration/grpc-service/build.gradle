@@ -39,6 +39,8 @@ protobuf {
 
 application {
     mainClass = 'de.shopeasy.grpc.server.ConditionServer'
+    // Server-Meldungen in einer Zeile: Uhrzeit, Stufe, Text
+    applicationDefaultJvmArgs = ['-Djava.util.logging.SimpleFormatter.format=%1$tT %4$s %5$s%n']
 }
 
 // Der Client läuft getrennt vom Server: ./gradlew :grpc-service:runClient
