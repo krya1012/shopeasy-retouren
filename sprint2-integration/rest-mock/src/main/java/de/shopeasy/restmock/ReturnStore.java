@@ -43,31 +43,32 @@ public class ReturnStore {
     }
 
     private void loadTestData() {
-        add("RET-2026-00457", "ZAL-100457", Marketplace.ZALANDO, ReturnStatus.NEW,
-                ReasonCode.SIZE_TOO_SMALL, "Blazer ist eine Nummer zu klein", "2026-10-12T08:15:00Z",
-                null, "kunde.1001", "anna.beispiel@example.com",
-                item("SH-BLZ-042-M", "Blazer Classic", 1, "89.90"));
-        add("RET-2026-00458", "ZAL-100458", Marketplace.ZALANDO, ReturnStatus.NEW,
-                ReasonCode.NOT_AS_DESCRIBED, "Farbe weicht stark vom Foto ab", "2026-10-12T09:40:00Z",
-                null, "kunde.1002", "ben.muster@example.com",
+        // Die erste Retoure ist das Beispiel von Folie 9 der Aufgabe.
+        add("RET-2026-00457", "ORD-2026-118932", Marketplace.ZALANDO, ReturnStatus.NEW,
+                ReasonCode.SIZE_TOO_SMALL, "Passt leider nicht, eine Nummer kleiner bitte.", "2026-09-18T09:14:00Z",
+                null, "CUST-88213", "j.mueller@example.com",
+                item("SH-BLZ-042-M", "Blazer Slim Fit", 1, "89.9"));
+        add("RET-2026-00458", "ORD-2026-118940", Marketplace.ZALANDO, ReturnStatus.NEW,
+                ReasonCode.NOT_AS_DESCRIBED, "Farbe weicht stark vom Foto ab", "2026-09-19T09:40:00Z",
+                null, "CUST-88214", "b.schmidt@example.com",
                 item("SH-DRS-017-S", "Sommerkleid", 1, "59.95"),
-                item("SH-BLT-003-U", "Ledergürtel", 1, "24.90"));
-        add("RET-2026-00459", "AMZ-302-5551234", Marketplace.AMAZON, ReturnStatus.APPROVED,
-                ReasonCode.DEFECTIVE, "Reißverschluss klemmt", "2026-10-11T14:05:00Z",
-                "https://labels.example.com/RET-2026-00459.pdf", "kunde.1003", "carla.test@example.com",
-                item("SH-JKT-088-L", "Winterjacke", 1, "129.00"));
-        add("RET-2026-00460", "AMZ-302-5557788", Marketplace.AMAZON, ReturnStatus.LABEL_SENT,
-                ReasonCode.CHANGED_MIND, "Gefällt mir doch nicht", "2026-10-10T18:30:00Z",
-                "https://labels.example.com/RET-2026-00460.pdf", "kunde.1004", "dennis.probe@example.com",
-                item("SH-SNK-120-42", "Sneaker Urban", 2, "74.50"));
-        add("RET-2026-00461", "ZAL-100461", Marketplace.ZALANDO, ReturnStatus.RECEIVED,
-                ReasonCode.SIZE_TOO_LARGE, "Hose ist zu weit", "2026-10-08T07:50:00Z",
-                "https://labels.example.com/RET-2026-00461.pdf", "kunde.1005", "eva.demo@example.com",
-                item("SH-PNT-031-32", "Chino Hose", 1, "49.90"));
-        add("RET-2026-00462", "AMZ-302-5559901", Marketplace.AMAZON, ReturnStatus.REJECTED,
-                ReasonCode.WRONG_ITEM, "Falscher Artikel geliefert", "2026-10-05T11:20:00Z",
-                null, "kunde.1006", "felix.stichprobe@example.com",
-                item("SH-SHT-009-M", "Leinenhemd", 1, "39.90"));
+                item("SH-BLT-003-U", "Ledergürtel", 1, "24.9"));
+        add("RET-2026-00459", "ORD-2026-118955", Marketplace.AMAZON, ReturnStatus.APPROVED,
+                ReasonCode.DEFECTIVE, "Reißverschluss klemmt", "2026-09-20T14:05:00Z",
+                "https://labels.example.com/RET-2026-00459.pdf", "CUST-88230", "c.weber@example.com",
+                item("SH-JKT-088-L", "Winterjacke", 1, "129.0"));
+        add("RET-2026-00460", "ORD-2026-118961", Marketplace.AMAZON, ReturnStatus.LABEL_SENT,
+                ReasonCode.CHANGED_MIND, "Gefällt mir doch nicht", "2026-09-21T18:30:00Z",
+                "https://labels.example.com/RET-2026-00460.pdf", "CUST-88245", "d.fischer@example.com",
+                item("SH-SNK-120-42", "Sneaker Urban", 2, "74.5"));
+        add("RET-2026-00461", "ORD-2026-118970", Marketplace.ZALANDO, ReturnStatus.RECEIVED,
+                ReasonCode.SIZE_TOO_LARGE, "Hose ist zu weit", "2026-09-22T07:50:00Z",
+                "https://labels.example.com/RET-2026-00461.pdf", "CUST-88251", "e.wagner@example.com",
+                item("SH-PNT-031-32", "Chino Hose", 1, "49.9"));
+        add("RET-2026-00462", "ORD-2026-118982", Marketplace.AMAZON, ReturnStatus.REJECTED,
+                ReasonCode.WRONG_ITEM, "Falscher Artikel geliefert", "2026-09-23T11:20:00Z",
+                null, "CUST-88260", "f.becker@example.com",
+                item("SH-SHT-009-M", "Leinenhemd", 1, "39.9"));
     }
 
     private static Item item(String sku, String productName, int quantity, String unitPrice) {

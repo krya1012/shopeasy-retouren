@@ -19,6 +19,7 @@ import de.shopeasy.grpc.ConditionCheckResponse;
 import de.shopeasy.grpc.GetCheckResultRequest;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 
 /**
@@ -27,23 +28,38 @@ import io.grpc.stub.StreamObserver;
  * <p>Fehler (siehe aufgabenanalyse.md, 5.2):
  * INVALID_ARGUMENT (falsche Daten), ALREADY_EXISTS (Prüfung gibt es schon), NOT_FOUND (kein Ergebnis),
  * UNAVAILABLE (simulierter Ausfall, return_id beginnt mit "RET-FAIL").
+ *
+ * <p>Simulierte Szenarien: "RET-FAIL..." fällt beim ersten Aufruf aus, "RET-SLOW..." antwortet erst nach
+ * {@link #DEFAULT_SLOW_MILLIS} ms (der Client läuft dann in seine Frist).
  */
 public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.ArticleConditionServiceImplBase {
 
     private static final Logger LOG = Logger.getLogger(ArticleConditionServiceImpl.class.getName());
     static final String OUTAGE_PREFIX = "RET-FAIL";
+    static final String SLOW_PREFIX = "RET-SLOW";
+    public static final long DEFAULT_SLOW_MILLIS = 5000;
 
     private final Clock clock;
+    private final long slowMillis;
     private final Map<String, ConditionCheckResponse> results = new HashMap<>();
     private final Set<String> alreadyFailed = new HashSet<>();
 
     public ArticleConditionServiceImpl(Clock clock) {
+        this(clock, DEFAULT_SLOW_MILLIS);
+    }
+
+    /** Die Wartezeit für das Szenario "RET-SLOW" ist einstellbar, damit Tests schnell bleiben. */
+    public ArticleConditionServiceImpl(Clock clock, long slowMillis) {
         this.clock = clock;
+        this.slowMillis = slowMillis;
     }
 
     @Override
     public void checkCondition(ConditionCheckRequest request, StreamObserver<ConditionCheckResponse> observer) {
-        reply(observer, () -> checkAll(List.of(request), false).get(0));
+        reply(observer, () -> {
+            simulateSlowResponse(List.of(request));
+            return checkAll(List.of(request), false).get(0);
+        });
     }
 
     @Override
@@ -53,6 +69,7 @@ public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.Art
             if (request.getItemsCount() == 0) {
                 throw RequestValidator.invalid("items darf nicht leer sein");
             }
+            simulateSlowResponse(request.getItemsList());
             return ConditionCheckBatchResponse.newBuilder()
                     .addAllResults(checkAll(request.getItemsList(), true))
                     .build();
@@ -127,6 +144,21 @@ public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.Art
         return responses;
     }
 
+    /**
+     * Simuliert einen langsamen Service. Absichtlich außerhalb der Sperre, damit andere Aufrufe nicht warten.
+     * Hat der Client schon aufgegeben, wird die Prüfung trotzdem noch gespeichert.
+     */
+    private void simulateSlowResponse(List<ConditionCheckRequest> requests) {
+        if (requests.stream().noneMatch(r -> r.getReturnId().startsWith(SLOW_PREFIX))) {
+            return;
+        }
+        try {
+            Thread.sleep(slowMillis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
     /** Hängt bei einem Stapel die Position an die Fehlermeldung. */
     private static StatusRuntimeException withPosition(StatusRuntimeException e, int index, boolean batch) {
         if (!batch) {
@@ -143,7 +175,12 @@ public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.Art
     /** Antwortet mit dem Ergebnis oder mit dem passenden gRPC-Fehler. Unerwartete Fehler werden zu INTERNAL. */
     private static <T> void reply(StreamObserver<T> observer, Supplier<T> action) {
         try {
-            observer.onNext(action.get());
+            T result = action.get();
+            if (observer instanceof ServerCallStreamObserver<T> call && call.isCancelled()) {
+                LOG.info("Client hat den Aufruf abgebrochen (Frist), Antwort wird nicht mehr gesendet");
+                return;
+            }
+            observer.onNext(result);
             observer.onCompleted();
         } catch (StatusRuntimeException e) {
             observer.onError(e);

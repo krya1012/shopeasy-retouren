@@ -94,6 +94,14 @@ class ErrorHandlingTest extends ServiceTestBase {
     }
 
     @Test
+    void langsamerServiceLaeuftInDieFristDesClients() {
+        ConditionCheckRequest slow = request("RET-SLOW-1", "SKU-1", ObservedCondition.AS_NEW, true);
+        StatusRuntimeException e = assertThrows(StatusRuntimeException.class,
+                () -> stub.withDeadlineAfter(100, java.util.concurrent.TimeUnit.MILLISECONDS).checkCondition(slow));
+        assertEquals(Status.Code.DEADLINE_EXCEEDED, codeOf(e));
+    }
+
+    @Test
     void stapelBewertetAllePositionen() {
         ConditionCheckBatchResponse response = stub.checkConditionBatch(ConditionCheckBatchRequest.newBuilder()
                 .addItems(request("RET-1", "SKU-1", ObservedCondition.AS_NEW, true))

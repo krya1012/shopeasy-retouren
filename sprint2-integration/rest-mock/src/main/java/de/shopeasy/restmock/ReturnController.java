@@ -1,6 +1,5 @@
 package de.shopeasy.restmock;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
@@ -25,9 +24,9 @@ public class ReturnController {
     }
 
     @GetMapping
-    public List<ReturnReport> list(@RequestParam Optional<ReturnStatus> status,
-                                   @RequestParam Optional<Marketplace> marketplace) {
-        return store.find(status, marketplace);
+    public ReturnList list(@RequestParam Optional<ReturnStatus> status,
+                           @RequestParam Optional<Marketplace> marketplace) {
+        return new ReturnList(store.find(status, marketplace));
     }
 
     @GetMapping("/{returnId}")

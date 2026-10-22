@@ -49,10 +49,19 @@ class ConditionClientTest extends ServiceTestBase {
     }
 
     @Test
+    void clientMeldetUeberschrittenFristUndWiederholtNicht() {
+        ConditionClient client = new ConditionClient(channel, 100);
+        ConditionClientException e = assertThrows(ConditionClientException.class,
+                () -> client.checkCondition(request("RET-SLOW-1", "SKU-1", ObservedCondition.AS_NEW, true)));
+        assertEquals(Status.Code.DEADLINE_EXCEEDED, e.getCode());
+        assertTrue(e.getMessage().startsWith("Zeitüberschreitung"));
+    }
+
+    @Test
     void clientGibtNachDreiVersuchenAuf() {
         // Kein Server hinter dem Kanal: UNAVAILABLE bei jedem Versuch
         io.grpc.ManagedChannel dead = io.grpc.inprocess.InProcessChannelBuilder.forName("gibt-es-nicht")
-                .directExecutor().build();
+                .build();
         ConditionClient client = new ConditionClient(dead);
         ConditionClientException e = assertThrows(ConditionClientException.class,
                 () -> client.checkCondition(request("RET-1", "SKU-1", ObservedCondition.AS_NEW, true)));

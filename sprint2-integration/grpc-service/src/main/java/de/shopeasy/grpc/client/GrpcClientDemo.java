@@ -12,20 +12,40 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
 /**
- * Spielt alle Szenarien durch: Annahme, Ablehnung, Grenzfall, Stapel, Fehlerfälle.
- * Start: {@code ./gradlew :grpc-service:runClient} (der Server muss laufen). Optional: Host und Port als Argumente.
+ * Client für den ArticleConditionService. Ohne Argumente spielt er alle Szenarien durch (Demo):
+ * Annahme, Ablehnung, Grenzfall, Stapel, Fehlerfälle. Mit Argumenten macht er genau eine Abfrage:
+ * <pre>
+ * check RET-2026-00457 SH-BLZ-042-M AS_NEW [tags=false]   Zustand prüfen (tags=true ist Standard)
+ * get RET-2026-00457 SH-BLZ-042-M                          früheres Ergebnis abrufen
+ * </pre>
+ * Start: {@code ./gradlew :grpc-service:runClient --args="get RET-A SKU"} (der Server muss laufen).
+ * Adresse standardmäßig localhost:9090, mit der Umgebungsvariable GRPC_TARGET änderbar (z. B. "rechner:9090").
  */
 public class GrpcClientDemo {
 
+    private static final String USAGE = """
+            Benutzung:
+              check <returnId> <sku> <ZUSTAND> [tags=true|false]
+                ZUSTAND: AS_NEW, MINOR_WEAR, VISIBLY_WORN, DAMAGED, MISSING_TAGS, MISSING_PARTS
+              get <returnId> <sku>
+              (ohne Argumente: Demo mit allen Szenarien)""";
+
     public static void main(String[] args) throws InterruptedException {
-        String host = args.length > 0 ? args[0] : "localhost";
-        int port = args.length > 1 ? Integer.parseInt(args[1]) : 9090;
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+        String target = System.getenv().getOrDefault("GRPC_TARGET", "localhost:9090");
+        ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
+        int exitCode = 0;
         try {
-            new GrpcClientDemo(new ConditionClient(channel)).run();
+            GrpcClientDemo demo = new GrpcClientDemo(new ConditionClient(channel));
+            if (args.length == 0) {
+                demo.run();
+            } else if (!demo.command(args)) {
+                System.err.println(USAGE);
+                exitCode = 2;
+            }
         } finally {
             channel.shutdown().awaitTermination(2, TimeUnit.SECONDS);
         }
+        System.exit(exitCode);
     }
 
     private final ConditionClient client;
@@ -34,6 +54,36 @@ public class GrpcClientDemo {
 
     GrpcClientDemo(ConditionClient client) {
         this.client = client;
+    }
+
+    /** @return false, wenn die Argumente nicht passen */
+    private boolean command(String[] args) {
+        switch (args[0]) {
+            case "check" -> {
+                if (args.length < 4 || args.length > 5) {
+                    return false;
+                }
+                ObservedCondition condition;
+                try {
+                    condition = ObservedCondition.valueOf(args[3]);
+                } catch (IllegalArgumentException e) {
+                    return false;
+                }
+                boolean tags = args.length < 5 || !args[4].equals("tags=false");
+                show("Prüfung " + args[1] + " / " + args[2],
+                        () -> client.checkCondition(request(args[1], args[2], condition, tags)));
+            }
+            case "get" -> {
+                if (args.length != 3) {
+                    return false;
+                }
+                show("Ergebnis " + args[1] + " / " + args[2], () -> client.getCheckResult(args[1], args[2]));
+            }
+            default -> {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void run() {
@@ -67,6 +117,8 @@ public class GrpcClientDemo {
                 () -> client.getCheckResult("RET-GIBT-ES-NICHT", "SH-X"));
         show("11. Ausfall: Service kurz nicht verfügbar (UNAVAILABLE), der Client wiederholt",
                 () -> client.checkCondition(request("RET-FAIL-" + run, "SH-BLZ-042-M", ObservedCondition.AS_NEW, true)));
+        show("12. Frist: Service antwortet zu langsam (DEADLINE_EXCEEDED), der Client wiederholt nicht",
+                () -> client.checkCondition(request("RET-SLOW-" + run, "SH-BLZ-042-M", ObservedCondition.AS_NEW, true)));
     }
 
     private static ConditionCheckRequest request(String returnId, String sku, ObservedCondition condition,

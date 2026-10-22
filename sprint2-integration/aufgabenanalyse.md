@@ -21,7 +21,7 @@ Drei kleine Programme, die später im Prozess genutzt werden. Jedes bekommt eine
 - Eine Meldung über die `returnId` abrufen.
 - Die Daten einer Bestellung über die `orderId` abrufen.
 - Den Status einer Meldung ändern.
-- Das Format der Meldung steht in der Aufgabe: `returnId`, `orderId`, `marketplace` (z. B. `ZALANDO`), `status` (z. B. `NEW`), `reason` (Code, z. B. `SIZE_TOO_SMALL`), `reasonText`, `requestedAt`, `updatedAt`, `items` (mit `sku`, `productName`, `quantity`, `unitPrice`, `currency`), `customer` und `returnLabelUrl`.
+- Das Format der Meldung steht in der Aufgabe: `returnId`, `orderId`, `marketplace` (z. B. `ZALANDO`), `status` (z. B. `NEW`), `reason` (Code, z. B. `SIZE_TOO_SMALL`), `reasonText`, `requestedAt`, `updatedAt`, `items` (mit `sku`, `productName`, `quantity`, `unitPrice`, `currency`), `customer` und `returnLabelUrl`. Die Liste steckt im Beispiel in einem Feld `data`.
 
 ### 2.2 gRPC-Service
 - Ausgangspunkt ist die mitgelieferte `.proto`. Änderungen nur nach Rücksprache mit dem Dozenten.

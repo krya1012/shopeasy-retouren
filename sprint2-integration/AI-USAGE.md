@@ -11,6 +11,7 @@ Einträge sofort beim Einsatz der KI anlegen, nicht erst zur Abgabe.
 |---|---|---|---|---|
 | 20.10.2026 | Claude Code (Opus 5.5 im Planungsmodus, Sonnet 5.5) | Yaraslau Krautsou | `aufgabenanalyse.md`: Analyse der Sprint-2-Aufgabe (PDF) und der `.proto`, Abgleich mit dem Soll-Prozess, Vorschläge für Zustandsregeln, gRPC-Fehler und Statusübergänge, Fragen an den Dozenten | offen – siehe Prüfliste |
 | 22.10.2026 | Claude Code (Opus 5.5 im Planungsmodus, Sonnet 5.5) | Yaraslau Krautsou | Code der drei Komponenten (Java/Spring Boot, RabbitMQ): `rest-mock/`, `grpc-service/` (mit Tests und Clients), `messaging-producer/`, `messaging-consumer/`, `compose.yaml`, `README.md`, Ergänzungen in `aufgabenanalyse.md`. Sprache und Broker hat Yaraslau Krautsou gewählt. | offen – siehe Prüfliste |
+| 22.10.2026 | Claude Code (Opus 5.5 im Planungsmodus, Sonnet 5.5) | Yaraslau Krautsou | Abgleich des Codes mit der Aufgabe (PDF) und Korrekturen: REST-Liste im Feld `data`, Testdaten nach Folie 9, Clients mit eigenen Abfragen, Szenario „zu langsam“ (Frist) im gRPC-Service, OpenAPI-Beschreibung, Abschnitte „Abgleich mit der Aufgabe“ und „Enterprise Integration Patterns“ in der `README.md` | offen – siehe Prüfliste |
 
 ## Prüfliste Sprint 2 (Team)
 

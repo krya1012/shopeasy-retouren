@@ -24,9 +24,9 @@ abstract class ServiceTestBase {
     void startServer() throws Exception {
         String name = InProcessServerBuilder.generateName();
         Clock fixed = Clock.fixed(Instant.parse("2026-10-22T10:00:00Z"), ZoneOffset.UTC);
-        server = InProcessServerBuilder.forName(name).directExecutor()
-                .addService(new ArticleConditionServiceImpl(fixed)).build().start();
-        channel = InProcessChannelBuilder.forName(name).directExecutor().build();
+        server = InProcessServerBuilder.forName(name)
+                .addService(new ArticleConditionServiceImpl(fixed, 500)).build().start();
+        channel = InProcessChannelBuilder.forName(name).build();
         stub = ArticleConditionServiceGrpc.newBlockingStub(channel);
     }
 

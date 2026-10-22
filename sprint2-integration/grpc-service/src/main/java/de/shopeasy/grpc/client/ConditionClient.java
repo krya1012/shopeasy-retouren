@@ -19,19 +19,27 @@ import io.grpc.StatusRuntimeException;
  *
  * <p>Fehlerbehandlung: Jeder Aufruf hat eine Frist. Bei UNAVAILABLE (Service kurz nicht erreichbar) wird
  * bis zu dreimal wiederholt. Alle anderen Fehler wiederholt man nicht, weil sie beim nächsten Mal wieder
- * auftreten (falsche Daten) oder die Wiederholung etwas Falsches bewirken würde (Duplikat).
+ * auftreten (falsche Daten), die Wiederholung etwas Falsches bewirken würde (Duplikat) oder die Prüfung beim
+ * Service eventuell schon gespeichert ist (Frist überschritten).
  * Am Ende wird eine {@link ConditionClientException} mit verständlicher Meldung geworfen.
  */
 public class ConditionClient {
 
     static final int MAX_ATTEMPTS = 3;
-    private static final long DEADLINE_SECONDS = 3;
+    static final long DEFAULT_DEADLINE_MILLIS = 3000;
     private static final long BACKOFF_MILLIS = 200;
 
     private final ArticleConditionServiceBlockingStub stub;
+    private final long deadlineMillis;
 
     public ConditionClient(Channel channel) {
+        this(channel, DEFAULT_DEADLINE_MILLIS);
+    }
+
+    /** Die Frist ist einstellbar, damit Tests schnell bleiben. */
+    public ConditionClient(Channel channel, long deadlineMillis) {
         this.stub = ArticleConditionServiceGrpc.newBlockingStub(channel);
+        this.deadlineMillis = deadlineMillis;
     }
 
     public ConditionCheckResponse checkCondition(ConditionCheckRequest request) {
@@ -51,7 +59,7 @@ public class ConditionClient {
     private <T> T call(Function<ArticleConditionServiceBlockingStub, T> rpc) {
         for (int attempt = 1; ; attempt++) {
             try {
-                return rpc.apply(stub.withDeadlineAfter(DEADLINE_SECONDS, TimeUnit.SECONDS));
+                return rpc.apply(stub.withDeadlineAfter(deadlineMillis, TimeUnit.MILLISECONDS));
             } catch (StatusRuntimeException e) {
                 boolean retry = e.getStatus().getCode() == Status.Code.UNAVAILABLE && attempt < MAX_ATTEMPTS;
                 if (!retry) {
@@ -63,7 +71,7 @@ public class ConditionClient {
         }
     }
 
-    private static ConditionClientException translate(StatusRuntimeException e, int attempts) {
+    private ConditionClientException translate(StatusRuntimeException e, int attempts) {
         Status status = e.getStatus();
         String detail = status.getDescription() == null ? "" : status.getDescription();
         String message = switch (status.getCode()) {
@@ -71,7 +79,8 @@ public class ConditionClient {
             case ALREADY_EXISTS -> "Doppelte Anfrage: " + detail;
             case NOT_FOUND -> "Nicht gefunden: " + detail;
             case UNAVAILABLE -> "Service nach " + attempts + " Versuchen nicht erreichbar: " + detail;
-            case DEADLINE_EXCEEDED -> "Zeitüberschreitung, keine Antwort innerhalb von " + DEADLINE_SECONDS + " s";
+            case DEADLINE_EXCEEDED -> "Zeitüberschreitung, keine Antwort innerhalb von " + deadlineMillis
+                    + " ms (die Prüfung kann beim Service trotzdem gespeichert sein, nicht blind wiederholen)";
             default -> "Unerwarteter Fehler (" + status.getCode() + "): " + detail;
         };
         return new ConditionClientException(status.getCode(), message, e);

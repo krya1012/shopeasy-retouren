@@ -25,16 +25,16 @@ class ReturnApiTest {
     void listeOhneFilterLiefertAlleRetouren() throws Exception {
         mvc.perform(get("/api/v1/returns"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(6));
+                .andExpect(jsonPath("$.data.length()").value(6));
     }
 
     @Test
     void filterNachStatusUndMarktplatz() throws Exception {
         mvc.perform(get("/api/v1/returns").param("status", "NEW").param("marketplace", "ZALANDO"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].marketplace").value("ZALANDO"))
-                .andExpect(jsonPath("$[0].status").value("NEW"));
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[0].marketplace").value("ZALANDO"))
+                .andExpect(jsonPath("$.data[0].status").value("NEW"));
     }
 
     @Test
@@ -48,19 +48,42 @@ class ReturnApiTest {
         mvc.perform(get("/api/v1/returns/RET-2026-00457"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.returnId").value("RET-2026-00457"))
-                .andExpect(jsonPath("$.orderId").value("ZAL-100457"))
+                .andExpect(jsonPath("$.orderId").value("ORD-2026-118932"))
                 .andExpect(jsonPath("$.marketplace").value("ZALANDO"))
                 .andExpect(jsonPath("$.status").value("NEW"))
                 .andExpect(jsonPath("$.reason").value("SIZE_TOO_SMALL"))
                 .andExpect(jsonPath("$.reasonText").isString())
-                .andExpect(jsonPath("$.requestedAt").value("2026-10-12T08:15:00Z"))
+                .andExpect(jsonPath("$.requestedAt").value("2026-09-18T09:14:00Z"))
                 .andExpect(jsonPath("$.updatedAt").exists())
                 .andExpect(jsonPath("$.items[0].sku").value("SH-BLZ-042-M"))
-                .andExpect(jsonPath("$.items[0].unitPrice").value(89.90))
+                .andExpect(jsonPath("$.items[0].unitPrice").value(89.9))
                 .andExpect(jsonPath("$.items[0].currency").value("EUR"))
                 .andExpect(jsonPath("$.customer.customerId").exists())
                 .andExpect(jsonPath("$.customer.email").exists())
                 .andExpect(jsonPath("$.returnLabelUrl").doesNotExist());
+    }
+
+    /** Das Beispiel von Folie 9: Liste im Umschlag "data", Retoure RET-2026-00457 mit genau diesen Werten. */
+    @Test
+    void listeEntsprichtDemBeispielAusDerAufgabe() throws Exception {
+        mvc.perform(get("/api/v1/returns").param("status", "NEW").param("marketplace", "ZALANDO"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].returnId").value("RET-2026-00457"))
+                .andExpect(jsonPath("$.data[0].orderId").value("ORD-2026-118932"))
+                .andExpect(jsonPath("$.data[0].marketplace").value("ZALANDO"))
+                .andExpect(jsonPath("$.data[0].status").value("NEW"))
+                .andExpect(jsonPath("$.data[0].reason").value("SIZE_TOO_SMALL"))
+                .andExpect(jsonPath("$.data[0].reasonText").value("Passt leider nicht, eine Nummer kleiner bitte."))
+                .andExpect(jsonPath("$.data[0].requestedAt").value("2026-09-18T09:14:00Z"))
+                .andExpect(jsonPath("$.data[0].updatedAt").value("2026-09-18T09:14:00Z"))
+                .andExpect(jsonPath("$.data[0].items[0].sku").value("SH-BLZ-042-M"))
+                .andExpect(jsonPath("$.data[0].items[0].productName").value("Blazer Slim Fit"))
+                .andExpect(jsonPath("$.data[0].items[0].quantity").value(1))
+                .andExpect(jsonPath("$.data[0].items[0].unitPrice").value(89.9))
+                .andExpect(jsonPath("$.data[0].items[0].currency").value("EUR"))
+                .andExpect(jsonPath("$.data[0].customer.customerId").value("CUST-88213"))
+                .andExpect(jsonPath("$.data[0].customer.email").value("j.mueller@example.com"))
+                .andExpect(jsonPath("$.data[0].returnLabelUrl").value(org.hamcrest.Matchers.nullValue()));
     }
 
     @Test
@@ -72,9 +95,9 @@ class ReturnApiTest {
 
     @Test
     void bestellungUeberOrderId() throws Exception {
-        mvc.perform(get("/api/v1/orders/ZAL-100458"))
+        mvc.perform(get("/api/v1/orders/ORD-2026-118940"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.orderId").value("ZAL-100458"))
+                .andExpect(jsonPath("$.orderId").value("ORD-2026-118940"))
                 .andExpect(jsonPath("$.items.length()").value(2))
                 .andExpect(jsonPath("$.totalAmount").value(84.85));
     }
@@ -95,7 +118,7 @@ class ReturnApiTest {
 
         mvc.perform(get("/api/v1/returns/RET-2026-00457"))
                 .andExpect(jsonPath("$.status").value("APPROVED"))
-                .andExpect(jsonPath("$.updatedAt").value(org.hamcrest.Matchers.not("2026-10-12T08:15:00Z")));
+                .andExpect(jsonPath("$.updatedAt").value(org.hamcrest.Matchers.not("2026-09-18T09:14:00Z")));
     }
 
     @Test
@@ -120,5 +143,15 @@ class ReturnApiTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"APPROVED\"}"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void openApiBeschreibungListetAlleEndpunkte() throws Exception {
+        mvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.info.title").value("ShopEasy Retourenmeldungen (Mock)"))
+                .andExpect(jsonPath("$.paths['/api/v1/returns']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/returns/{returnId}']").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/orders/{orderId}']").exists());
     }
 }

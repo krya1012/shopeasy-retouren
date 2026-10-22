@@ -21,8 +21,19 @@ Alle Tests: `./gradlew test`. Alles bauen: `./gradlew build`.
 
 ```
 ./gradlew :rest-mock:bootRun       # Server auf Port 8080
-./gradlew :rest-mock:runClient     # Client, ruft alle Endpunkte auf
+./gradlew :rest-mock:runClient     # Client ohne Argumente: Demo, ruft alle Endpunkte auf
 ```
+
+Der Client kann auch einzelne Abfragen machen (Server muss laufen; andere Adresse mit der Umgebungsvariable `MOCK_URL`):
+
+```
+./gradlew :rest-mock:runClient --args="list status=NEW marketplace=ZALANDO"
+./gradlew :rest-mock:runClient --args="get RET-2026-00457"
+./gradlew :rest-mock:runClient --args="order ORD-2026-118932"
+./gradlew :rest-mock:runClient --args="status RET-2026-00457 APPROVED"
+```
+
+Beschreibung der Schnittstelle (OpenAPI): http://localhost:8080/v3/api-docs, Oberfläche zum Ausprobieren: http://localhost:8080/swagger-ui.html.
 
 | Aufruf | Zweck |
 |---|---|
@@ -31,13 +42,21 @@ Alle Tests: `./gradlew test`. Alles bauen: `./gradlew build`.
 | `GET /api/v1/orders/{orderId}` | Bestelldaten (404, wenn unbekannt) |
 | `PATCH /api/v1/returns/{returnId}` mit `{"status":"APPROVED"}` | Status ändern, `updatedAt` wird neu gesetzt |
 
-Das Format der Meldung ist das aus der Aufgabe (Folie 9). Fehler kommen als `ProblemDetail` (RFC 9457) mit passendem Statuscode: 404 für Unbekanntes, 400 für ungültigen Status oder Filter. Es gibt sechs Testretouren im Speicher (`ReturnStore`); nach einem Neustart sind die Daten wieder im Ausgangszustand. Die Bestelldaten (`orderId`) sind eine Annahme, die Aufgabe nennt dafür kein Format (Frage 3 an den Dozenten).
+Das Format ist das aus der Aufgabe (Folie 9): Die Liste steckt im Feld `data`, die erste Testretoure `RET-2026-00457` ist genau das Beispiel der Folie. Einzelabruf und Bestellung liefern ein einzelnes Objekt ohne `data`. Fehler kommen als `ProblemDetail` (RFC 9457) mit passendem Statuscode: 404 für Unbekanntes, 400 für ungültigen Status oder Filter. Es gibt sechs Testretouren im Speicher (`ReturnStore`); nach einem Neustart sind die Daten wieder im Ausgangszustand. Die Bestelldaten (`orderId`) sind eine Annahme, die Aufgabe nennt dafür kein Format (Frage 3 an den Dozenten).
 
 ## 2. gRPC-Service
 
 ```
 ./gradlew :grpc-service:run          # Server auf Port 9090
-./gradlew :grpc-service:runClient    # Client, spielt alle Szenarien durch
+./gradlew :grpc-service:runClient    # Client ohne Argumente: Demo, spielt alle Szenarien durch
+```
+
+Der Client kann auch einzelne Abfragen machen (Server muss laufen; andere Adresse mit der Umgebungsvariable `GRPC_TARGET`, z. B. `rechner:9090`):
+
+```
+./gradlew :grpc-service:runClient --args="check RET-2026-00457 SH-BLZ-042-M AS_NEW"
+./gradlew :grpc-service:runClient --args="check RET-2026-00458 SH-DRS-017-S AS_NEW tags=false"
+./gradlew :grpc-service:runClient --args="get RET-2026-00457 SH-BLZ-042-M"
 ```
 
 Die Schnittstelle ist die `.proto` des Dozenten (`grpc-service/src/main/proto/article_condition_service.proto`). **Einzige Änderung:** zwei Zeilen `option java_...`, damit der erzeugte Code in einem Paket liegt. Service, Nachrichten und Felder sind unverändert (Frage 2 an den Dozenten bleibt offen).
@@ -62,11 +81,12 @@ Fehler (gRPC-Statuscodes):
 | Dieselbe Prüfung (`return_id` + `sku`) noch einmal | `ALREADY_EXISTS` |
 | `GetCheckResult` für eine Prüfung, die es nicht gibt | `NOT_FOUND` |
 | Simulierter Ausfall: Eine `return_id` mit Präfix `RET-FAIL` schlägt beim ersten Aufruf fehl | `UNAVAILABLE` |
+| Simulierte Langsamkeit: Eine `return_id` mit Präfix `RET-SLOW` wird erst nach 5 Sekunden beantwortet | Der Client bricht nach seiner Frist von 3 Sekunden ab (`DEADLINE_EXCEEDED`) |
 | Unerwarteter Fehler im Service | `INTERNAL` (ohne Details nach außen) |
 
 **Stapelprüfung:** Die `.proto` hat kein Fehlerfeld je Position. Deshalb gilt „alles oder nichts“: Ist eine Position falsch oder doppelt, wird der ganze Stapel abgelehnt und nichts gespeichert. Die Meldung nennt die Position (`items[1]: ...`).
 
-**Client** (`ConditionClient`): Jeder Aufruf hat eine Frist von 3 Sekunden. Bei `UNAVAILABLE` wiederholt er bis zu dreimal, alle anderen Fehler nicht (falsche Daten bleiben falsch, ein Duplikat soll nicht noch einmal gesendet werden). Am Ende steht eine `ConditionClientException` mit verständlicher Meldung.
+**Client** (`ConditionClient`): Jeder Aufruf hat eine Frist von 3 Sekunden. Bei `UNAVAILABLE` wiederholt er bis zu dreimal, alle anderen Fehler nicht (falsche Daten bleiben falsch, ein Duplikat soll nicht noch einmal gesendet werden). Bei überschrittener Frist wiederholt er **nicht**, weil die Prüfung beim Service trotzdem gespeichert sein kann (eine Wiederholung würde dann `ALREADY_EXISTS` liefern). Am Ende steht eine `ConditionClientException` mit verständlicher Meldung.
 
 ## 3. Messaging mit RabbitMQ
 
@@ -142,6 +162,36 @@ REJECTED, EXPIRED → CLOSED
 Das Demo-Szenario zeigt: den vollständigen Weg einer Retoure, ein doppeltes Event, den Grenzfall `MANUAL_REVIEW`, einen nicht erlaubten Übergang, eine Nachricht ohne JSON und eine Nachricht ohne `returnId`. Im Log des Consumers steht jeweils, was passiert ist.
 
 **Grenzen:** Der aktuelle Status und die Liste verarbeiteter `eventId`s liegen im Speicher und sind nach einem Neustart leer. Im Betrieb gehört beides in eine Datenbank. Die Kundeninfo prüft keine Statuswechsel, sie vertraut den Events (die Prüfung macht die Verwaltung). Die Fehler-Queue wird nur ins Log geschrieben.
+
+## Verwendete Enterprise Integration Patterns
+
+Die Aufgabe verweist auf die Muster von Hohpe und Woolf. Diese sind im Messaging umgesetzt (der Dozent hat sie als Literatur genannt):
+
+| Muster | Wo |
+|---|---|
+| Event Message | `ReturnStatusChanged`: meldet, dass etwas passiert ist |
+| Publish-Subscribe Channel | Topic-Exchange `retouren.status`, mehrere Empfänger-Queues |
+| Message Router | Routing-Key `retoure.status.<STATUS>` und die Bindungen der Queues |
+| Guaranteed Delivery | persistente Nachrichten, dauerhafte Queues, Publisher Confirms |
+| Invalid Message Channel / Dead Letter Channel | Fehler-Queue `retouren.status.dlq` |
+| Idempotent Receiver | Consumer ignoriert doppelte `eventId`s |
+
+## Abgleich mit der Aufgabe (Stand 22.10.2026)
+
+Geprüft gegen `Aufgabe DvG WS26_Sprint 2.pdf`, Folie für Folie:
+
+| Folie | Anforderung | Stand |
+|---|---|---|
+| 8 | drei Komponenten, Message Broker | erfüllt: vier Programme, RabbitMQ |
+| 9 | Liste mit Filter, Einzelabruf, Bestellung, Status ändern, Format, Client | erfüllt, Format wie im Beispiel (`data`) |
+| 10 | gRPC nach der `.proto`, Client, Simulation, Szenarien, Fehler | erfüllt; Änderung an der `.proto` nur Java-Optionen, Rücksprache offen |
+| 11 | Statusübergänge, Producer, Consumer, Topics/Queues | erfüllt |
+| X | Messaging und gRPC: Fehler, doppelte Events, Struktur | erfüllt und getestet; die Folie spricht von „Payment“ und „Rechnungen“, das übertragen wir sinngemäß (Frage 1 an den Dozenten) |
+| 12 | Best Practices, KI dokumentieren | REST mit Versionspfad, Plural, Statuscodes, ProblemDetail und OpenAPI; KI in `AI-USAGE.md` |
+
+Bewusste Grenzen:
+- Der Consumer hält den Status in einem eigenen Speicher und ruft den REST-Mock nicht auf. Die Systeme bleiben getrennt, verbunden werden sie erst im Workflow (Sprint 4).
+- Der gRPC-Service wertet `image_urls`, `original_packaging` und `inspector_note` nicht aus. Die Regeln brauchen sie nicht.
 
 ## Zuordnung zu den Bewertungsaspekten
 
