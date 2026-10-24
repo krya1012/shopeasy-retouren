@@ -15,7 +15,8 @@ import io.grpc.ManagedChannelBuilder;
  * Client für den ArticleConditionService. Ohne Argumente spielt er alle Szenarien durch (Demo):
  * Annahme, Ablehnung, Grenzfall, Stapel, Fehlerfälle. Mit Argumenten macht er genau eine Abfrage:
  * <pre>
- * check RET-2026-00457 SH-BLZ-042-M AS_NEW [tags=false]   Zustand prüfen (tags=true ist Standard)
+ * check RET-2026-00457 SH-BLZ-042-M AS_NEW [tags=false] [packaging=false]   Zustand prüfen
+ *                                                          (Etikett und Verpackung sind Standard)
  * get RET-2026-00457 SH-BLZ-042-M                          früheres Ergebnis abrufen
  * </pre>
  * Start: {@code ./gradlew :grpc-service:runClient --args="get RET-A SKU"} (der Server muss laufen).
@@ -25,7 +26,7 @@ public class GrpcClientDemo {
 
     private static final String USAGE = """
             Benutzung:
-              check <returnId> <sku> <ZUSTAND> [tags=true|false]
+              check <returnId> <sku> <ZUSTAND> [tags=true|false] [packaging=true|false]
                 ZUSTAND: AS_NEW, MINOR_WEAR, VISIBLY_WORN, DAMAGED, MISSING_TAGS, MISSING_PARTS
                          (UNSPECIFIED ist ungültig und zeigt den Fehler INVALID_ARGUMENT)
               get <returnId> <sku>
@@ -61,7 +62,7 @@ public class GrpcClientDemo {
     private boolean command(String[] args) {
         switch (args[0]) {
             case "check" -> {
-                if (args.length < 4 || args.length > 5) {
+                if (args.length < 4 || args.length > 6) {
                     return false;
                 }
                 ObservedCondition condition;
@@ -71,9 +72,22 @@ public class GrpcClientDemo {
                 } catch (IllegalArgumentException e) {
                     return false;
                 }
-                boolean tags = args.length < 5 || !args[4].equals("tags=false");
+                boolean tags = true;
+                boolean packaging = true;
+                for (int i = 4; i < args.length; i++) {
+                    switch (args[i]) {
+                        case "tags=true", "packaging=true" -> { }
+                        case "tags=false" -> tags = false;
+                        case "packaging=false" -> packaging = false;
+                        default -> {
+                            return false;
+                        }
+                    }
+                }
+                boolean tagsPresent = tags;
+                boolean packagingPresent = packaging;
                 show("Prüfung " + args[1] + " / " + args[2],
-                        () -> client.checkCondition(request(args[1], args[2], condition, tags)));
+                        () -> client.checkCondition(request(args[1], args[2], condition, tagsPresent, packagingPresent)));
             }
             case "get" -> {
                 if (args.length != 3) {
@@ -125,12 +139,17 @@ public class GrpcClientDemo {
 
     private static ConditionCheckRequest request(String returnId, String sku, ObservedCondition condition,
                                                  boolean tagsPresent) {
+        return request(returnId, sku, condition, tagsPresent, true);
+    }
+
+    private static ConditionCheckRequest request(String returnId, String sku, ObservedCondition condition,
+                                                 boolean tagsPresent, boolean packaging) {
         return ConditionCheckRequest.newBuilder()
                 .setReturnId(returnId)
                 .setSku(sku)
                 .setObservedCondition(condition)
                 .setTagsPresent(tagsPresent)
-                .setOriginalPackaging(true)
+                .setOriginalPackaging(packaging)
                 .setInspectorNote("Demo")
                 .setInspectedAt(Instant.now().toString())
                 .build();

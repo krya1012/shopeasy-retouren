@@ -42,9 +42,9 @@ Beschreibung der Schnittstelle (OpenAPI): http://localhost:8080/v3/api-docs, Obe
 | `GET /api/v1/returns?status=NEW&marketplace=ZALANDO` | Liste, beide Filter sind optional |
 | `GET /api/v1/returns/{returnId}` | eine Meldung (404, wenn unbekannt) |
 | `GET /api/v1/orders/{orderId}` | Bestelldaten (404, wenn unbekannt) |
-| `PATCH /api/v1/returns/{returnId}` mit `{"status":"APPROVED"}` | Status ändern, `updatedAt` wird neu gesetzt |
+| `PATCH /api/v1/returns/{returnId}` mit `{"status":"APPROVED"}` | Status ändern, `updatedAt` wird neu gesetzt. Nicht erlaubter Wechsel (z. B. `REJECTED` → `APPROVED`): 409. Derselbe Status noch einmal: 200, nichts ändert sich (die Anfrage darf man wiederholen) |
 
-Das Format ist das aus der Aufgabe (Folie 9): Die Liste steckt im Feld `data`, die erste Testretoure `RET-2026-00457` ist genau das Beispiel der Folie. Einzelabruf und Bestellung liefern ein einzelnes Objekt ohne `data`. Fehler kommen als `ProblemDetail` (RFC 9457) mit passendem Statuscode: 404 für Unbekanntes, 400 für ungültigen Status oder Filter. Es gibt sechs Testretouren im Speicher (`ReturnStore`); nach einem Neustart sind die Daten wieder im Ausgangszustand. Die Bestelldaten (`orderId`) haben ein eigenes Format. Die Aufgabe nennt keins, der Dozent hat bestätigt, dass wir ein eigenes, sinnvolles Format wählen dürfen.
+Das Format ist das aus der Aufgabe (Folie 9): Die Liste steckt im Feld `data`, die erste Testretoure `RET-2026-00457` ist genau das Beispiel der Folie. Einzelabruf und Bestellung liefern ein einzelnes Objekt ohne `data`. Fehler kommen als `ProblemDetail` (RFC 9457) mit passendem Statuscode: 404 für Unbekanntes, 400 für ungültigen Status oder Filter, 409 für einen nicht erlaubten Statuswechsel (gleiche Tabelle wie beim Messaging, siehe Abschnitt 3). Es gibt sechs Testretouren im Speicher (`ReturnStore`); nach einem Neustart sind die Daten wieder im Ausgangszustand. Die Bestelldaten (`orderId`) haben ein eigenes Format. Die Aufgabe nennt keins, der Dozent hat bestätigt, dass wir ein eigenes, sinnvolles Format wählen dürfen.
 
 ## 2. gRPC-Service
 
@@ -58,6 +58,7 @@ Der Client kann auch einzelne Abfragen machen (Server muss laufen; andere Adress
 ```
 ./gradlew :grpc-service:runClient --args="check RET-2026-00457 SH-BLZ-042-M AS_NEW"
 ./gradlew :grpc-service:runClient --args="check RET-2026-00458 SH-DRS-017-S AS_NEW tags=false"
+./gradlew :grpc-service:runClient --args="check RET-2026-00459 SH-JKT-088-L AS_NEW packaging=false"
 ./gradlew :grpc-service:runClient --args="get RET-2026-00457 SH-BLZ-042-M"
 ```
 
@@ -67,7 +68,8 @@ Regeln der Prüfung (Vorschlag, im Team abzustimmen):
 
 | Zustand | Weitere Angaben | Entscheidung | Score |
 |---|---|---|---|
-| `AS_NEW` | Etikett vorhanden | `ACCEPT` | 0,95 |
+| `AS_NEW` | Etikett und Originalverpackung vorhanden | `ACCEPT` | 0,95 |
+| `AS_NEW` | Etikett vorhanden, Originalverpackung fehlt | `ACCEPT` | 0,85 |
 | `AS_NEW` | Etikett fehlt | `MANUAL_REVIEW` | 0,50 |
 | `MINOR_WEAR` | – | `MANUAL_REVIEW` | 0,55 |
 | `MISSING_TAGS` | – | `MANUAL_REVIEW` | 0,50 |
@@ -193,7 +195,7 @@ Geprüft gegen `Aufgabe DvG WS26_Sprint 2.pdf`, Folie für Folie:
 
 Bewusste Grenzen:
 - Der Consumer hält den Status in einem eigenen Speicher und ruft den REST-Mock nicht auf. Die Systeme bleiben getrennt, verbunden werden sie erst im Workflow (Sprint 4).
-- Der gRPC-Service wertet `image_urls`, `original_packaging` und `inspector_note` nicht aus. Die Regeln brauchen sie nicht.
+- Der gRPC-Service wertet `image_urls` und `inspector_note` nicht aus. Die Regeln brauchen sie nicht. `original_packaging` senkt nur den Score (keine Ablehnung, weil die Originalverpackung keine Bedingung für die Rücknahme ist).
 
 ## Zuordnung zu den Bewertungsaspekten
 

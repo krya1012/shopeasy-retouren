@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-/** Retourenmeldungen: Liste mit Filter, Einzelabruf und Statusänderung. */
+/** Retourenmeldungen: Liste mit Filter, Einzelabruf und Statusänderung (unerlaubte Wechsel geben 409). */
 @RestController
 @RequestMapping("/api/v1/returns")
 public class ReturnController {
@@ -39,7 +39,11 @@ public class ReturnController {
         if (update.status() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Das Feld 'status' fehlt.");
         }
-        return store.updateStatus(returnId, update.status()).orElseThrow(() -> notFound("Retoure", returnId));
+        try {
+            return store.updateStatus(returnId, update.status()).orElseThrow(() -> notFound("Retoure", returnId));
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
     }
 
     static ResponseStatusException notFound(String what, String id) {

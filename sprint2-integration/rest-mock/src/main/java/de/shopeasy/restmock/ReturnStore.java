@@ -38,10 +38,24 @@ public class ReturnStore {
         return Optional.ofNullable(orders.get(orderId));
     }
 
-    /** Setzt den Status und {@code updatedAt}. Leer, wenn es die Retoure nicht gibt. */
+    /**
+     * Setzt den Status und {@code updatedAt}, wenn der Wechsel erlaubt ist. Ist der Status schon gesetzt, ändert
+     * sich nichts (so darf man dieselbe Anfrage wiederholen). Läuft das atomar in der Map, kann kein gleichzeitiger
+     * Aufruf dazwischen einen unerlaubten Wechsel durchbringen.
+     *
+     * @throws IllegalStateException wenn der Wechsel nicht erlaubt ist (Meldung für den Aufrufer)
+     * @return leer, wenn es die Retoure nicht gibt
+     */
     public Optional<ReturnReport> updateStatus(String returnId, ReturnStatus newStatus) {
-        return Optional.ofNullable(returns.computeIfPresent(returnId,
-                (id, old) -> old.withStatus(newStatus, Instant.now())));
+        return Optional.ofNullable(returns.computeIfPresent(returnId, (id, current) -> {
+            if (current.status() == newStatus) {
+                return current;
+            }
+            if (!StatusTransitions.isAllowed(current.status(), newStatus)) {
+                throw new IllegalStateException("Statuswechsel nicht erlaubt: " + current.status() + " -> " + newStatus);
+            }
+            return current.withStatus(newStatus, Instant.now());
+        }));
     }
 
     private void loadTestData() {

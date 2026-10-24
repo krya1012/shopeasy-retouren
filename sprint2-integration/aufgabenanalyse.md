@@ -77,7 +77,8 @@ Aus der Folie „Aspekte Messaging und gRPC“:
 
 | Beobachteter Zustand | Weitere Angaben | Entscheidung |
 |---|---|---|
-| `AS_NEW` | Etikett vorhanden | `ACCEPT` |
+| `AS_NEW` | Etikett vorhanden, Originalverpackung vorhanden | `ACCEPT` |
+| `AS_NEW` | Etikett vorhanden, Originalverpackung fehlt | `ACCEPT` (mit niedrigerem Score) |
 | `AS_NEW` | Etikett fehlt | `MANUAL_REVIEW` |
 | `MINOR_WEAR` | – | `MANUAL_REVIEW` |
 | `MISSING_TAGS` | – | `MANUAL_REVIEW` |

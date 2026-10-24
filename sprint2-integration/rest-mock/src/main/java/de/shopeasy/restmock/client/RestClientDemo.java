@@ -108,6 +108,8 @@ public class RestClientDemo {
         step("6. Fehler: unbekannte Retoure (404)", "GET", "/api/v1/returns/RET-GIBT-ES-NICHT", null);
         step("7. Fehler: ungültiger Status (400)", "PATCH", "/api/v1/returns/RET-2026-00457", "{\"status\":\"QUATSCH\"}");
         step("8. Fehler: ungültiger Filter (400)", "GET", "/api/v1/returns?marketplace=EBAY", null);
+        step("9. Fehler: nicht erlaubter Statuswechsel REJECTED -> APPROVED (409)", "PATCH",
+                "/api/v1/returns/RET-2026-00462", "{\"status\":\"APPROVED\"}");
     }
 
     private void step(String title, String method, String path, String body) throws IOException, InterruptedException {

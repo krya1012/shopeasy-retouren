@@ -24,6 +24,16 @@ class ConditionRulesTest extends ServiceTestBase {
     }
 
     @Test
+    void neuwertigOhneVerpackungWirdAngenommenMitNiedrigeremScore() {
+        ConditionCheckResponse r = stub.checkCondition(
+                request("RET-1", "SKU-1", ObservedCondition.AS_NEW, true, false));
+        assertEquals(Decision.ACCEPT, r.getDecision());
+        assertFalse(r.getRequiresManualReview());
+        assertEquals(0.85, r.getConfidenceScore());
+        assertTrue(r.getReason().contains("ohne Originalverpackung"));
+    }
+
+    @Test
     void neuwertigOhneEtikettIstGrenzfall() {
         ConditionCheckResponse r = check(ObservedCondition.AS_NEW, false);
         assertEquals(Decision.MANUAL_REVIEW, r.getDecision());

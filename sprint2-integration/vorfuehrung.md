@@ -69,8 +69,9 @@ Fertig, wenn Terminal 1 „Started RestMockApplication“, Terminal 2 „läuft 
 ```
 ./gradlew :rest-mock:runClient --args="get RET-GIBT-ES-NICHT" --console=plain -q
 ./gradlew :rest-mock:runClient --args="status RET-2026-00457 QUATSCH" --console=plain -q
+./gradlew :rest-mock:runClient --args="status RET-2026-00462 APPROVED" --console=plain -q
 ```
-**Du siehst:** `-> 404` bzw. `-> 400`. Fehler kommen als ProblemDetail (RFC 9457) mit dem passenden Statuscode.
+**Du siehst:** `-> 404`, `-> 400` und `-> 409` (die Retoure `RET-2026-00462` ist abgelehnt und darf nicht mehr genehmigt werden). Fehler kommen als ProblemDetail (RFC 9457) mit dem passenden Statuscode.
 
 **Wenn Zeit ist:** Im Browser Swagger-UI öffnen und bei `GET /api/v1/returns` „Try it out“ drücken. Die Beschreibung der Schnittstelle entsteht automatisch (OpenAPI).
 
@@ -172,6 +173,8 @@ podman start shopeasy-rabbitmq
 - **Warum `ALREADY_EXISTS` bei einer doppelten Prüfung?** Die Aufgabe nennt die doppelte Anfrage als Fehlerfall. Der Client sieht so, dass es die Prüfung schon gibt, und kann sie mit `get` abrufen.
 - **Warum wiederholt der Client bei `DEADLINE_EXCEEDED` nicht?** Der Service könnte die Prüfung schon gespeichert haben, eine Wiederholung würde `ALREADY_EXISTS` liefern. Erst mit `get` nachsehen. Bei `UNAVAILABLE` (nicht verarbeitet) wiederholt er dagegen.
 - **Warum wird bei der Stapelprüfung alles oder nichts abgelehnt?** Die `.proto` hat kein Fehlerfeld je Position. Der Dozent hat bestätigt, dass das passt.
+- **Warum gibt der REST-Mock 409 bei einem Statuswechsel?** Die Anfrage passt nicht zum Zustand der Retoure. Es gelten dieselben Wechsel wie beim Messaging. Derselbe Status noch einmal gibt 200, damit man eine Anfrage nach einem Timeout gefahrlos wiederholen darf. (`ReturnStore`, `StatusTransitions`)
+- **Warum wird ohne Originalverpackung nicht abgelehnt?** Die Verpackung ist keine Bedingung für die Rücknahme. Wir senken nur den Score von 0,95 auf 0,85 und nennen es in der Begründung. (`ConditionRules`)
 - **Wer hat die Regeln für Annahme und Ablehnung festgelegt?** Sie sind ein Vorschlag aus `aufgabenanalyse.md` (Abschnitt 5.1). Das Team muss sie vor dem Termin abstimmen. Bis dahin steht in `AI-USAGE.md` „offen“.
 - **Was hat die KI gemacht?** Der Code ist mit Claude Code entstanden und in `AI-USAGE.md` dokumentiert. Wir haben ihn gelesen und können ihn erklären (das muss vorher stimmen).
 - **Wie hängt das mit Sprint 1 zusammen?** Der REST-Mock entspricht „Marktplatz-Retoure eingegangen (REST)“, der gRPC-Service „Annahme/Ablehnung entscheiden“, das Messaging den Nachrichtenschritten. Die Modelle passen wir in Sprint 4 an (Abschnitt 6 in `aufgabenanalyse.md`).

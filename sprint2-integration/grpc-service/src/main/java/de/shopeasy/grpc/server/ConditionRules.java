@@ -4,7 +4,7 @@ import de.shopeasy.grpc.ConditionCheckRequest;
 import de.shopeasy.grpc.Decision;
 
 /**
- * Die Regeln der Zustandsprüfung (Vorschlag aus aufgabenanalyse.md, 5.1).
+ * Die Regeln der Zustandsprüfung (Vorschlag aus aufgabenanalyse.md, 5.1). Genutzt werden Zustand, Etikett und Originalverpackung.
  * Der Score ist bei eindeutigen Fällen hoch und bei Grenzfällen niedrig.
  */
 final class ConditionRules {
@@ -22,9 +22,7 @@ final class ConditionRules {
     /** Erwartet eine geprüfte Anfrage (siehe {@link RequestValidator}). */
     static Result evaluate(ConditionCheckRequest request) {
         return switch (request.getObservedCondition()) {
-            case AS_NEW -> request.getTagsPresent()
-                    ? new Result(Decision.ACCEPT, 0.95, "Neuwertig, Etikett vorhanden")
-                    : new Result(Decision.MANUAL_REVIEW, 0.50, "Neuwertig, aber Etikett fehlt");
+            case AS_NEW -> asNew(request);
             case MINOR_WEAR -> new Result(Decision.MANUAL_REVIEW, 0.55, "Leichte Gebrauchsspuren, Grenzfall");
             case MISSING_TAGS -> new Result(Decision.MANUAL_REVIEW, 0.50, "Etiketten fehlen, Grenzfall");
             case VISIBLY_WORN -> new Result(Decision.REJECT, 0.90, "Deutlich getragen");
@@ -32,5 +30,18 @@ final class ConditionRules {
             case MISSING_PARTS -> new Result(Decision.REJECT, 0.90, "Zubehör oder Teile fehlen");
             default -> throw new IllegalArgumentException("Unbekannter Zustand: " + request.getObservedCondition());
         };
+    }
+
+    /**
+     * Fehlt die Originalverpackung, wird trotzdem angenommen (sie ist keine Bedingung für die Rücknahme),
+     * aber mit etwas weniger Sicherheit.
+     */
+    private static Result asNew(ConditionCheckRequest request) {
+        if (!request.getTagsPresent()) {
+            return new Result(Decision.MANUAL_REVIEW, 0.50, "Neuwertig, aber Etikett fehlt");
+        }
+        return request.getOriginalPackaging()
+                ? new Result(Decision.ACCEPT, 0.95, "Neuwertig, Etikett vorhanden")
+                : new Result(Decision.ACCEPT, 0.85, "Neuwertig, Etikett vorhanden, ohne Originalverpackung");
     }
 }

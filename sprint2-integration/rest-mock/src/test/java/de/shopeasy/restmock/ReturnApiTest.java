@@ -146,6 +146,27 @@ class ReturnApiTest {
     }
 
     @Test
+    void unerlaubterStatuswechselGibt409UndAendertNichts() throws Exception {
+        mvc.perform(patch("/api/v1/returns/RET-2026-00462")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"APPROVED\"}"))
+                .andExpect(status().isConflict());
+
+        mvc.perform(get("/api/v1/returns/RET-2026-00462"))
+                .andExpect(jsonPath("$.status").value("REJECTED"));
+    }
+
+    @Test
+    void gleicherStatusIstErlaubtUndAendertNichts() throws Exception {
+        mvc.perform(patch("/api/v1/returns/RET-2026-00459")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"APPROVED\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("APPROVED"))
+                .andExpect(jsonPath("$.updatedAt").value("2026-09-20T14:05:00Z"));
+    }
+
+    @Test
     void openApiBeschreibungListetAlleEndpunkte() throws Exception {
         mvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
