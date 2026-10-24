@@ -49,4 +49,5 @@ tasks.register('runClient', JavaExec) {
     description = 'Startet den gRPC-Client (der Server muss laufen).'
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'de.shopeasy.grpc.client.GrpcClientDemo'
+    jvmArgs '-Djava.util.logging.SimpleFormatter.format=%1$tT %4$s %5$s%n'
 }

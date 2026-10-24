@@ -2,6 +2,8 @@ package de.shopeasy.messaging.producer;
 
 import static de.shopeasy.messaging.producer.ReturnStatus.*;
 
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -51,6 +53,6 @@ public class DemoScenario {
 
         LOG.info("=== 6. Unvollständige Nachricht: returnId fehlt (landet in der Fehler-Queue)");
         publisher.publishRaw("retoure.status.UNBEKANNT",
-                "{\"eventId\":\"" + java.util.UUID.randomUUID() + "\",\"newStatus\":\"APPROVED\"}");
+                "{\"eventId\":\"" + UUID.randomUUID() + "\",\"newStatus\":\"APPROVED\"}");
     }
 }

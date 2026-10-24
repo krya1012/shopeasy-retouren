@@ -22,6 +22,7 @@ public class ProducerApplication {
             LOG.error("FEHLER: Event nicht zugestellt. {}", e.getMessage());
             exitCode = 1;
         }
-        System.exit(SpringApplication.exit(context, () -> 0) + exitCode);
+        int code = exitCode;
+        System.exit(SpringApplication.exit(context, () -> code));
     }
 }

@@ -101,6 +101,24 @@ class StatusEventPublisherTest {
     }
 
     @Test
+    void unterbrochenerThreadBrichtOhneWeitereVersucheAb() {
+        doThrow(new AmqpConnectException(new ConnectException("Connection refused")))
+                .when(rabbit).send(any(String.class), any(String.class), any(Message.class), any(CorrelationData.class));
+
+        Thread.currentThread().interrupt();
+        try {
+            EventNotDeliveredException e = assertThrows(EventNotDeliveredException.class,
+                    () -> publisher.publish(StatusEvent.of("RET-1", ReturnStatus.NEW, ReturnStatus.APPROVED)));
+            assertTrue(e.getMessage().contains("abgebrochen"));
+            assertTrue(Thread.currentThread().isInterrupted(), "Das Abbruch-Zeichen bleibt gesetzt");
+        } finally {
+            Thread.interrupted(); // Zeichen löschen, damit andere Tests nicht gestört werden
+        }
+        verify(rabbit, times(1)).send(any(String.class), any(String.class), any(Message.class),
+                any(CorrelationData.class));
+    }
+
+    @Test
     void zweiterVersuchKlapptDannKeinFehler() {
         brokerAnswers(new CorrelationData.Confirm(true, null));
         doThrow(new AmqpConnectException(new ConnectException("Connection refused")))

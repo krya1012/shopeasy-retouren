@@ -41,7 +41,7 @@ Marktplatz-Eingang      Zustandsprüfung           Status-Updates
 ```
 
 4. Ein vierter Terminal für die Client-Befehle. Schrift groß stellen.
-5. Browser-Tabs: http://localhost:8080/swagger-ui.html und die RabbitMQ-Oberfläche.
+5. Browser-Tabs: http://localhost:8080/swagger-ui.html und die RabbitMQ-Oberfläche. In der Oberfläche unter „Queues“ → `retouren.status.dlq` → „Purge Messages“ drücken (jeder Übungslauf legt dort 3 Nachrichten ab, vor dem Termin soll sie leer sein).
 
 Fertig, wenn Terminal 1 „Started RestMockApplication“, Terminal 2 „läuft auf Port 9090“ und Terminal 3 „Started ConsumerApplication“ zeigt.
 
@@ -128,9 +128,10 @@ Hinweis: `RET-FAIL-1` fällt nur beim ersten Mal aus und `RET-SLOW-1` wird nur e
 1. `Status aktualisiert: RET-... NEW -> APPROVED` bis `REFUNDED -> CLOSED`: der ganze Weg einer Retoure.
 2. `Duplikat ignoriert: Event ... wurde schon verarbeitet`: dasselbe Event kam zweimal, es wird nur einmal verarbeitet (an der `eventId` erkannt).
 3. `INSPECTED -> MANUAL_REVIEW -> ACCEPTED`: der Grenzfall mit manueller Prüfung.
-4. `WARN Verwaltung lehnt Nachricht ab: Übergang nicht erlaubt: ... NEW -> INSPECTED` und danach `ERROR FEHLER-QUEUE: ...`: ein nicht erlaubter Statuswechsel landet in der Fehler-Queue.
-5. `Nachricht ist kein gültiges Event-JSON` und `Pflichtfeld fehlt: returnId`: der Consumer versteht die Nachricht nicht, sie landet ebenfalls in der Fehler-Queue.
-6. `Kundeninfo: Kund:in informiert, ...` nur bei `APPROVED`, `ACCEPTED`, `REFUNDED`: der zweite Empfänger bekommt nur seine Status.
+4. `WARN Verwaltung lehnt Nachricht ab: Übergang nicht erlaubt: ... NEW -> INSPECTED`: ein nicht erlaubter Statuswechsel wird abgelehnt und kommt in die Fehler-Queue.
+5. `Nachricht ist kein gültiges Event-JSON` und `Pflichtfeld fehlt: returnId`: der Consumer versteht die Nachricht nicht, sie kommt ebenfalls in die Fehler-Queue.
+6. In der RabbitMQ-Oberfläche bei `retouren.status.dlq` stehen jetzt **3 Nachrichten** (die Anzeige aktualisiert sich alle 5 Sekunden). „Get messages“ zeigt den Inhalt und im Header `x-death` den Grund (`rejected`).
+7. `Kundeninfo: Kund:in informiert, ...` nur bei `APPROVED`, `ACCEPTED`, `REFUNDED`: der zweite Empfänger bekommt nur seine Status.
 
 **Fehlerfall Broker nicht erreichbar** (optional, ca. 1 Minute). Zuerst den Consumer in Terminal 3 mit Strg+C beenden, sonst füllt er das Log mit Verbindungsmeldungen (er verbindet sich nach dem Neustart des Brokers von selbst wieder, das dauert bis zu 10 Sekunden):
 ```

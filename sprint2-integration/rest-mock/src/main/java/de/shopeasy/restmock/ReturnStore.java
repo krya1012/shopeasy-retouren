@@ -2,6 +2,8 @@ package de.shopeasy.restmock;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,7 +26,7 @@ public class ReturnStore {
         return returns.values().stream()
                 .filter(r -> status.map(s -> r.status() == s).orElse(true))
                 .filter(r -> marketplace.map(m -> r.marketplace() == m).orElse(true))
-                .sorted((a, b) -> a.returnId().compareTo(b.returnId()))
+                .sorted(Comparator.comparing(ReturnReport::returnId))
                 .toList();
     }
 
@@ -83,7 +85,7 @@ public class ReturnStore {
         returns.put(returnId, new ReturnReport(returnId, orderId, marketplace, status, reason, reasonText,
                 requested, requested, List.of(items), customer, labelUrl));
 
-        BigDecimal total = List.of(items).stream()
+        BigDecimal total = Arrays.stream(items)
                 .map(i -> i.unitPrice().multiply(BigDecimal.valueOf(i.quantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         orders.put(orderId, new Order(orderId, marketplace, requested.minusSeconds(10L * 24 * 3600),

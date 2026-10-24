@@ -163,7 +163,7 @@ REJECTED, EXPIRED → CLOSED
 
 Das Demo-Szenario zeigt: den vollständigen Weg einer Retoure, ein doppeltes Event, den Grenzfall `MANUAL_REVIEW`, einen nicht erlaubten Übergang, eine Nachricht ohne JSON und eine Nachricht ohne `returnId`. Im Log des Consumers steht jeweils, was passiert ist.
 
-**Grenzen:** Der aktuelle Status und die Liste verarbeiteter `eventId`s liegen im Speicher und sind nach einem Neustart leer. Im Betrieb gehört beides in eine Datenbank. Die Kundeninfo prüft keine Statuswechsel, sie vertraut den Events (die Prüfung macht die Verwaltung). Die Fehler-Queue wird nur ins Log geschrieben.
+**Grenzen:** Der aktuelle Status und die Liste verarbeiteter `eventId`s liegen im Speicher und sind nach einem Neustart leer. Im Betrieb gehört beides in eine Datenbank. Die Kundeninfo prüft keine Statuswechsel, sie vertraut den Events (die Prüfung macht die Verwaltung). Aus der Fehler-Queue liest niemand: Die Nachrichten bleiben dort liegen, bis eine Person sie prüft (RabbitMQ-Oberfläche, „Get messages“).
 
 ## Verwendete Enterprise Integration Patterns
 

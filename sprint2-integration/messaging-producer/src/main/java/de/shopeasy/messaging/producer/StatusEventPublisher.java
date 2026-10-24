@@ -87,7 +87,7 @@ public class StatusEventPublisher {
                             + " Versuchen nicht erreichbar: " + e.getMessage(), e);
                 }
                 LOG.warn("Senden fehlgeschlagen ({}), Versuch {} von {}", e.getMessage(), attempt + 1, MAX_ATTEMPTS);
-                sleep(backoffMillis * attempt);
+                pause(backoffMillis * attempt);
             }
         }
     }
@@ -115,11 +115,13 @@ public class StatusEventPublisher {
         }
     }
 
-    private static void sleep(long millis) {
+    /** Wartet zwischen zwei Versuchen. Wird der Thread unterbrochen, wird abgebrochen und nicht weiter versucht. */
+    private static void pause(long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new EventNotDeliveredException("Senden abgebrochen", e);
         }
     }
 }

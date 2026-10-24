@@ -4,7 +4,6 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -24,6 +23,6 @@ public class RabbitConfig {
 
     @Bean
     JsonMapper jsonMapper() {
-        return JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
+        return JsonMapper.builder().build(); // der Producer schreibt nur JSON, er liest keins
     }
 }

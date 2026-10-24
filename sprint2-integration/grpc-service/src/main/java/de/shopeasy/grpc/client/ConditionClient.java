@@ -3,6 +3,7 @@ package de.shopeasy.grpc.client;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import de.shopeasy.grpc.ArticleConditionServiceGrpc;
 import de.shopeasy.grpc.ArticleConditionServiceGrpc.ArticleConditionServiceBlockingStub;
@@ -25,6 +26,7 @@ import io.grpc.StatusRuntimeException;
  */
 public class ConditionClient {
 
+    private static final Logger LOG = Logger.getLogger(ConditionClient.class.getName());
     static final int MAX_ATTEMPTS = 3;
     static final long DEFAULT_DEADLINE_MILLIS = 3000;
     private static final long BACKOFF_MILLIS = 200;
@@ -65,7 +67,7 @@ public class ConditionClient {
                 if (!retry) {
                     throw translate(e, attempt);
                 }
-                System.out.println("   Service nicht verfügbar, neuer Versuch " + (attempt + 1) + " von " + MAX_ATTEMPTS);
+                LOG.warning("Service nicht verfügbar, neuer Versuch " + (attempt + 1) + " von " + MAX_ATTEMPTS);
                 sleep(BACKOFF_MILLIS * attempt);
             }
         }

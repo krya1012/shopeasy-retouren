@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
  * Verbindet die Queues mit den Handlern. Gelingt die Verarbeitung, bestätigt Spring die Nachricht (ack).
  * Versteht ein Handler die Nachricht nicht, lehnen wir sie ohne erneute Zustellung ab (reject). Der Broker legt
  * sie dann in die Fehler-Queue, und der Consumer bleibt nicht an ihr hängen.
+ * Aus der Fehler-Queue liest absichtlich niemand: Die Nachrichten bleiben liegen, bis eine Person sie prüft
+ * (in der RabbitMQ-Oberfläche unter "Get messages").
  */
 @Component
 public class StatusListeners {
@@ -43,14 +45,5 @@ public class StatusListeners {
             LOG.warn("Kundeninfo lehnt Nachricht ab: {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
         }
-    }
-
-    /** Die Fehler-Queue wird hier nur protokolliert. Im Betrieb würde eine Person die Nachrichten prüfen. */
-    @RabbitListener(queues = RabbitConfig.QUEUE_DLQ)
-    void onDeadLetter(Message message) {
-        Object deaths = message.getMessageProperties().getHeader("x-death");
-        LOG.error("FEHLER-QUEUE: Eine Nachricht wurde abgelehnt. Inhalt: {} | x-death: {}",
-                new String(message.getBody(), java.nio.charset.StandardCharsets.UTF_8),
-                deaths);
     }
 }
