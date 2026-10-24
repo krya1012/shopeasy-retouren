@@ -23,14 +23,25 @@ import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 
 /**
- * Der gRPC-Service. Er bewertet den Zustand mit {@link ConditionRules} und merkt sich die Ergebnisse im Speicher.
+ * The gRPC service. It judges the condition with {@link ConditionRules} and keeps the results in memory.
  *
- * <p>Fehler (siehe aufgabenanalyse.md, 5.2):
- * INVALID_ARGUMENT (falsche Daten), ALREADY_EXISTS (Prüfung gibt es schon), NOT_FOUND (kein Ergebnis),
- * UNAVAILABLE (simulierter Ausfall, return_id beginnt mit "RET-FAIL").
+ * <p><b>gRPC basics:</b>
+ * <ul>
+ *   <li>The interface comes from the lecturer's {@code article_condition_service.proto}. The build tool generates
+ *       Java classes from it (messages like {@link ConditionCheckRequest} and the base class
+ *       {@code ArticleConditionServiceImplBase}). We only write the logic by extending that base class.</li>
+ *   <li>A method does not return its result. It gets a {@link StreamObserver} and calls
+ *       {@code onNext(result)} and {@code onCompleted()} to answer, or {@code onError(...)} to fail.</li>
+ *   <li>Errors are {@link Status} codes: {@code INVALID_ARGUMENT} (wrong data), {@code ALREADY_EXISTS} (check
+ *       exists already), {@code NOT_FOUND} (no result), {@code UNAVAILABLE} (simulated outage, return_id starts
+ *       with "RET-FAIL"), {@code INTERNAL} (unexpected error). See TASK-ANALYSIS.md, section 5.2.</li>
+ * </ul>
  *
- * <p>Simulierte Szenarien: "RET-FAIL..." fällt beim ersten Aufruf aus, "RET-SLOW..." antwortet erst nach
- * {@link #DEFAULT_SLOW_MILLIS} ms (der Client läuft dann in seine Frist).
+ * <p><b>Simulated scenarios:</b> "RET-FAIL..." fails with UNAVAILABLE on the first call only. "RET-SLOW..." answers
+ * only after {@link #DEFAULT_SLOW_MILLIS} ms, so the client runs into its deadline.
+ *
+ * <p>Threads: gRPC calls our methods from several threads at the same time. Shared data (the maps) is therefore
+ * only changed inside {@code synchronized} methods.
  */
 public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.ArticleConditionServiceImplBase {
 
@@ -44,16 +55,18 @@ public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.Art
     private final Map<String, ConditionCheckResponse> results = new HashMap<>();
     private final Set<String> alreadyFailed = new HashSet<>();
 
+    /** The {@link Clock} is passed in so tests can use a fixed time. */
     public ArticleConditionServiceImpl(Clock clock) {
         this(clock, DEFAULT_SLOW_MILLIS);
     }
 
-    /** Die Wartezeit für das Szenario "RET-SLOW" ist einstellbar, damit Tests schnell bleiben. */
+    /** The waiting time of the scenario "RET-SLOW" can be set, so tests stay fast. */
     public ArticleConditionServiceImpl(Clock clock, long slowMillis) {
         this.clock = clock;
         this.slowMillis = slowMillis;
     }
 
+    /** Checks one article. */
     @Override
     public void checkCondition(ConditionCheckRequest request, StreamObserver<ConditionCheckResponse> observer) {
         reply(observer, () -> {
@@ -62,12 +75,13 @@ public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.Art
         });
     }
 
+    /** Checks several articles at once. All or nothing: one error rejects the whole batch. */
     @Override
     public void checkConditionBatch(ConditionCheckBatchRequest request,
                                     StreamObserver<ConditionCheckBatchResponse> observer) {
         reply(observer, () -> {
             if (request.getItemsCount() == 0) {
-                throw RequestValidator.invalid("items darf nicht leer sein");
+                throw RequestValidator.invalid("items must not be empty");
             }
             simulateSlowResponse(request.getItemsList());
             return ConditionCheckBatchResponse.newBuilder()
@@ -76,17 +90,18 @@ public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.Art
         });
     }
 
+    /** Returns the result of an earlier check, or NOT_FOUND. */
     @Override
     public synchronized void getCheckResult(GetCheckResultRequest request,
                                             StreamObserver<ConditionCheckResponse> observer) {
         reply(observer, () -> {
             if (request.getReturnId().isBlank() || request.getSku().isBlank()) {
-                throw RequestValidator.invalid("return_id und sku dürfen nicht leer sein");
+                throw RequestValidator.invalid("return_id and sku must not be empty");
             }
             ConditionCheckResponse result = results.get(key(request.getReturnId(), request.getSku()));
             if (result == null) {
                 throw Status.NOT_FOUND
-                        .withDescription("Keine Prüfung für " + request.getReturnId() + " / " + request.getSku())
+                        .withDescription("No check for " + request.getReturnId() + " / " + request.getSku())
                         .asRuntimeException();
             }
             return result;
@@ -94,11 +109,11 @@ public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.Art
     }
 
     /**
-     * Prüft und bewertet alle Anfragen. Alles oder nichts: Gibt es bei einer Position einen Fehler,
-     * wird nichts gespeichert (die .proto hat kein Fehlerfeld je Position).
+     * Validates and judges all requests. All or nothing: if one item has an error, nothing is stored
+     * (the .proto has no error field per item).
      */
     private synchronized List<ConditionCheckResponse> checkAll(List<ConditionCheckRequest> requests, boolean batch) {
-        // 1. Eingaben prüfen
+        // 1. Validate the input
         for (int i = 0; i < requests.size(); i++) {
             try {
                 RequestValidator.validate(requests.get(i));
@@ -106,27 +121,28 @@ public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.Art
                 throw withPosition(e, i, batch);
             }
         }
-        // 2. Simulierter Ausfall: beim ersten Aufruf je return_id
+        // 2. Simulated outage: on the first call per return_id
         for (ConditionCheckRequest request : requests) {
             if (request.getReturnId().startsWith(OUTAGE_PREFIX) && alreadyFailed.add(request.getReturnId())) {
-                throw Status.UNAVAILABLE.withDescription("Service kurzzeitig nicht verfügbar (simuliert)")
+                throw Status.UNAVAILABLE.withDescription("Service temporarily unavailable (simulated)")
                         .asRuntimeException();
             }
         }
-        // 3. Doppelte Anfragen: schon gespeichert oder im selben Stapel zweimal
+        // 3. Duplicate requests: already stored, or twice in the same batch
         Set<String> keys = new HashSet<>();
         for (int i = 0; i < requests.size(); i++) {
             String key = key(requests.get(i).getReturnId(), requests.get(i).getSku());
             if (results.containsKey(key) || !keys.add(key)) {
                 throw withPosition(Status.ALREADY_EXISTS
-                        .withDescription("Prüfung für " + requests.get(i).getReturnId() + " / "
-                                + requests.get(i).getSku() + " gibt es schon").asRuntimeException(), i, batch);
+                        .withDescription("Check for " + requests.get(i).getReturnId() + " / "
+                                + requests.get(i).getSku() + " exists already").asRuntimeException(), i, batch);
             }
         }
-        // 4. Bewerten und speichern
+        // 4. Judge and store
         List<ConditionCheckResponse> responses = new ArrayList<>();
         for (ConditionCheckRequest request : requests) {
             ConditionRules.Result rule = ConditionRules.evaluate(request);
+            // The generated message classes are immutable: we build a new one with a builder.
             ConditionCheckResponse response = ConditionCheckResponse.newBuilder()
                     .setReturnId(request.getReturnId())
                     .setSku(request.getSku())
@@ -138,15 +154,15 @@ public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.Art
                     .build();
             results.put(key(request.getReturnId(), request.getSku()), response);
             responses.add(response);
-            LOG.info(() -> "Prüfung " + response.getReturnId() + " / " + response.getSku() + ": "
+            LOG.info(() -> "Check " + response.getReturnId() + " / " + response.getSku() + ": "
                     + response.getDecision() + " (" + response.getConfidenceScore() + ")");
         }
         return responses;
     }
 
     /**
-     * Simuliert einen langsamen Service. Absichtlich außerhalb der Sperre, damit andere Aufrufe nicht warten.
-     * Hat der Client schon aufgegeben, wird die Prüfung trotzdem noch gespeichert.
+     * Simulates a slow service. This is deliberately done outside the lock, so other calls do not wait.
+     * If the client has already given up, the check is still stored.
      */
     private void simulateSlowResponse(List<ConditionCheckRequest> requests) {
         if (requests.stream().noneMatch(r -> r.getReturnId().startsWith(SLOW_PREFIX))) {
@@ -159,7 +175,7 @@ public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.Art
         }
     }
 
-    /** Hängt bei einem Stapel die Position an die Fehlermeldung. */
+    /** For a batch, adds the position of the faulty item to the error message. */
     private static StatusRuntimeException withPosition(StatusRuntimeException e, int index, boolean batch) {
         if (!batch) {
             return e;
@@ -172,12 +188,15 @@ public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.Art
         return returnId + "|" + sku;
     }
 
-    /** Antwortet mit dem Ergebnis oder mit dem passenden gRPC-Fehler. Unerwartete Fehler werden zu INTERNAL. */
+    /**
+     * Answers with the result or with the matching gRPC error. This one place turns exceptions into gRPC status
+     * codes. An unexpected error becomes INTERNAL, without details for the client (details go to the log).
+     */
     private static <T> void reply(StreamObserver<T> observer, Supplier<T> action) {
         try {
             T result = action.get();
             if (observer instanceof ServerCallStreamObserver<T> call && call.isCancelled()) {
-                LOG.info("Client hat den Aufruf abgebrochen (Frist), Antwort wird nicht mehr gesendet");
+                LOG.info("Client cancelled the call (deadline), the answer is not sent any more");
                 return;
             }
             observer.onNext(result);
@@ -185,8 +204,8 @@ public class ArticleConditionServiceImpl extends ArticleConditionServiceGrpc.Art
         } catch (StatusRuntimeException e) {
             observer.onError(e);
         } catch (RuntimeException e) {
-            LOG.log(Level.SEVERE, "Unerwarteter Fehler", e);
-            observer.onError(Status.INTERNAL.withDescription("Interner Fehler").asRuntimeException());
+            LOG.log(Level.SEVERE, "Unexpected error", e);
+            observer.onError(Status.INTERNAL.withDescription("Internal error").asRuntimeException());
         }
     }
 }

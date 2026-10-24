@@ -11,7 +11,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 
-/** Hält die Testdaten im Speicher. Es gibt keine Datenbank, der Stand ist nach einem Neustart wieder der alte. */
+/**
+ * Holds the test data in memory. There is no database: after a restart the data is back to its initial state.
+ *
+ * <p>Spring Boot note: {@code @Component} makes Spring create one object of this class at startup; the
+ * controllers get it through their constructor. The maps are {@link ConcurrentHashMap}s because several HTTP
+ * requests can arrive at the same time (each in its own thread). The texts of the test returns are German
+ * customer texts on purpose: they are shop data, not documentation.
+ */
 @Component
 public class ReturnStore {
 
@@ -22,6 +29,7 @@ public class ReturnStore {
         loadTestData();
     }
 
+    /** Returns the reports that match the optional filters, sorted by returnId. */
     public List<ReturnReport> find(Optional<ReturnStatus> status, Optional<Marketplace> marketplace) {
         return returns.values().stream()
                 .filter(r -> status.map(s -> r.status() == s).orElse(true))
@@ -39,12 +47,12 @@ public class ReturnStore {
     }
 
     /**
-     * Setzt den Status und {@code updatedAt}, wenn der Wechsel erlaubt ist. Ist der Status schon gesetzt, ändert
-     * sich nichts (so darf man dieselbe Anfrage wiederholen). Läuft das atomar in der Map, kann kein gleichzeitiger
-     * Aufruf dazwischen einen unerlaubten Wechsel durchbringen.
+     * Sets the status and {@code updatedAt} if the change is allowed. If the status is already set, nothing
+     * changes (so the same request may be repeated). {@code computeIfPresent} runs the check and the change as one
+     * step inside the map, so no parallel call can slip a forbidden change in between.
      *
-     * @throws IllegalStateException wenn der Wechsel nicht erlaubt ist (Meldung für den Aufrufer)
-     * @return leer, wenn es die Retoure nicht gibt
+     * @throws IllegalStateException if the change is not allowed (the message is meant for the caller)
+     * @return empty if the return does not exist
      */
     public Optional<ReturnReport> updateStatus(String returnId, ReturnStatus newStatus) {
         return Optional.ofNullable(returns.computeIfPresent(returnId, (id, current) -> {
@@ -52,14 +60,14 @@ public class ReturnStore {
                 return current;
             }
             if (!StatusTransitions.isAllowed(current.status(), newStatus)) {
-                throw new IllegalStateException("Statuswechsel nicht erlaubt: " + current.status() + " -> " + newStatus);
+                throw new IllegalStateException("Status change not allowed: " + current.status() + " -> " + newStatus);
             }
             return current.withStatus(newStatus, Instant.now());
         }));
     }
 
     private void loadTestData() {
-        // Die erste Retoure ist das Beispiel von Folie 9 der Aufgabe.
+        // The first return is the example from slide 9 of the task (kept exactly as the lecturer wrote it).
         add("RET-2026-00457", "ORD-2026-118932", Marketplace.ZALANDO, ReturnStatus.NEW,
                 ReasonCode.SIZE_TOO_SMALL, "Passt leider nicht, eine Nummer kleiner bitte.", "2026-09-18T09:14:00Z",
                 null, "CUST-88213", "j.mueller@example.com",
@@ -87,10 +95,12 @@ public class ReturnStore {
                 item("SH-SHT-009-M", "Leinenhemd", 1, "39.9"));
     }
 
+    /** Short helper for the test data: an item in EUR. */
     private static Item item(String sku, String productName, int quantity, String unitPrice) {
         return new Item(sku, productName, quantity, new BigDecimal(unitPrice), "EUR");
     }
 
+    /** Adds a return and the matching order (the order total is the sum of the items). */
     private void add(String returnId, String orderId, Marketplace marketplace, ReturnStatus status,
                      ReasonCode reason, String reasonText, String requestedAt, String labelUrl,
                      String customerId, String email, Item... items) {

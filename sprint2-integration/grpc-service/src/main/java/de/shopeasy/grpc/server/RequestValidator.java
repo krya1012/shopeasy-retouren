@@ -8,29 +8,37 @@ import de.shopeasy.grpc.ObservedCondition;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
-/** Prüft die Eingaben. Bei falschen Daten gibt es den gRPC-Status INVALID_ARGUMENT. */
+/**
+ * Checks the input of a request. Wrong data gives the gRPC status {@code INVALID_ARGUMENT}.
+ *
+ * <p>gRPC basics: every call ends with a status code (like HTTP status codes, but for gRPC). The server reports
+ * an error by creating a {@link Status}, adding a description, and turning it into a
+ * {@link StatusRuntimeException}. The client receives the same code and description.
+ */
 final class RequestValidator {
 
     private RequestValidator() {
+        // utility class: only static methods
     }
 
-    /** @throws StatusRuntimeException INVALID_ARGUMENT mit Beschreibung des Fehlers */
+    /** @throws StatusRuntimeException with code INVALID_ARGUMENT and a description of the problem */
     static void validate(ConditionCheckRequest request) {
         if (request.getReturnId().isBlank()) {
-            throw invalid("return_id darf nicht leer sein");
+            throw invalid("return_id must not be empty");
         }
         if (request.getSku().isBlank()) {
-            throw invalid("sku darf nicht leer sein");
+            throw invalid("sku must not be empty");
         }
         ObservedCondition condition = request.getObservedCondition();
+        // UNRECOGNIZED = the client sent a number that this version of the .proto does not know
         if (condition == ObservedCondition.OBSERVED_CONDITION_UNSPECIFIED
                 || condition == ObservedCondition.UNRECOGNIZED) {
-            throw invalid("observed_condition muss gesetzt sein");
+            throw invalid("observed_condition must be set");
         }
         try {
             OffsetDateTime.parse(request.getInspectedAt());
         } catch (DateTimeException e) {
-            throw invalid("inspected_at ist kein ISO-8601-Zeitstempel: '" + request.getInspectedAt() + "'");
+            throw invalid("inspected_at is not an ISO-8601 timestamp: '" + request.getInspectedAt() + "'");
         }
     }
 

@@ -11,7 +11,7 @@ dependencies {
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
     implementation "io.grpc:grpc-stub:${grpcVersion}"
     implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
-    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // für @Generated im erzeugten Code
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // for @Generated in the generated code
 
     testImplementation "io.grpc:grpc-inprocess:${grpcVersion}"
     testImplementation platform('org.junit:junit-bom:5.13.4')
@@ -19,6 +19,8 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// The protobuf plugin turns the .proto file (src/main/proto) into Java classes during the build:
+// the messages (protoc) and the service base classes (the grpc plugin).
 protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:${protobufVersion}"
@@ -39,14 +41,14 @@ protobuf {
 
 application {
     mainClass = 'de.shopeasy.grpc.server.ConditionServer'
-    // Server-Meldungen in einer Zeile: Uhrzeit, Stufe, Text
+    // server messages in one line: time, level, text
     applicationDefaultJvmArgs = ['-Djava.util.logging.SimpleFormatter.format=%1$tT %4$s %5$s%n']
 }
 
-// Der Client läuft getrennt vom Server: ./gradlew :grpc-service:runClient
+// The client runs separately from the server: ./gradlew :grpc-service:runClient
 tasks.register('runClient', JavaExec) {
     group = 'application'
-    description = 'Startet den gRPC-Client (der Server muss laufen).'
+    description = 'Starts the gRPC client (the server must be running).'
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'de.shopeasy.grpc.client.GrpcClientDemo'
     jvmArgs '-Djava.util.logging.SimpleFormatter.format=%1$tT %4$s %5$s%n'

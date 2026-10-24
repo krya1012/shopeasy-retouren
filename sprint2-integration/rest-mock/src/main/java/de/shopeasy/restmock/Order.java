@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-/** Bestelldaten zu einer Retoure (die Aufgabe nennt dafür nur die Abfrage über die orderId). */
+/** Order data for a return (the task only mentions a call by orderId, so we designed this format ourselves). */
 public record Order(
         String orderId,
         Marketplace marketplace,

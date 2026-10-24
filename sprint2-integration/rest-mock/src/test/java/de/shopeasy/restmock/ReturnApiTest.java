@@ -13,6 +13,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
+/**
+ * Tests the REST API without a real network. {@code @SpringBootTest} starts the whole application,
+ * {@code @AutoConfigureMockMvc} gives us a {@link MockMvc} object that sends fake HTTP requests directly into it.
+ * {@code @DirtiesContext} restarts the application after every test, so a PATCH in one test cannot change the
+ * data of the next test.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -22,14 +28,14 @@ class ReturnApiTest {
     MockMvc mvc;
 
     @Test
-    void listeOhneFilterLiefertAlleRetouren() throws Exception {
+    void listWithoutFilterReturnsAllReturns() throws Exception {
         mvc.perform(get("/api/v1/returns"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.length()").value(6));
     }
 
     @Test
-    void filterNachStatusUndMarktplatz() throws Exception {
+    void filterByStatusAndMarketplace() throws Exception {
         mvc.perform(get("/api/v1/returns").param("status", "NEW").param("marketplace", "ZALANDO"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.length()").value(2))
@@ -38,13 +44,13 @@ class ReturnApiTest {
     }
 
     @Test
-    void ungueltigerFilterIstEinFehler() throws Exception {
+    void invalidFilterIsAnError() throws Exception {
         mvc.perform(get("/api/v1/returns").param("marketplace", "EBAY"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void einzelneRetoureHatDasFormatAusDerAufgabe() throws Exception {
+    void singleReturnHasTheFormatFromTheTask() throws Exception {
         mvc.perform(get("/api/v1/returns/RET-2026-00457"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.returnId").value("RET-2026-00457"))
@@ -63,9 +69,9 @@ class ReturnApiTest {
                 .andExpect(jsonPath("$.returnLabelUrl").doesNotExist());
     }
 
-    /** Das Beispiel von Folie 9: Liste im Umschlag "data", Retoure RET-2026-00457 mit genau diesen Werten. */
+    /** The example from slide 9: list inside the envelope "data", return RET-2026-00457 with exactly these values. */
     @Test
-    void listeEntsprichtDemBeispielAusDerAufgabe() throws Exception {
+    void listMatchesTheExampleFromTheTask() throws Exception {
         mvc.perform(get("/api/v1/returns").param("status", "NEW").param("marketplace", "ZALANDO"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].returnId").value("RET-2026-00457"))
@@ -87,14 +93,14 @@ class ReturnApiTest {
     }
 
     @Test
-    void unbekannteRetoureGibt404() throws Exception {
-        mvc.perform(get("/api/v1/returns/RET-GIBT-ES-NICHT"))
+    void unknownReturnGives404() throws Exception {
+        mvc.perform(get("/api/v1/returns/RET-DOES-NOT-EXIST"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
     }
 
     @Test
-    void bestellungUeberOrderId() throws Exception {
+    void orderByOrderId() throws Exception {
         mvc.perform(get("/api/v1/orders/ORD-2026-118940"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderId").value("ORD-2026-118940"))
@@ -103,13 +109,13 @@ class ReturnApiTest {
     }
 
     @Test
-    void unbekannteBestellungGibt404() throws Exception {
-        mvc.perform(get("/api/v1/orders/GIBT-ES-NICHT"))
+    void unknownOrderGives404() throws Exception {
+        mvc.perform(get("/api/v1/orders/DOES-NOT-EXIST"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void statusAendernSetztNeuenStatusUndUpdatedAt() throws Exception {
+    void changingStatusSetsNewStatusAndUpdatedAt() throws Exception {
         mvc.perform(patch("/api/v1/returns/RET-2026-00457")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"APPROVED\"}"))
@@ -122,15 +128,15 @@ class ReturnApiTest {
     }
 
     @Test
-    void ungueltigerStatusGibt400() throws Exception {
+    void invalidStatusGives400() throws Exception {
         mvc.perform(patch("/api/v1/returns/RET-2026-00457")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"status\":\"QUATSCH\"}"))
+                        .content("{\"status\":\"NONSENSE\"}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void fehlenderStatusGibt400() throws Exception {
+    void missingStatusGives400() throws Exception {
         mvc.perform(patch("/api/v1/returns/RET-2026-00457")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -138,15 +144,15 @@ class ReturnApiTest {
     }
 
     @Test
-    void statusAendernBeiUnbekannterRetoureGibt404() throws Exception {
-        mvc.perform(patch("/api/v1/returns/RET-GIBT-ES-NICHT")
+    void changingStatusOfUnknownReturnGives404() throws Exception {
+        mvc.perform(patch("/api/v1/returns/RET-DOES-NOT-EXIST")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"APPROVED\"}"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void unerlaubterStatuswechselGibt409UndAendertNichts() throws Exception {
+    void forbiddenStatusChangeGives409AndChangesNothing() throws Exception {
         mvc.perform(patch("/api/v1/returns/RET-2026-00462")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"APPROVED\"}"))
@@ -157,7 +163,7 @@ class ReturnApiTest {
     }
 
     @Test
-    void gleicherStatusIstErlaubtUndAendertNichts() throws Exception {
+    void sameStatusIsAllowedAndChangesNothing() throws Exception {
         mvc.perform(patch("/api/v1/returns/RET-2026-00459")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"APPROVED\"}"))
@@ -167,10 +173,10 @@ class ReturnApiTest {
     }
 
     @Test
-    void openApiBeschreibungListetAlleEndpunkte() throws Exception {
+    void openApiDescriptionListsAllEndpoints() throws Exception {
         mvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.info.title").value("ShopEasy Retourenmeldungen (Mock)"))
+                .andExpect(jsonPath("$.info.title").value("ShopEasy Return Reports (Mock)"))
                 .andExpect(jsonPath("$.paths['/api/v1/returns']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/returns/{returnId}']").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/orders/{orderId}']").exists());

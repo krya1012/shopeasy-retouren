@@ -5,14 +5,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Die Logik des Empfängers "Verwaltung": Er aktualisiert den Status einer Retoure.
- * Sie arbeitet nur mit den Bytes der Nachricht, deshalb kann man sie ohne Broker testen.
+ * The logic of the receiver "management": it updates the status of a return.
+ * It only works with the bytes of the message, so it can be tested without a broker.
+ *
+ * <p>Checks, in this order: (1) is the message valid, (2) was this event processed before (duplicate),
+ * (3) does the event start from the status we know, (4) is the change allowed.
+ *
+ * <p><b>Spring Boot basics:</b> {@code @Component} makes this a bean. Spring sees that the constructor needs an
+ * {@link EventParser} and a {@link ReturnStatusRegistry} and passes the existing beans in.
  */
 @Component
 public class StatusUpdateHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(StatusUpdateHandler.class);
 
+    /** Result of a successful call: the event was applied, or it was a duplicate and ignored. */
     public enum Outcome { PROCESSED, DUPLICATE }
 
     private final EventParser parser;
@@ -24,30 +31,35 @@ public class StatusUpdateHandler {
         this.registry = registry;
     }
 
-    /** @throws InvalidEventException wenn die Nachricht nicht verstanden wird oder der Übergang nicht erlaubt ist */
+    /**
+     * {@code synchronized} lets only one thread at a time run this method, so "check, then change" cannot be
+     * disturbed by a second message arriving at the same moment.
+     *
+     * @throws InvalidEventException if the message is not understood or the status change is not allowed
+     */
     public synchronized Outcome handle(byte[] body) {
         StatusEvent event = parser.parse(body);
 
-        // Zuerst auf Duplikate prüfen: Ein doppeltes Event würde sonst als "unerlaubter Übergang" abgelehnt.
+        // Check for duplicates first: a repeated event would otherwise be rejected as "change not allowed".
         if (processed.contains(event.eventId())) {
-            LOG.info("Duplikat ignoriert: Event {} wurde schon verarbeitet ({} {} -> {})",
+            LOG.info("Duplicate ignored: event {} was already processed ({} {} -> {})",
                     event.eventId(), event.returnId(), event.oldStatus(), event.newStatus());
             return Outcome.DUPLICATE;
         }
 
         ReturnStatus current = registry.current(event.returnId());
         if (event.oldStatus() != current) {
-            throw new InvalidEventException("Event passt nicht zum bekannten Status: " + event.returnId()
-                    + " ist " + current + ", das Event geht aber von " + event.oldStatus() + " aus");
+            throw new InvalidEventException("Event does not match the known status: " + event.returnId()
+                    + " is " + current + ", but the event starts from " + event.oldStatus());
         }
         if (!StatusTransitions.isAllowed(event.oldStatus(), event.newStatus())) {
-            throw new InvalidEventException("Übergang nicht erlaubt: " + event.returnId() + " "
+            throw new InvalidEventException("Status change not allowed: " + event.returnId() + " "
                     + event.oldStatus() + " -> " + event.newStatus());
         }
 
         registry.set(event.returnId(), event.newStatus());
         processed.markProcessed(event.eventId());
-        LOG.info("Status aktualisiert: {} {} -> {} (Event {})",
+        LOG.info("Status updated: {} {} -> {} (event {})",
                 event.returnId(), event.oldStatus(), event.newStatus(), event.eventId());
         return Outcome.PROCESSED;
     }

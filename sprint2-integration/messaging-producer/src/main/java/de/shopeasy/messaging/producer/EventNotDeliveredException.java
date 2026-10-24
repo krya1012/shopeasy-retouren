@@ -1,6 +1,9 @@
 package de.shopeasy.messaging.producer;
 
-/** Das Event konnte nicht zugestellt werden (Broker nicht erreichbar, nicht bestätigt oder keine Queue gefunden). */
+/**
+ * The event could not be delivered: the broker is not reachable, it did not confirm the message, or no queue
+ * accepted it. The producer never fails silently; it always ends with this exception.
+ */
 public class EventNotDeliveredException extends RuntimeException {
 
     public EventNotDeliveredException(String message, Throwable cause) {

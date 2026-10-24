@@ -1,32 +1,43 @@
-# Sprint 2: Integrationstechniken (REST, gRPC, Messaging)
+# Sprint 2: Integration Techniques (REST, gRPC, Messaging)
 
-Drei kleine Programme, die später im Prozess genutzt werden. Jedes hat einen Client zum Ausprobieren. Die Aufgabe steht in `Aufgabe DvG WS26_Sprint 2.pdf`, die Analyse in [aufgabenanalyse.md](aufgabenanalyse.md). KI-Nutzung: [AI-USAGE.md](AI-USAGE.md).
+Three small programs that will be used in the process later. Each has a client to try it out. The task is in `Aufgabe DvG WS26_Sprint 2.pdf`, the analysis is in [TASK-ANALYSIS.md](TASK-ANALYSIS.md). AI use: [AI-USAGE.md](AI-USAGE.md).
 
-Der Code ist mit Claude Code entstanden (Co-Autor Yaraslau Krautsou) und noch **nicht vom Team geprüft**. Sprache (Java mit Spring Boot) und Broker (RabbitMQ) hat Yaraslau Krautsou am 22.10.2026 gewählt, die Zustimmung des Teams steht noch aus.
+The code was written with Claude Code (co-author Yaraslau Krautsou) and is **not yet reviewed by the team**. Yaraslau Krautsou chose the language (Java with Spring Boot) and the broker (RabbitMQ) on 22.10.2026; the team has not agreed yet.
 
-| Ordner | Programm | Bezug zum Soll-Prozess |
+| Folder | Program | Link to the target process (Sprint 1, labels are German) |
 |---|---|---|
-| `rest-mock/` | REST-Mock für Retourenmeldungen (Amazon, Zalando) | „Marktplatz-Retoure eingegangen (REST)“ |
-| `grpc-service/` | gRPC-Service zur Zustandsprüfung | „Annahme/Ablehnung entscheiden“, „Zustand im WMS buchen“ |
-| `messaging-producer/`, `messaging-consumer/` | Status-Updates über RabbitMQ | Nachrichtenschritte (`t_notify`, `t_notify_in`, `t_end_notify`) |
+| `rest-mock/` | REST mock for return reports (Amazon, Zalando) | "Marktplatz-Retoure eingegangen (REST)" |
+| `grpc-service/` | gRPC service for the condition check | "Annahme/Ablehnung entscheiden", "Zustand im WMS buchen" |
+| `messaging-producer/`, `messaging-consumer/` | Status updates over RabbitMQ | message steps (`t_notify`, `t_notify_in`, `t_end_notify`) |
 
-## Voraussetzungen
+## Requirements
 
-- Java 21 oder neuer. Gradle wird über `./gradlew` geladen, eine eigene Installation ist nicht nötig.
-- Für das Messaging ein Container-Programm (Podman oder Docker).
+- Java 21 or newer. Gradle is downloaded by `./gradlew`, no own installation needed.
+- For the messaging: a container program (Podman or Docker).
 
-Alle Tests: `./gradlew test` (mit `--rerun` läuft sie neu und zeigt jeden Test mit Namen). Alles bauen: `./gradlew build`.
+All tests: `./gradlew test` (with `--rerun` it runs again and shows every test by name). Build everything: `./gradlew build`. Create the Javadoc pages: `./gradlew javadoc`.
 
-**Vorführung (20 Minuten):** Der Ablauf Schritt für Schritt steht in [vorfuehrung.md](vorfuehrung.md).
+**Demo (20 minutes):** the step-by-step script is in [DEMO-SCRIPT.md](DEMO-SCRIPT.md).
 
-## 1. REST-Mock
+## Reading the code (for beginners)
+
+The Javadoc comment at the top of each class explains what it does and the Spring Boot, gRPC or RabbitMQ idea behind it. A good order to read:
+
+| Module | Start with | Then |
+|---|---|---|
+| `rest-mock` | `RestMockApplication` (how Spring Boot starts) | `ReturnController` (URLs), `ReturnStore` (data), `ReturnApiTest` |
+| `grpc-service` | the `.proto` file (the interface) | `ArticleConditionServiceImpl` (service), `ConditionRules` (decision), `ConditionClient` (client), tests |
+| `messaging-producer` | `StatusEvent` (the message) | `StatusEventPublisher` (sending), `DemoScenario`, `StatusEventPublisherTest` |
+| `messaging-consumer` | `RabbitConfig` (queues and bindings) | `StatusListeners` (receiving), `StatusUpdateHandler` (logic), `StatusTransitions`, tests |
+
+## 1. REST mock
 
 ```
-./gradlew :rest-mock:bootRun       # Server auf Port 8080
-./gradlew :rest-mock:runClient     # Client ohne Argumente: Demo, ruft alle Endpunkte auf
+./gradlew :rest-mock:bootRun       # server on port 8080
+./gradlew :rest-mock:runClient     # client without arguments: demo, calls all endpoints
 ```
 
-Der Client kann auch einzelne Abfragen machen (Server muss laufen; andere Adresse mit der Umgebungsvariable `MOCK_URL`):
+The client can also make single calls (the server must be running; use the environment variable `MOCK_URL` for another address):
 
 ```
 ./gradlew :rest-mock:runClient --args="list status=NEW marketplace=ZALANDO"
@@ -35,25 +46,25 @@ Der Client kann auch einzelne Abfragen machen (Server muss laufen; andere Adress
 ./gradlew :rest-mock:runClient --args="status RET-2026-00457 APPROVED"
 ```
 
-Beschreibung der Schnittstelle (OpenAPI): http://localhost:8080/v3/api-docs, Oberfläche zum Ausprobieren: http://localhost:8080/swagger-ui.html.
+Description of the interface (OpenAPI): http://localhost:8080/v3/api-docs, page to try it out: http://localhost:8080/swagger-ui.html.
 
-| Aufruf | Zweck |
+| Call | Purpose |
 |---|---|
-| `GET /api/v1/returns?status=NEW&marketplace=ZALANDO` | Liste, beide Filter sind optional |
-| `GET /api/v1/returns/{returnId}` | eine Meldung (404, wenn unbekannt) |
-| `GET /api/v1/orders/{orderId}` | Bestelldaten (404, wenn unbekannt) |
-| `PATCH /api/v1/returns/{returnId}` mit `{"status":"APPROVED"}` | Status ändern, `updatedAt` wird neu gesetzt. Nicht erlaubter Wechsel (z. B. `REJECTED` → `APPROVED`): 409. Derselbe Status noch einmal: 200, nichts ändert sich (die Anfrage darf man wiederholen) |
+| `GET /api/v1/returns?status=NEW&marketplace=ZALANDO` | list, both filters are optional |
+| `GET /api/v1/returns/{returnId}` | one report (404 if unknown) |
+| `GET /api/v1/orders/{orderId}` | order data (404 if unknown) |
+| `PATCH /api/v1/returns/{returnId}` with `{"status":"APPROVED"}` | change the status, `updatedAt` is set again. A forbidden change (e.g. `REJECTED` → `APPROVED`) gives 409. The same status again gives 200 and changes nothing (the request may be repeated) |
 
-Das Format ist das aus der Aufgabe (Folie 9): Die Liste steckt im Feld `data`, die erste Testretoure `RET-2026-00457` ist genau das Beispiel der Folie. Einzelabruf und Bestellung liefern ein einzelnes Objekt ohne `data`. Fehler kommen als `ProblemDetail` (RFC 9457) mit passendem Statuscode: 404 für Unbekanntes, 400 für ungültigen Status oder Filter, 409 für einen nicht erlaubten Statuswechsel (gleiche Tabelle wie beim Messaging, siehe Abschnitt 3). Es gibt sechs Testretouren im Speicher (`ReturnStore`); nach einem Neustart sind die Daten wieder im Ausgangszustand. Die Bestelldaten (`orderId`) haben ein eigenes Format. Die Aufgabe nennt keins, der Dozent hat bestätigt, dass wir ein eigenes, sinnvolles Format wählen dürfen.
+The format is the one from the task (slide 9): the list is in the field `data`, and the first test return `RET-2026-00457` is exactly the example from the slide. The single call and the order return one object without `data`. Errors come as `ProblemDetail` (RFC 9457) with a matching status code: 404 for unknown things, 400 for an invalid status or filter, 409 for a forbidden status change (same table as in the messaging, see section 3). There are six test returns in memory (`ReturnStore`); after a restart the data is back to the start state. The order data (`orderId`) has our own format. The task does not name one, and the lecturer confirmed that we may choose our own sensible format.
 
-## 2. gRPC-Service
+## 2. gRPC service
 
 ```
-./gradlew :grpc-service:run          # Server auf Port 9090
-./gradlew :grpc-service:runClient    # Client ohne Argumente: Demo, spielt alle Szenarien durch
+./gradlew :grpc-service:run          # server on port 9090
+./gradlew :grpc-service:runClient    # client without arguments: demo, plays all scenarios
 ```
 
-Der Client kann auch einzelne Abfragen machen (Server muss laufen; andere Adresse mit der Umgebungsvariable `GRPC_TARGET`, z. B. `rechner:9090`):
+The client can also make single calls (the server must be running; use the environment variable `GRPC_TARGET` for another address, e.g. `myhost:9090`):
 
 ```
 ./gradlew :grpc-service:runClient --args="check RET-2026-00457 SH-BLZ-042-M AS_NEW"
@@ -62,68 +73,68 @@ Der Client kann auch einzelne Abfragen machen (Server muss laufen; andere Adress
 ./gradlew :grpc-service:runClient --args="get RET-2026-00457 SH-BLZ-042-M"
 ```
 
-Die Schnittstelle ist die `.proto` des Dozenten (`grpc-service/src/main/proto/article_condition_service.proto`). **Einzige Änderung:** zwei Zeilen `option java_...`, damit der erzeugte Code in einem Paket liegt. Service, Nachrichten und Felder sind unverändert. Der Dozent hat bestätigt, dass das so passt.
+The interface is the lecturer's `.proto` (`grpc-service/src/main/proto/article_condition_service.proto`). **Only change:** two `option java_...` lines, so the generated code is placed in a package. Service, messages and fields are unchanged. The lecturer confirmed this is fine. (The comments in the `.proto` are the lecturer's German originals.)
 
-Regeln der Prüfung (Vorschlag, im Team abzustimmen):
+Rules of the check (proposal, to be agreed by the team):
 
-| Zustand | Weitere Angaben | Entscheidung | Score |
+| Condition | Other data | Decision | Score |
 |---|---|---|---|
-| `AS_NEW` | Etikett und Originalverpackung vorhanden | `ACCEPT` | 0,95 |
-| `AS_NEW` | Etikett vorhanden, Originalverpackung fehlt | `ACCEPT` | 0,85 |
-| `AS_NEW` | Etikett fehlt | `MANUAL_REVIEW` | 0,50 |
-| `MINOR_WEAR` | – | `MANUAL_REVIEW` | 0,55 |
-| `MISSING_TAGS` | – | `MANUAL_REVIEW` | 0,50 |
-| `VISIBLY_WORN` | – | `REJECT` | 0,90 |
-| `DAMAGED` | – | `REJECT` | 0,95 |
-| `MISSING_PARTS` | – | `REJECT` | 0,90 |
+| `AS_NEW` | tag and original packaging present | `ACCEPT` | 0.95 |
+| `AS_NEW` | tag present, original packaging missing | `ACCEPT` | 0.85 |
+| `AS_NEW` | tag missing | `MANUAL_REVIEW` | 0.50 |
+| `MINOR_WEAR` | – | `MANUAL_REVIEW` | 0.55 |
+| `MISSING_TAGS` | – | `MANUAL_REVIEW` | 0.50 |
+| `VISIBLY_WORN` | – | `REJECT` | 0.90 |
+| `DAMAGED` | – | `REJECT` | 0.95 |
+| `MISSING_PARTS` | – | `REJECT` | 0.90 |
 
-Fehler (gRPC-Statuscodes):
+Errors (gRPC status codes):
 
-| Fall | Statuscode |
+| Case | Status code |
 |---|---|
-| `return_id` oder `sku` leer, Zustand nicht gesetzt, `inspected_at` kein ISO-8601-Wert | `INVALID_ARGUMENT` |
-| Dieselbe Prüfung (`return_id` + `sku`) noch einmal | `ALREADY_EXISTS` |
-| `GetCheckResult` für eine Prüfung, die es nicht gibt | `NOT_FOUND` |
-| Simulierter Ausfall: Eine `return_id` mit Präfix `RET-FAIL` schlägt beim ersten Aufruf fehl | `UNAVAILABLE` |
-| Simulierte Langsamkeit: Eine `return_id` mit Präfix `RET-SLOW` wird erst nach 5 Sekunden beantwortet | Der Client bricht nach seiner Frist von 3 Sekunden ab (`DEADLINE_EXCEEDED`) |
-| Unerwarteter Fehler im Service | `INTERNAL` (ohne Details nach außen) |
+| `return_id` or `sku` empty, condition not set, `inspected_at` not an ISO-8601 value | `INVALID_ARGUMENT` |
+| The same check (`return_id` + `sku`) again | `ALREADY_EXISTS` |
+| `GetCheckResult` for a check that does not exist | `NOT_FOUND` |
+| Simulated outage: a `return_id` with the prefix `RET-FAIL` fails on the first call | `UNAVAILABLE` |
+| Simulated slowness: a `return_id` with the prefix `RET-SLOW` is answered only after 5 seconds | the client gives up after its deadline of 3 seconds (`DEADLINE_EXCEEDED`) |
+| Unexpected error in the service | `INTERNAL` (no details to the outside) |
 
-**Stapelprüfung:** Die `.proto` hat kein Fehlerfeld je Position. Deshalb gilt „alles oder nichts“: Ist eine Position falsch oder doppelt, wird der ganze Stapel abgelehnt und nichts gespeichert. Die Meldung nennt die Position (`items[1]: ...`).
+**Batch check:** the `.proto` has no error field per item. So it is "all or nothing": if one item is wrong or a duplicate, the whole batch is rejected and nothing is stored. The message names the position (`items[1]: ...`).
 
-**Client** (`ConditionClient`): Jeder Aufruf hat eine Frist von 3 Sekunden. Bei `UNAVAILABLE` wiederholt er bis zu dreimal, alle anderen Fehler nicht (falsche Daten bleiben falsch, ein Duplikat soll nicht noch einmal gesendet werden). Bei überschrittener Frist wiederholt er **nicht**, weil die Prüfung beim Service trotzdem gespeichert sein kann (eine Wiederholung würde dann `ALREADY_EXISTS` liefern). Am Ende steht eine `ConditionClientException` mit verständlicher Meldung.
+**Client** (`ConditionClient`): every call has a deadline of 3 seconds. On `UNAVAILABLE` it retries up to three times; other errors are not retried (wrong data stays wrong, a duplicate must not be sent again). After a missed deadline it does **not** retry, because the service may have stored the check anyway (a retry would then give `ALREADY_EXISTS`). At the end there is a `ConditionClientException` with a readable message.
 
-## 3. Messaging mit RabbitMQ
+## 3. Messaging with RabbitMQ
 
-### Broker starten
+### Start the broker
 
-Podman (einmalig die virtuelle Maschine anlegen, danach den Container starten):
+Podman (create the virtual machine once, then start the container):
 
 ```
 podman machine init && podman machine start
 podman run -d --name shopeasy-rabbitmq -p 5672:5672 -p 15672:15672 docker.io/library/rabbitmq:4-management
 ```
 
-Mit Docker geht auch `docker compose up -d` (Datei `compose.yaml`). Weboberfläche: http://localhost:15672 (Benutzer `guest`, Passwort `guest`). Später `podman start shopeasy-rabbitmq` bzw. `podman stop shopeasy-rabbitmq`.
+With Docker, `docker compose up -d` also works (file `compose.yaml`). Web page: http://localhost:15672 (user `guest`, password `guest`). Later `podman start shopeasy-rabbitmq` and `podman stop shopeasy-rabbitmq`.
 
-### Programme starten (zwei Terminals)
-
-```
-./gradlew :messaging-consumer:bootRun    # zuerst: legt Queues an und wartet auf Nachrichten
-./gradlew :messaging-producer:bootRun    # spielt das Demo-Szenario ab und beendet sich
-```
-
-### Aufbau
+### Start the programs (two terminals)
 
 ```
-Producer --> Exchange retouren.status (Topic)
-              |-- retoure.status.#  --> Queue verwaltung   (alle Statuswechsel, aktualisiert den Status)
-              |-- ...APPROVED / REJECTED / ACCEPTED / REFUNDED --> Queue kundeninfo (informiert Kund:innen)
-            abgelehnte Nachrichten --> Exchange retouren.status.dlx --> Queue dlq (Fehler-Queue)
+./gradlew :messaging-consumer:bootRun    # first: creates the queues and waits for messages
+./gradlew :messaging-producer:bootRun    # plays the demo scenario and ends
 ```
 
-Der Producer kennt nur den Exchange und den Routing-Key `retoure.status.<NEUER_STATUS>`, keine Queues und keine Empfänger. Ein dritter Empfänger braucht keine Änderung am Producer.
+### Layout
 
-### Event `ReturnStatusChanged` (JSON, der Vertrag zwischen Producer und Consumer)
+```
+Producer --> exchange returns.status (topic)
+              |-- return.status.#  --> queue management    (all status changes, updates the status)
+              |-- ...APPROVED / REJECTED / ACCEPTED / REFUNDED --> queue customer-info (informs customers)
+            rejected messages --> exchange returns.status.dlx --> queue dlq (dead letter queue)
+```
+
+The queue names are `returns.status.management`, `returns.status.customer-info` and `returns.status.dlq`. The producer only knows the exchange and the routing key `return.status.<NEW_STATUS>`, no queues and no receivers. A third receiver needs no change in the producer.
+
+### Event `ReturnStatusChanged` (JSON, the contract between producer and consumer)
 
 ```json
 {
@@ -133,13 +144,13 @@ Der Producer kennt nur den Exchange und den Routing-Key `retoure.status.<NEUER_S
   "oldStatus": "NEW",
   "newStatus": "APPROVED",
   "occurredAt": "2026-10-22T11:47:25.123Z",
-  "source": "ShopEasy-Retourenmanagement"
+  "source": "ShopEasy-Returns-Management"
 }
 ```
 
-Pflichtfelder sind `eventId`, `returnId`, `oldStatus`, `newStatus` und `occurredAt`. Unbekannte Zusatzfelder ignoriert der Consumer, damit das Event später erweitert werden kann. Producer und Consumer haben je eine eigene Kopie der Klassen, es gibt bewusst keinen gemeinsamen Code.
+Required fields are `eventId`, `returnId`, `oldStatus`, `newStatus` and `occurredAt`. The consumer ignores unknown extra fields, so the event can be extended later. Producer and consumer each have their own copy of the classes; there is deliberately no shared code.
 
-### Erlaubte Statuswechsel (Vorschlag, im Team abzustimmen)
+### Allowed status changes (proposal, to be agreed by the team)
 
 ```
 NEW → APPROVED | REJECTED | IN_REVIEW
@@ -151,59 +162,59 @@ ACCEPTED → REFUNDED → CLOSED
 REJECTED, EXPIRED → CLOSED
 ```
 
-### Fehlerbehandlung
+### Error handling
 
-| Fall | Was passiert |
+| Case | What happens |
 |---|---|
-| Broker nicht erreichbar | Producer versucht es dreimal, dann `EventNotDeliveredException` und Exit-Code 1 |
-| Broker bestätigt nicht (nack) oder gar nicht | Producer meldet den Fehler (Publisher Confirms) |
-| Keine Queue nimmt die Nachricht an | Der Broker gibt sie zurück (`mandatory`), Producer meldet den Fehler |
-| Consumer versteht die Nachricht nicht (kein JSON, Pflichtfeld fehlt, unbekannter Status) | Consumer lehnt ab (reject, ohne erneute Zustellung), die Nachricht liegt in der Fehler-Queue |
-| Nicht erlaubter Statuswechsel oder `oldStatus` passt nicht zum bekannten Status | wie oben |
-| **Doppeltes Event** (gleiche `eventId`) | Consumer erkennt es an der `eventId`, ignoriert es und bestätigt die Nachricht |
-| Broker startet neu | Queues und Nachrichten sind dauerhaft (durable, persistent) |
+| Broker not reachable | the producer tries three times, then `EventNotDeliveredException` and exit code 1 |
+| Broker does not confirm (nack) or not at all | the producer reports the error (publisher confirms) |
+| No queue accepts the message | the broker returns it (`mandatory`), the producer reports the error |
+| The consumer does not understand the message (no JSON, required field missing, unknown status) | the consumer rejects it (reject, no redelivery), the message lies in the dead letter queue |
+| Forbidden status change, or `oldStatus` does not match the known status | as above |
+| **Duplicate event** (same `eventId`) | the consumer recognises it by the `eventId`, ignores it and confirms the message |
+| Broker restarts | queues and messages are durable (durable, persistent) |
 
-Das Demo-Szenario zeigt: den vollständigen Weg einer Retoure, ein doppeltes Event, den Grenzfall `MANUAL_REVIEW`, einen nicht erlaubten Übergang, eine Nachricht ohne JSON und eine Nachricht ohne `returnId`. Im Log des Consumers steht jeweils, was passiert ist.
+The demo scenario shows: the complete path of a return (seven status changes), a duplicate event, the borderline case `MANUAL_REVIEW`, a forbidden change, a message without JSON and a message without `returnId`. The consumer's log shows what happened each time.
 
-**Grenzen:** Der aktuelle Status und die Liste verarbeiteter `eventId`s liegen im Speicher und sind nach einem Neustart leer. Im Betrieb gehört beides in eine Datenbank. Die Kundeninfo prüft keine Statuswechsel, sie vertraut den Events (die Prüfung macht die Verwaltung). Aus der Fehler-Queue liest niemand: Die Nachrichten bleiben dort liegen, bis eine Person sie prüft (RabbitMQ-Oberfläche, „Get messages“).
+**Limits:** the current status and the list of processed `eventId`s are in memory and empty after a restart. In production both belong in a database. The customer info does not check status changes; it trusts the events (the management receiver does the check). Nobody reads from the dead letter queue: the messages stay there until a person checks them (RabbitMQ web page, "Get messages").
 
-## Verwendete Enterprise Integration Patterns
+## Enterprise Integration Patterns used
 
-Die Aufgabe verweist auf die Muster von Hohpe und Woolf. Diese sind im Messaging umgesetzt (der Dozent hat sie als Literatur genannt):
+The task refers to the patterns of Hohpe and Woolf. These are used in the messaging (the lecturer named them as literature):
 
-| Muster | Wo |
+| Pattern | Where |
 |---|---|
-| Event Message | `ReturnStatusChanged`: meldet, dass etwas passiert ist |
-| Publish-Subscribe Channel | Topic-Exchange `retouren.status`, mehrere Empfänger-Queues |
-| Message Router | Routing-Key `retoure.status.<STATUS>` und die Bindungen der Queues |
-| Guaranteed Delivery | persistente Nachrichten, dauerhafte Queues, Publisher Confirms |
-| Invalid Message Channel / Dead Letter Channel | Fehler-Queue `retouren.status.dlq` |
-| Idempotent Receiver | Consumer ignoriert doppelte `eventId`s |
+| Event Message | `ReturnStatusChanged`: reports that something happened |
+| Publish-Subscribe Channel | topic exchange `returns.status`, several receiver queues |
+| Message Router | routing key `return.status.<STATUS>` and the bindings of the queues |
+| Guaranteed Delivery | persistent messages, durable queues, publisher confirms |
+| Invalid Message Channel / Dead Letter Channel | dead letter queue `returns.status.dlq` |
+| Idempotent Receiver | the consumer ignores duplicate `eventId`s |
 
-## Abgleich mit der Aufgabe (Stand 22.10.2026)
+## Check against the task (state 22.10.2026)
 
-Geprüft gegen `Aufgabe DvG WS26_Sprint 2.pdf`, Folie für Folie:
+Checked against `Aufgabe DvG WS26_Sprint 2.pdf`, slide by slide:
 
-| Folie | Anforderung | Stand |
+| Slide | Requirement | State |
 |---|---|---|
-| 8 | drei Komponenten, Message Broker | erfüllt: vier Programme, RabbitMQ |
-| 9 | Liste mit Filter, Einzelabruf, Bestellung, Status ändern, Format, Client | erfüllt, Format wie im Beispiel (`data`) |
-| 10 | gRPC nach der `.proto`, Client, Simulation, Szenarien, Fehler | erfüllt; Änderung an der `.proto` nur Java-Optionen, vom Dozenten bestätigt |
-| 11 | Statusübergänge, Producer, Consumer, Topics/Queues | erfüllt |
-| X | Messaging und gRPC: Fehler, doppelte Events, Struktur | erfüllt und getestet; die Folie spricht von „Payment“ und „Rechnungen“, laut Dozent ist sie alt und wird ignoriert; die Fehlerfälle setzen wir trotzdem um |
-| 12 | Best Practices, KI dokumentieren | REST mit Versionspfad, Plural, Statuscodes, ProblemDetail und OpenAPI; KI in `AI-USAGE.md` |
+| 8 | three components, message broker | done: four programs, RabbitMQ |
+| 9 | list with filter, single call, order, change status, format, client | done, format as in the example (`data`) |
+| 10 | gRPC from the `.proto`, client, simulation, scenarios, errors | done; change to the `.proto` is only Java options, confirmed by the lecturer |
+| 11 | status changes, producer, consumer, topics/queues | done |
+| X | messaging and gRPC: errors, duplicate events, structure | done and tested; the slide talks about "Payment" and "invoices", the lecturer said it is old and to be ignored; we implement the error cases anyway |
+| 12 | best practices, document AI | REST with version path, plural, status codes, ProblemDetail and OpenAPI; AI in `AI-USAGE.md` |
 
-Bewusste Grenzen:
-- Der Consumer hält den Status in einem eigenen Speicher und ruft den REST-Mock nicht auf. Die Systeme bleiben getrennt, verbunden werden sie erst im Workflow (Sprint 4).
-- Der gRPC-Service wertet `image_urls` und `inspector_note` nicht aus. Die Regeln brauchen sie nicht. `original_packaging` senkt nur den Score (keine Ablehnung, weil die Originalverpackung keine Bedingung für die Rücknahme ist).
+Deliberate limits:
+- The consumer keeps the status in its own memory and does not call the REST mock. The systems stay separate; they are connected only in the workflow (Sprint 4).
+- The gRPC service does not use `image_urls` and `inspector_note`. The rules do not need them. `original_packaging` only lowers the score (no rejection, because the original packaging is no condition for taking a return back).
 
-## Zuordnung zu den Bewertungsaspekten
+## Mapping to the grading aspects
 
-| Aspekt | Wo |
+| Aspect | Where |
 |---|---|
-| Messaging: saubere Eventdefinition | Abschnitt „Event“, `StatusEvent` |
-| Messaging: Producer-/Consumer-Logik, Entkopplung | `StatusEventPublisher`, `StatusListeners`, `RabbitConfig`, zwei Empfänger-Queues |
-| Messaging: Fehler (nicht zustellbar, nicht verstanden, doppelt) | Tabelle „Fehlerbehandlung“, Tests `StatusEventPublisherTest`, `StatusUpdateHandlerTest` |
-| gRPC: saubere Schnittstelle | `.proto` unverändert bis auf Java-Optionen |
-| gRPC: Fehler im Service und im Client | Tabelle „Fehler“, Tests `ErrorHandlingTest`, `ConditionClientTest` |
-| Struktur des Codes | Je Modul kleine Klassen mit einer Aufgabe, Regeln, Validierung und Service getrennt |
+| Messaging: clean event definition | section "Event", `StatusEvent` |
+| Messaging: producer/consumer logic, decoupling | `StatusEventPublisher`, `StatusListeners`, `RabbitConfig`, two receiver queues |
+| Messaging: errors (not deliverable, not understood, duplicate) | table "Error handling", tests `StatusEventPublisherTest`, `StatusUpdateHandlerTest` |
+| gRPC: clean interface | `.proto` unchanged except Java options |
+| gRPC: errors in service and client | table "Errors", tests `ErrorHandlingTest`, `ConditionClientTest` |
+| Code structure | small classes with one job per module; rules, validation and service are separate |

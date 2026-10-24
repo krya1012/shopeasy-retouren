@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
-/** Jeder Fehlerfall des Service und der passende gRPC-Statuscode. */
+/** Every error case of the service and the matching gRPC status code. */
 class ErrorHandlingTest extends ServiceTestBase {
 
     private static Status.Code codeOf(StatusRuntimeException e) {
@@ -20,7 +20,7 @@ class ErrorHandlingTest extends ServiceTestBase {
     }
 
     @Test
-    void leereReturnIdIstInvalidArgument() {
+    void emptyReturnIdIsInvalidArgument() {
         StatusRuntimeException e = assertThrows(StatusRuntimeException.class,
                 () -> stub.checkCondition(request("", "SKU-1", ObservedCondition.AS_NEW, true)));
         assertEquals(Status.Code.INVALID_ARGUMENT, codeOf(e));
@@ -28,29 +28,29 @@ class ErrorHandlingTest extends ServiceTestBase {
     }
 
     @Test
-    void leereSkuIstInvalidArgument() {
+    void emptySkuIsInvalidArgument() {
         StatusRuntimeException e = assertThrows(StatusRuntimeException.class,
                 () -> stub.checkCondition(request("RET-1", " ", ObservedCondition.AS_NEW, true)));
         assertEquals(Status.Code.INVALID_ARGUMENT, codeOf(e));
     }
 
     @Test
-    void zustandUnspecifiedIstInvalidArgument() {
+    void unspecifiedConditionIsInvalidArgument() {
         StatusRuntimeException e = assertThrows(StatusRuntimeException.class, () -> stub.checkCondition(
                 request("RET-1", "SKU-1", ObservedCondition.OBSERVED_CONDITION_UNSPECIFIED, true)));
         assertEquals(Status.Code.INVALID_ARGUMENT, codeOf(e));
     }
 
     @Test
-    void zeitstempelKeinIsoWertIstInvalidArgument() {
+    void timestampThatIsNotIsoIsInvalidArgument() {
         ConditionCheckRequest bad = request("RET-1", "SKU-1", ObservedCondition.AS_NEW, true).toBuilder()
-                .setInspectedAt("gestern").build();
+                .setInspectedAt("yesterday").build();
         StatusRuntimeException e = assertThrows(StatusRuntimeException.class, () -> stub.checkCondition(bad));
         assertEquals(Status.Code.INVALID_ARGUMENT, codeOf(e));
     }
 
     @Test
-    void zweiteGleichePruefungIstAlreadyExists() {
+    void secondIdenticalCheckIsAlreadyExists() {
         ConditionCheckRequest r = request("RET-1", "SKU-1", ObservedCondition.AS_NEW, true);
         stub.checkCondition(r);
         StatusRuntimeException e = assertThrows(StatusRuntimeException.class, () -> stub.checkCondition(r));
@@ -58,13 +58,13 @@ class ErrorHandlingTest extends ServiceTestBase {
     }
 
     @Test
-    void gleicheRetoureAndereSkuIstErlaubt() {
+    void sameReturnOtherSkuIsAllowed() {
         stub.checkCondition(request("RET-1", "SKU-1", ObservedCondition.AS_NEW, true));
         stub.checkCondition(request("RET-1", "SKU-2", ObservedCondition.DAMAGED, true));
     }
 
     @Test
-    void ergebnisAbrufen() {
+    void fetchResult() {
         ConditionCheckResponse created = stub.checkCondition(request("RET-1", "SKU-1", ObservedCondition.DAMAGED, true));
         ConditionCheckResponse loaded = stub.getCheckResult(
                 GetCheckResultRequest.newBuilder().setReturnId("RET-1").setSku("SKU-1").build());
@@ -72,21 +72,21 @@ class ErrorHandlingTest extends ServiceTestBase {
     }
 
     @Test
-    void unbekanntesErgebnisIstNotFound() {
+    void unknownResultIsNotFound() {
         StatusRuntimeException e = assertThrows(StatusRuntimeException.class, () -> stub.getCheckResult(
                 GetCheckResultRequest.newBuilder().setReturnId("RET-X").setSku("SKU-X").build()));
         assertEquals(Status.Code.NOT_FOUND, codeOf(e));
     }
 
     @Test
-    void abrufOhneIdsIstInvalidArgument() {
+    void fetchWithoutIdsIsInvalidArgument() {
         StatusRuntimeException e = assertThrows(StatusRuntimeException.class,
                 () -> stub.getCheckResult(GetCheckResultRequest.getDefaultInstance()));
         assertEquals(Status.Code.INVALID_ARGUMENT, codeOf(e));
     }
 
     @Test
-    void simulierterAusfallBeimErstenAufrufDanachFunktioniertEs() {
+    void simulatedOutageOnFirstCallThenItWorks() {
         ConditionCheckRequest r = request("RET-FAIL-1", "SKU-1", ObservedCondition.AS_NEW, true);
         StatusRuntimeException e = assertThrows(StatusRuntimeException.class, () -> stub.checkCondition(r));
         assertEquals(Status.Code.UNAVAILABLE, codeOf(e));
@@ -94,7 +94,7 @@ class ErrorHandlingTest extends ServiceTestBase {
     }
 
     @Test
-    void langsamerServiceLaeuftInDieFristDesClients() {
+    void slowServiceRunsIntoTheClientDeadline() {
         ConditionCheckRequest slow = request("RET-SLOW-1", "SKU-1", ObservedCondition.AS_NEW, true);
         StatusRuntimeException e = assertThrows(StatusRuntimeException.class,
                 () -> stub.withDeadlineAfter(100, java.util.concurrent.TimeUnit.MILLISECONDS).checkCondition(slow));
@@ -102,7 +102,7 @@ class ErrorHandlingTest extends ServiceTestBase {
     }
 
     @Test
-    void stapelBewertetAllePositionen() {
+    void batchJudgesAllItems() {
         ConditionCheckBatchResponse response = stub.checkConditionBatch(ConditionCheckBatchRequest.newBuilder()
                 .addItems(request("RET-1", "SKU-1", ObservedCondition.AS_NEW, true))
                 .addItems(request("RET-1", "SKU-2", ObservedCondition.DAMAGED, true))
@@ -112,7 +112,7 @@ class ErrorHandlingTest extends ServiceTestBase {
     }
 
     @Test
-    void stapelMitFehlerSpeichertNichtsUndNenntDiePosition() {
+    void batchWithErrorStoresNothingAndNamesThePosition() {
         ConditionCheckBatchRequest batch = ConditionCheckBatchRequest.newBuilder()
                 .addItems(request("RET-1", "SKU-1", ObservedCondition.AS_NEW, true))
                 .addItems(request("RET-1", "", ObservedCondition.AS_NEW, true))
@@ -127,7 +127,7 @@ class ErrorHandlingTest extends ServiceTestBase {
     }
 
     @Test
-    void stapelMitDoppelterPositionIstAlreadyExists() {
+    void batchWithDuplicateItemIsAlreadyExists() {
         ConditionCheckRequest r = request("RET-1", "SKU-1", ObservedCondition.AS_NEW, true);
         StatusRuntimeException e = assertThrows(StatusRuntimeException.class, () -> stub.checkConditionBatch(
                 ConditionCheckBatchRequest.newBuilder().addItems(r).addItems(r).build()));
@@ -135,7 +135,7 @@ class ErrorHandlingTest extends ServiceTestBase {
     }
 
     @Test
-    void leererStapelIstInvalidArgument() {
+    void emptyBatchIsInvalidArgument() {
         StatusRuntimeException e = assertThrows(StatusRuntimeException.class,
                 () -> stub.checkConditionBatch(ConditionCheckBatchRequest.getDefaultInstance()));
         assertEquals(Status.Code.INVALID_ARGUMENT, codeOf(e));

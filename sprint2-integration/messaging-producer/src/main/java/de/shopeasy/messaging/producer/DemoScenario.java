@@ -8,7 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-/** Spielt die Szenarien für die Vorführung ab. Im Consumer-Log sieht man, was jeweils passiert. */
+/**
+ * Plays the scenarios for the demo. In the consumer's log you can see what happens with each one.
+ *
+ * <p>Spring Boot note: this is a {@code @Component}; {@link ProducerApplication} asks Spring for this bean and
+ * calls {@link #run()}. The {@link StatusEventPublisher} is injected through the constructor.
+ */
 @Component
 public class DemoScenario {
 
@@ -21,7 +26,7 @@ public class DemoScenario {
     }
 
     public void run() {
-        LOG.info("=== 1. Vollständiger Weg einer Retoure (acht Statuswechsel)");
+        LOG.info("=== 1. Complete path of a return (seven status changes)");
         String id = "RET-2026-" + (System.currentTimeMillis() % 100000);
         ReturnStatus[] path = {NEW, APPROVED, LABEL_SENT, RECEIVED, INSPECTED, ACCEPTED, REFUNDED, CLOSED};
         StatusEvent approved = null;
@@ -33,10 +38,10 @@ public class DemoScenario {
             }
         }
 
-        LOG.info("=== 2. Doppeltes Event: dasselbe Event (gleiche eventId) wird noch einmal gesendet");
+        LOG.info("=== 2. Duplicate event: the same event (same eventId) is sent again");
         publisher.publish(approved);
 
-        LOG.info("=== 3. Grenzfall: Prüfung ergibt MANUAL_REVIEW, danach Annahme");
+        LOG.info("=== 3. Borderline case: the inspection gives MANUAL_REVIEW, then acceptance");
         String id2 = id + "-B";
         publisher.publish(StatusEvent.of(id2, NEW, APPROVED));
         publisher.publish(StatusEvent.of(id2, APPROVED, LABEL_SENT));
@@ -45,14 +50,14 @@ public class DemoScenario {
         publisher.publish(StatusEvent.of(id2, INSPECTED, MANUAL_REVIEW));
         publisher.publish(StatusEvent.of(id2, MANUAL_REVIEW, ACCEPTED));
 
-        LOG.info("=== 4. Nicht erlaubter Übergang: NEW -> INSPECTED (landet in der Fehler-Queue)");
+        LOG.info("=== 4. Forbidden status change: NEW -> INSPECTED (ends in the dead letter queue)");
         publisher.publish(StatusEvent.of(id + "-C", NEW, INSPECTED));
 
-        LOG.info("=== 5. Kaputte Nachricht: kein JSON (landet in der Fehler-Queue)");
-        publisher.publishRaw("retoure.status.UNBEKANNT", "das ist kein JSON");
+        LOG.info("=== 5. Broken message: not JSON (ends in the dead letter queue)");
+        publisher.publishRaw("return.status.UNKNOWN", "this is not JSON");
 
-        LOG.info("=== 6. Unvollständige Nachricht: returnId fehlt (landet in der Fehler-Queue)");
-        publisher.publishRaw("retoure.status.UNBEKANNT",
+        LOG.info("=== 6. Incomplete message: returnId is missing (ends in the dead letter queue)");
+        publisher.publishRaw("return.status.UNKNOWN",
                 "{\"eventId\":\"" + UUID.randomUUID() + "\",\"newStatus\":\"APPROVED\"}");
     }
 }

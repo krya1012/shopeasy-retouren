@@ -1,6 +1,6 @@
-# RabbitMQ mit Weboberfläche: http://localhost:15672 (Benutzer guest, Passwort guest)
-# Start:  podman compose up -d   (oder docker compose up -d)
-# Stopp:  podman compose down
+# RabbitMQ with web page: http://localhost:15672 (user guest, password guest)
+# Start:  docker compose up -d   (podman compose needs an extra provider, see README: use podman run)
+# Stop:   docker compose down
 services:
   rabbitmq:
     image: docker.io/library/rabbitmq:4-management

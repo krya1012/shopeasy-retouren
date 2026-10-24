@@ -13,7 +13,11 @@ import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 
-/** Startet für jeden Test einen frischen Service im selben Prozess (ohne Netzwerk). */
+/**
+ * Starts a fresh service for every test, inside the same process (no network). The in-process channel talks to
+ * the in-process server directly. A fixed clock makes the timestamps in the answers predictable.
+ * {@code @BeforeEach} / {@code @AfterEach} run before and after every single test.
+ */
 abstract class ServiceTestBase {
 
     protected ArticleConditionServiceGrpc.ArticleConditionServiceBlockingStub stub;

@@ -2,7 +2,7 @@
 
 Grundlage ist das Dokument „Prozess Analyse der Shop Easy GmbH“ von Eduard Moser. (siehe `AI-USAGE.md`).
 
-Unter jedem Text steht **„Im Ist-Modell“**: die zugehörigen Schwachstellen mit ihrer Nummer (W1–W17, so stehen sie als Hinweise in `ist-prozess.bpmn`), der Kategorie und dem **Namen des Schritts im Diagramm**. Die Maßnahmen im Soll-Prozess stehen in `soll-prozess-realisierung.md`.
+Unter jedem Text steht **„Im Ist-Modell“**: die zugehörigen Schwachstellen mit ihrer Nummer (W1–W17, so stehen sie als Hinweise in `ist-prozess.bpmn`), der Kategorie und dem **Namen des Schritts im Diagramm**. Die Maßnahmen im Soll-Prozess stehen in `SOLL-PROZESS-REALISIERUNG.md`.
 
 **Kategorien** (Vorgabe der Aufgabe): **Medienbruch** (Daten wechseln das System und werden abgetippt), **Wartezeit** (der Fall wartet), **Fehlerquelle** (Fehler oder unklare Entscheidungen sind möglich).
 

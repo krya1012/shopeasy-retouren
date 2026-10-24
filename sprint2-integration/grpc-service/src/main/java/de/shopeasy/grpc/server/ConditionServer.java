@@ -7,7 +7,13 @@ import java.util.logging.Logger;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
-/** Startet den gRPC-Service. Port als Argument, sonst 9090. Start: {@code ./gradlew :grpc-service:run}. */
+/**
+ * Starts the gRPC service. The port is the first argument, otherwise 9090.
+ * Start: {@code ./gradlew :grpc-service:run}.
+ *
+ * <p>This module does not use Spring Boot. gRPC has its own small server (grpc-java); we create it with a
+ * builder, register our service on it, and start it. The server code needs no framework.
+ */
 public class ConditionServer {
 
     private static final Logger LOG = Logger.getLogger(ConditionServer.class.getName());
@@ -18,12 +24,13 @@ public class ConditionServer {
                 .addService(new ArticleConditionServiceImpl(Clock.systemUTC()))
                 .build()
                 .start();
-        LOG.info("ArticleConditionService läuft auf Port " + port);
+        LOG.info("ArticleConditionService is running on port " + port);
 
+        // The shutdown hook runs when the program is stopped (Ctrl+C), so the server ends cleanly.
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            LOG.info("Server wird beendet");
+            LOG.info("Server is shutting down");
             server.shutdown();
         }));
-        server.awaitTermination();
+        server.awaitTermination(); // keep the program alive until the server ends
     }
 }

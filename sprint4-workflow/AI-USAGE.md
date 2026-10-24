@@ -1,12 +1,13 @@
-# KI-Nutzung – Sprint 4 (Workflow (Camunda), 17.11.–8.12.2026)
+# AI Use – Sprint 4 (Workflow (Camunda), 17.11.–8.12.2026)
 
-Laut Aufgabenstellung führt undokumentierte KI-Nutzung zum Nicht-Bestehen. Jeder Eintrag: Datum, Werkzeug, Co-Autor:in, Zweck, Prüfstatus. Übersicht über alle Sprints: [AI-USAGE.md](../AI-USAGE.md). GitHub-Repository: [https://github.com/krya1012/shopeasy-retouren](https://github.com/krya1012/shopeasy-retouren), diese Datei: [sprint4-workflow/AI-USAGE.md](https://github.com/krya1012/shopeasy-retouren/blob/main/sprint4-workflow/AI-USAGE.md).
+According to the task, undocumented AI use leads to failing. Every entry: date, tool, co-author, purpose, review status. Overview of all sprints: [AI-USAGE.md](../AI-USAGE.md). GitHub repository: [https://github.com/krya1012/shopeasy-retouren](https://github.com/krya1012/shopeasy-retouren), this file: [sprint4-workflow/AI-USAGE.md](https://github.com/krya1012/shopeasy-retouren/blob/main/sprint4-workflow/AI-USAGE.md).
 
-**Co-Autorenschaft:** Einträge mit Claude Code entstehen in Sitzungen von **Yaraslau Krautsou** (Co-Autor von Claude Code). Andere Personen stehen je Eintrag in der Spalte „Co-Autor:in“.
-**Modell:** Claude Code mit der Einstellung `opusplan` (Claude Opus 5.5 im Planungsmodus, sonst Claude Sonnet 5.5), sofern nicht anders eingetragen.
+**Co-authorship:** entries with Claude Code are created in sessions of **Yaraslau Krautsou** (co-author of Claude Code). Other people are named per entry in the column "Co-author".
+**Model:** Claude Code with the setting `opusplan` (Claude Opus 5.5 in planning mode, otherwise Claude Sonnet 5.5), unless entered differently.
+**Language:** documentation, code comments and program output are in English (from Sprint 2 on).
 
-Einträge sofort beim Einsatz der KI anlegen, nicht erst zur Abgabe.
+Create entries immediately when AI is used, not only at hand-in.
 
-| Datum | Werkzeug | Co-Autor:in | Zweck / Artefakt | Prüfstatus (Team) |
+| Date | Tool | Co-author | Purpose / artifact | Review status (team) |
 |---|---|---|---|---|
-| – | – | – | Noch keine KI-Nutzung in diesem Sprint eingetragen | – |
+| – | – | – | No AI use entered for this sprint yet | – |

@@ -5,16 +5,16 @@ plugins {
 dependencies {
     implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1' // OpenAPI-Beschreibung und Swagger-UI
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1' // OpenAPI description and Swagger UI
 
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-// Der Client läuft getrennt vom Server: ./gradlew :rest-mock:runClient
+// The client runs separately from the server: ./gradlew :rest-mock:runClient
 tasks.register('runClient', JavaExec) {
     group = 'application'
-    description = 'Startet den REST-Client (der Server muss laufen).'
+    description = 'Starts the REST client (the server must be running).'
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'de.shopeasy.restmock.client.RestClientDemo'
 }

@@ -11,11 +11,11 @@ import de.shopeasy.grpc.client.ConditionClient;
 import de.shopeasy.grpc.client.ConditionClientException;
 import io.grpc.Status;
 
-/** Fehlerbehandlung im Client: Wiederholung bei UNAVAILABLE, verständliche Meldungen sonst. */
+/** Error handling in the client: retry on UNAVAILABLE, readable messages otherwise. */
 class ConditionClientTest extends ServiceTestBase {
 
     @Test
-    void clientWiederholtBeiAusfallUndBekommtDannDasErgebnis() {
+    void clientRetriesOnOutageAndThenGetsTheResult() {
         ConditionClient client = new ConditionClient(channel);
         ConditionCheckResponse r = client.checkCondition(
                 request("RET-FAIL-1", "SKU-1", ObservedCondition.AS_NEW, true));
@@ -23,16 +23,16 @@ class ConditionClientTest extends ServiceTestBase {
     }
 
     @Test
-    void clientWirftBeiFalschenDatenOhneWiederholung() {
+    void clientThrowsOnInvalidDataWithoutRetry() {
         ConditionClient client = new ConditionClient(channel);
         ConditionClientException e = assertThrows(ConditionClientException.class,
                 () -> client.checkCondition(request("", "SKU-1", ObservedCondition.AS_NEW, true)));
         assertEquals(Status.Code.INVALID_ARGUMENT, e.getCode());
-        assertTrue(e.getMessage().startsWith("Falsche Daten"));
+        assertTrue(e.getMessage().startsWith("Invalid data"));
     }
 
     @Test
-    void clientMeldetDuplikat() {
+    void clientReportsDuplicate() {
         ConditionClient client = new ConditionClient(channel);
         client.checkCondition(request("RET-1", "SKU-1", ObservedCondition.AS_NEW, true));
         ConditionClientException e = assertThrows(ConditionClientException.class,
@@ -41,7 +41,7 @@ class ConditionClientTest extends ServiceTestBase {
     }
 
     @Test
-    void clientMeldetUnbekanntesErgebnis() {
+    void clientReportsUnknownResult() {
         ConditionClient client = new ConditionClient(channel);
         ConditionClientException e = assertThrows(ConditionClientException.class,
                 () -> client.getCheckResult("RET-X", "SKU-X"));
@@ -49,24 +49,24 @@ class ConditionClientTest extends ServiceTestBase {
     }
 
     @Test
-    void clientMeldetUeberschrittenFristUndWiederholtNicht() {
+    void clientReportsMissedDeadlineAndDoesNotRetry() {
         ConditionClient client = new ConditionClient(channel, 100);
         ConditionClientException e = assertThrows(ConditionClientException.class,
                 () -> client.checkCondition(request("RET-SLOW-1", "SKU-1", ObservedCondition.AS_NEW, true)));
         assertEquals(Status.Code.DEADLINE_EXCEEDED, e.getCode());
-        assertTrue(e.getMessage().startsWith("Zeitüberschreitung"));
+        assertTrue(e.getMessage().startsWith("Timeout"));
     }
 
     @Test
-    void clientGibtNachDreiVersuchenAuf() {
-        // Kein Server hinter dem Kanal: UNAVAILABLE bei jedem Versuch
-        io.grpc.ManagedChannel dead = io.grpc.inprocess.InProcessChannelBuilder.forName("gibt-es-nicht")
+    void clientGivesUpAfterThreeAttempts() {
+        // No server behind the channel: UNAVAILABLE on every attempt
+        io.grpc.ManagedChannel dead = io.grpc.inprocess.InProcessChannelBuilder.forName("does-not-exist")
                 .build();
         ConditionClient client = new ConditionClient(dead);
         ConditionClientException e = assertThrows(ConditionClientException.class,
                 () -> client.checkCondition(request("RET-1", "SKU-1", ObservedCondition.AS_NEW, true)));
         assertEquals(Status.Code.UNAVAILABLE, e.getCode());
-        assertTrue(e.getMessage().contains("3 Versuchen"));
+        assertTrue(e.getMessage().contains("3 attempts"));
         dead.shutdownNow();
     }
 }

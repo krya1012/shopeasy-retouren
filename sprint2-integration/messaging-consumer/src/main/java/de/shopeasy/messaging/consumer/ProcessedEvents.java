@@ -5,9 +5,13 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Merkt sich die eventIds, die ein Empfänger schon verarbeitet hat. So wird ein doppelt gesendetes Event
- * nur einmal verarbeitet (Idempotenz). Die Liste liegt im Speicher und ist nach einem Neustart leer;
- * im Betrieb gehört sie in eine Datenbank.
+ * Remembers the {@code eventId}s that a receiver has already processed. With this list a message that is sent
+ * twice is processed only once. This property is called idempotency.
+ *
+ * <p>The list lives in memory and is empty after a restart. In production it would be stored in a database.
+ *
+ * <p>Java note: {@code ConcurrentHashMap.newKeySet()} creates a set that several threads can use at the same
+ * time without breaking it. RabbitMQ listeners run in their own threads.
  */
 public class ProcessedEvents {
 

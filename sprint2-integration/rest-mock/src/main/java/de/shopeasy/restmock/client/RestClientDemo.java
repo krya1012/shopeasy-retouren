@@ -12,26 +12,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Client für den REST-Mock. Ohne Argumente ruft er alle Endpunkte einmal auf (Demo).
- * Mit Argumenten macht er genau eine Abfrage:
+ * Command line client for the REST mock. Without arguments it calls every endpoint once (demo).
+ * With arguments it makes exactly one call:
  * <pre>
- * list [status=NEW] [marketplace=ZALANDO]   Liste, Filter sind optional
- * get RET-2026-00457                        eine Retourenmeldung
- * order ORD-2026-118932                     Bestelldaten
- * status RET-2026-00457 APPROVED            Status ändern
+ * list [status=NEW] [marketplace=ZALANDO]   list, the filters are optional
+ * get RET-2026-00457                        one return report
+ * order ORD-2026-118932                     order data
+ * status RET-2026-00457 APPROVED            change the status
  * </pre>
- * Start: {@code ./gradlew :rest-mock:runClient --args="list status=NEW"} (der Server muss laufen).
- * Die Basis-URL steht standardmäßig auf http://localhost:8080, mit der Umgebungsvariable MOCK_URL änderbar.
+ * Start: {@code ./gradlew :rest-mock:runClient --args="list status=NEW"} (the server must be running).
+ * The base URL is http://localhost:8080 by default; change it with the environment variable MOCK_URL.
+ *
+ * <p>Java note: this client uses the {@link HttpClient} that is part of Java itself (since Java 11), so it needs
+ * no extra library. It prints the HTTP status code and the JSON body of every answer.
  */
 public class RestClientDemo {
 
     private static final String USAGE = """
-            Benutzung:
+            Usage:
               list [status=NEW] [marketplace=ZALANDO]
               get <returnId>
               order <orderId>
               status <returnId> <STATUS>
-              (ohne Argumente: Demo mit allen Aufrufen)""";
+              (without arguments: demo with all calls)""";
 
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build();
     private final String baseUrl;
@@ -51,15 +54,15 @@ public class RestClientDemo {
                 System.exit(2);
             }
         } catch (IOException e) {
-            System.err.println("Server nicht erreichbar unter " + baseUrl + ": " + e.getMessage());
-            System.err.println("Bitte zuerst den Server starten: ./gradlew :rest-mock:bootRun");
+            System.err.println("Server not reachable at " + baseUrl + ": " + e.getMessage());
+            System.err.println("Please start the server first: ./gradlew :rest-mock:bootRun");
             System.exit(1);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
 
-    /** @return false, wenn die Argumente nicht passen */
+    /** @return false if the arguments do not fit */
     private boolean command(String[] args) throws IOException, InterruptedException {
         switch (args[0]) {
             case "list" -> {
@@ -100,15 +103,15 @@ public class RestClientDemo {
     }
 
     private void demo() throws IOException, InterruptedException {
-        step("1. Alle Retouren", "GET", "/api/v1/returns", null);
-        step("2. Nur neue Retouren von Zalando", "GET", "/api/v1/returns?status=NEW&marketplace=ZALANDO", null);
-        step("3. Eine Retoure über die returnId", "GET", "/api/v1/returns/RET-2026-00457", null);
-        step("4. Bestelldaten über die orderId", "GET", "/api/v1/orders/ORD-2026-118932", null);
-        step("5. Status auf APPROVED setzen", "PATCH", "/api/v1/returns/RET-2026-00457", "{\"status\":\"APPROVED\"}");
-        step("6. Fehler: unbekannte Retoure (404)", "GET", "/api/v1/returns/RET-GIBT-ES-NICHT", null);
-        step("7. Fehler: ungültiger Status (400)", "PATCH", "/api/v1/returns/RET-2026-00457", "{\"status\":\"QUATSCH\"}");
-        step("8. Fehler: ungültiger Filter (400)", "GET", "/api/v1/returns?marketplace=EBAY", null);
-        step("9. Fehler: nicht erlaubter Statuswechsel REJECTED -> APPROVED (409)", "PATCH",
+        step("1. All returns", "GET", "/api/v1/returns", null);
+        step("2. Only new returns from Zalando", "GET", "/api/v1/returns?status=NEW&marketplace=ZALANDO", null);
+        step("3. One return by returnId", "GET", "/api/v1/returns/RET-2026-00457", null);
+        step("4. Order data by orderId", "GET", "/api/v1/orders/ORD-2026-118932", null);
+        step("5. Set the status to APPROVED", "PATCH", "/api/v1/returns/RET-2026-00457", "{\"status\":\"APPROVED\"}");
+        step("6. Error: unknown return (404)", "GET", "/api/v1/returns/RET-DOES-NOT-EXIST", null);
+        step("7. Error: invalid status (400)", "PATCH", "/api/v1/returns/RET-2026-00457", "{\"status\":\"NONSENSE\"}");
+        step("8. Error: invalid filter (400)", "GET", "/api/v1/returns?marketplace=EBAY", null);
+        step("9. Error: forbidden status change REJECTED -> APPROVED (409)", "PATCH",
                 "/api/v1/returns/RET-2026-00462", "{\"status\":\"APPROVED\"}");
     }
 

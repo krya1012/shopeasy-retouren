@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 
-/** Die Regeln werden über den Service geprüft, damit nur die öffentliche Schnittstelle genutzt wird. */
+/** The rules are tested through the service, so only the public interface is used. */
 class ConditionRulesTest extends ServiceTestBase {
 
     private ConditionCheckResponse check(ObservedCondition condition, boolean tags) {
@@ -16,7 +16,7 @@ class ConditionRulesTest extends ServiceTestBase {
     }
 
     @Test
-    void neuwertigMitEtikettWirdAngenommen() {
+    void asNewWithTagIsAccepted() {
         ConditionCheckResponse r = check(ObservedCondition.AS_NEW, true);
         assertEquals(Decision.ACCEPT, r.getDecision());
         assertFalse(r.getRequiresManualReview());
@@ -24,51 +24,51 @@ class ConditionRulesTest extends ServiceTestBase {
     }
 
     @Test
-    void neuwertigOhneVerpackungWirdAngenommenMitNiedrigeremScore() {
+    void asNewWithoutPackagingIsAcceptedWithLowerScore() {
         ConditionCheckResponse r = stub.checkCondition(
                 request("RET-1", "SKU-1", ObservedCondition.AS_NEW, true, false));
         assertEquals(Decision.ACCEPT, r.getDecision());
         assertFalse(r.getRequiresManualReview());
         assertEquals(0.85, r.getConfidenceScore());
-        assertTrue(r.getReason().contains("ohne Originalverpackung"));
+        assertTrue(r.getReason().contains("without original packaging"));
     }
 
     @Test
-    void neuwertigOhneEtikettIstGrenzfall() {
+    void asNewWithoutTagIsBorderline() {
         ConditionCheckResponse r = check(ObservedCondition.AS_NEW, false);
         assertEquals(Decision.MANUAL_REVIEW, r.getDecision());
         assertTrue(r.getRequiresManualReview());
     }
 
     @Test
-    void leichteGebrauchsspurenSindGrenzfall() {
+    void minorWearIsBorderline() {
         assertEquals(Decision.MANUAL_REVIEW, check(ObservedCondition.MINOR_WEAR, true).getDecision());
     }
 
     @Test
-    void fehlendeEtikettenSindGrenzfall() {
+    void missingTagsIsBorderline() {
         assertEquals(Decision.MANUAL_REVIEW, check(ObservedCondition.MISSING_TAGS, false).getDecision());
     }
 
     @Test
-    void deutlichGetragenWirdAbgelehnt() {
+    void visiblyWornIsRejected() {
         ConditionCheckResponse r = check(ObservedCondition.VISIBLY_WORN, true);
         assertEquals(Decision.REJECT, r.getDecision());
         assertFalse(r.getRequiresManualReview());
     }
 
     @Test
-    void beschaedigtWirdAbgelehnt() {
+    void damagedIsRejected() {
         assertEquals(Decision.REJECT, check(ObservedCondition.DAMAGED, true).getDecision());
     }
 
     @Test
-    void fehlendeTeileWerdenAbgelehnt() {
+    void missingPartsIsRejected() {
         assertEquals(Decision.REJECT, check(ObservedCondition.MISSING_PARTS, true).getDecision());
     }
 
     @Test
-    void antwortEnthaeltIdsUndZeitstempel() {
+    void answerContainsIdsAndTimestamp() {
         ConditionCheckResponse r = check(ObservedCondition.AS_NEW, true);
         assertEquals("RET-1", r.getReturnId());
         assertEquals("SKU-1", r.getSku());

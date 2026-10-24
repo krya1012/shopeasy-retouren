@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class StatusTransitionsTest {
 
     @Test
-    void erlaubteUebergaenge() {
+    void allowedTransitions() {
         assertTrue(StatusTransitions.isAllowed(NEW, APPROVED));
         assertTrue(StatusTransitions.isAllowed(NEW, IN_REVIEW));
         assertTrue(StatusTransitions.isAllowed(LABEL_SENT, EXPIRED));
@@ -18,7 +18,7 @@ class StatusTransitionsTest {
     }
 
     @Test
-    void nichtErlaubteUebergaenge() {
+    void forbiddenTransitions() {
         assertFalse(StatusTransitions.isAllowed(NEW, REFUNDED));
         assertFalse(StatusTransitions.isAllowed(APPROVED, NEW));
         assertFalse(StatusTransitions.isAllowed(RECEIVED, ACCEPTED));
@@ -26,7 +26,7 @@ class StatusTransitionsTest {
     }
 
     @Test
-    void ausClosedGehtNichts() {
+    void nothingLeavesClosed() {
         for (ReturnStatus to : ReturnStatus.values()) {
             assertFalse(StatusTransitions.isAllowed(CLOSED, to));
         }

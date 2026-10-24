@@ -6,7 +6,21 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 
-/** Welche Statuswechsel erlaubt sind (siehe aufgabenanalyse.md, 5.3). */
+/**
+ * Defines which status changes are allowed (see TASK-ANALYSIS.md, section 5.3). Everything else is rejected, for
+ * example {@code NEW -> REFUNDED}: money must not be refunded before the article was inspected.
+ *
+ * <pre>
+ * NEW -> APPROVED | REJECTED | IN_REVIEW      IN_REVIEW -> APPROVED | REJECTED
+ * APPROVED -> LABEL_SENT -> RECEIVED | EXPIRED
+ * RECEIVED -> INSPECTED -> ACCEPTED | REJECTED | MANUAL_REVIEW
+ * MANUAL_REVIEW -> ACCEPTED | REJECTED
+ * ACCEPTED -> REFUNDED -> CLOSED              REJECTED | EXPIRED -> CLOSED
+ * </pre>
+ *
+ * <p>Java note: an {@link EnumMap} is a map whose keys are enum values; it is fast and keeps the order of the
+ * enum. {@code Set.of(...)} creates an unchangeable set.
+ */
 public final class StatusTransitions {
 
     private static final Map<ReturnStatus, Set<ReturnStatus>> ALLOWED = new EnumMap<>(ReturnStatus.class);
@@ -27,6 +41,7 @@ public final class StatusTransitions {
     }
 
     private StatusTransitions() {
+        // utility class: only static methods, no objects needed
     }
 
     public static boolean isAllowed(ReturnStatus from, ReturnStatus to) {

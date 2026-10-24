@@ -1,26 +1,29 @@
-# ShopEasy – Digitalisierung der Retourenabwicklung
+# ShopEasy – Digitalising the Returns Process
 
-Projekt im Modul „Digitalisierung von Geschäftsprozessen" (HKA, WS 2026/27, Prof. Dr. Heberle).
-Ziel: Konzept und Prototypen für die digitalisierte Retourenabwicklung der ShopEasy GmbH.
+Project in the module "Digitalisierung von Geschäftsprozessen" (HKA, WS 2026/27, Prof. Dr. Heberle).
+Goal: concept and prototypes for the digitalised returns process of ShopEasy GmbH.
+
+**Language:** the Sprint 1 documents are in German (as handed in). From Sprint 2 on, all documentation, code comments and program output are in English.
 
 ## Sprints
 
-| Sprint | Zeitraum | Inhalt | Ordner |
+| Sprint | Period | Content | Folder |
 |---|---|---|---|
-| 1 | 6.–20.10. | BPM: Ist-/Soll-BPMN, Schwachstellen, KPI-Katalog | `sprint1-bpm/` |
-| 2 | 20.10.–3.11. | Integration: REST-Mock, gRPC, Messaging | `sprint2-integration/` |
-| 3 | 3.–17.11. | Process Mining (Celonis) | `sprint3-mining/` |
-| 4 | 17.11.–8.12. | Ausführbarer Workflow (Camunda) | `sprint4-workflow/` |
-| 5 | 8.12.–12.1. | RPA (UiPath) & AI-Agent (n8n) | `sprint5-rpa-ai/` |
-| 6 | 12.–26.1. | Zusammenführung & Dokumentation | `sprint6-abschluss/` |
+| 1 | 6.–20.10. | BPM: as-is/target BPMN, weakness analysis, KPI catalogue | `sprint1-bpm/` |
+| 2 | 20.10.–3.11. | Integration: REST mock, gRPC, messaging | `sprint2-integration/` |
+| 3 | 3.–17.11. | Process mining (Celonis) | `sprint3-mining/` |
+| 4 | 17.11.–8.12. | Executable workflow (Camunda) | `sprint4-workflow/` |
+| 5 | 8.12.–12.1. | RPA (UiPath) & AI agent (n8n) | `sprint5-rpa-ai/` |
+| 6 | 12.–26.1. | Integration & documentation | `sprint6-abschluss/` |
 
-## Weitere Dokumente
+## More documents
 
-- [Project Charter](docs/00-project-charter.md)
-- [Sprint-1-Bericht](sprint1-bpm/sprint1-bericht.md) mit Diagrammen: [Ist-Prozess](sprint1-bpm/ist-prozess.png), [Soll-Prozess](sprint1-bpm/soll-prozess.png)
-- Die Modelle in `sprint1-bpm/` werden im Camunda Modeler gepflegt; die Diagramme (PNG) werden dort exportiert (Datei → Export as Image).
-- [KI-Nutzung (Pflichtdokumentation)](AI-USAGE.md): Übersicht, je Sprint eine Datei `AI-USAGE.md` im Sprint-Ordner
+- [Project charter](docs/00-PROJECT-CHARTER.md)
+- [Sprint 1 report](sprint1-bpm/SPRINT1-BERICHT.md) with diagrams: [as-is process](sprint1-bpm/ist-prozess.png), [target process](sprint1-bpm/soll-prozess.png)
+- The models in `sprint1-bpm/` are maintained in the Camunda Modeler; the diagrams (PNG) are exported there (File → Export as Image).
+- [Sprint 2: README](sprint2-integration/README.md), [task analysis](sprint2-integration/TASK-ANALYSIS.md), [demo script](sprint2-integration/DEMO-SCRIPT.md)
+- [AI use (mandatory documentation)](AI-USAGE.md): overview, one `AI-USAGE.md` file per sprint folder
 
-## Hinweis
+## Note
 
-Jede Nutzung von KI-Werkzeugen wird in der `AI-USAGE.md` des jeweiligen Sprints dokumentiert (Übersicht: `AI-USAGE.md`).
+Every use of AI tools is documented in the `AI-USAGE.md` of the respective sprint (overview: `AI-USAGE.md`).

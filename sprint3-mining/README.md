@@ -1,3 +1,3 @@
 # sprint3-mining
 
-Platzhalter – wird im jeweiligen Sprint befüllt.
+Placeholder – filled in during the sprint. Write all documentation in English.

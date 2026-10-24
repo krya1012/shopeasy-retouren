@@ -7,8 +7,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Welche Statuswechsel erlaubt sind (siehe aufgabenanalyse.md, 5.3). Eigene Kopie der Tabelle aus dem
- * messaging-consumer, es gibt bewusst keinen gemeinsamen Code zwischen den Modulen.
+ * Defines which status changes are allowed (see TASK-ANALYSIS.md, section 5.3). This is the REST mock's own copy
+ * of the table in the messaging-consumer; there is no shared code between the modules on purpose.
+ *
+ * <p>Java note: an {@link EnumMap} is a map whose keys are enum values. {@code Set.of(...)} creates a set that
+ * cannot be changed.
  */
 final class StatusTransitions {
 
@@ -30,6 +33,7 @@ final class StatusTransitions {
     }
 
     private StatusTransitions() {
+        // utility class: only static methods
     }
 
     static boolean isAllowed(ReturnStatus from, ReturnStatus to) {

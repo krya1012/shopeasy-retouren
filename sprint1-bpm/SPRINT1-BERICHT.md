@@ -3,9 +3,9 @@
 ## Inhalt der Abgabe
 - `sprint1-bpm/ist-prozess.bpmn` – Ist-Prozess, drei Eingangskanäle (Webshop, Marktplatz, E-Mail), drei Lanes und zwei externe Pools (Kund:in, Marktplatz); Bild: [`ist-prozess.png`](ist-prozess.png)
 - `sprint1-bpm/soll-prozess.bpmn` – Soll-Prozess mit Umsetzungsart je Aktivität; Bild: [`soll-prozess.png`](soll-prozess.png)
-- `sprint1-bpm/schwachstellenanalyse.md`
-- `sprint1-bpm/kpi-katalog.md` – KPI-Katalog nach Christian Sticker (K1–K11) mit zwei Ergänzungen (K12, K13), Verknüpfung mit den Schwachstellen und Vorlage für Sprint 3
-- `sprint1-bpm/soll-prozess-realisierung.md` – Begründung der Umsetzungsart je Soll-Aktivität
+- `sprint1-bpm/SCHWACHSTELLENANALYSE.md`
+- `sprint1-bpm/KPI-KATALOG.md` – KPI-Katalog nach Christian Sticker (K1–K11) mit zwei Ergänzungen (K12, K13), Verknüpfung mit den Schwachstellen und Vorlage für Sprint 3
+- `sprint1-bpm/SOLL-PROZESS-REALISIERUNG.md` – Begründung der Umsetzungsart je Soll-Aktivität
 
 ![Ist-Prozess](ist-prozess.png)
 
@@ -33,7 +33,7 @@ Die beteiligten Systeme aus der Aufgabenstellung (Webshop-Frontend, Marktplatz-P
 
 ![Soll-Prozess](soll-prozess.png)
 
-Die Wahl der Umsetzungsart je Aktivität (mit Begründung, verworfener Alternative und Fehlerfall) steht in `sprint1-bpm/soll-prozess-realisierung.md`. Von 22 Aufgaben laufen 16 automatisch und 6 sind menschlich. Im Normalfall (Webshop, Annahme) sind es 11 von 12 Aufgaben automatisch; nur die Zustandsprüfung am Wareneingang bleibt bei einer Person. Der Mensch ist die Rückfallebene für Ausfälle und Ausnahmen.
+Die Wahl der Umsetzungsart je Aktivität (mit Begründung, verworfener Alternative und Fehlerfall) steht in `sprint1-bpm/SOLL-PROZESS-REALISIERUNG.md`. Von 22 Aufgaben laufen 16 automatisch und 6 sind menschlich. Im Normalfall (Webshop, Annahme) sind es 11 von 12 Aufgaben automatisch; nur die Zustandsprüfung am Wareneingang bleibt bei einer Person. Der Mensch ist die Rückfallebene für Ausfälle und Ausnahmen.
 
 ## Umsetzungsarten im Soll-Prozess
 

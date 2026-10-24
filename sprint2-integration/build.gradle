@@ -1,4 +1,5 @@
-// Gemeinsame Einstellungen für alle vier Module.
+// Settings shared by all four modules (Gradle basics: a "subproject" is one module with its own build.gradle;
+// this file adds the common parts so they are not repeated four times).
 subprojects {
     apply plugin: 'java'
 
@@ -20,7 +21,7 @@ subprojects {
 
     tasks.withType(Test).configureEach {
         useJUnitPlatform()
-        // Jeden Test mit Namen ausgeben (gut für die Vorführung): ./gradlew test --rerun
+        // Print every test with its name (good for the demo): ./gradlew test --rerun
         testLogging {
             events 'passed', 'failed', 'skipped'
             exceptionFormat 'full'

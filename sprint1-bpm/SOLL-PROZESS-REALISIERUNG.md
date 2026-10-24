@@ -1,6 +1,6 @@
 # Soll-Prozess: Realisierung der Schritte
 
-Bezug: `sprint1-bpm/soll-prozess.bpmn` (Spalte „ID“ nennt die Elemente im Diagramm) und `sprint1-bpm/schwachstellenanalyse.md` (W-Nummern). Im Diagramm sind die Aufgaben nach Umsetzungsart eingefärbt: **blau** System/Service/Messaging, **grün** Regeln (DMN), **orange** Mensch, **violett** Software-Roboter (RPA), **rot** KI. Die Legende steht im Diagramm.
+Bezug: `sprint1-bpm/soll-prozess.bpmn` (Spalte „ID“ nennt die Elemente im Diagramm) und `sprint1-bpm/SCHWACHSTELLENANALYSE.md` (W-Nummern). Im Diagramm sind die Aufgaben nach Umsetzungsart eingefärbt: **blau** System/Service/Messaging, **grün** Regeln (DMN), **orange** Mensch, **violett** Software-Roboter (RPA), **rot** KI. Die Legende steht im Diagramm.
 
 ## 1. Entscheidungsregeln
 

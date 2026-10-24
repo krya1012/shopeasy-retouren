@@ -2,7 +2,7 @@ package de.shopeasy.grpc.client;
 
 import io.grpc.Status;
 
-/** Fehler beim Aufruf des Service, mit gRPC-Statuscode und verständlicher Meldung. */
+/** Error when calling the service, with the gRPC status code and a readable message. */
 public class ConditionClientException extends RuntimeException {
 
     private final Status.Code code;

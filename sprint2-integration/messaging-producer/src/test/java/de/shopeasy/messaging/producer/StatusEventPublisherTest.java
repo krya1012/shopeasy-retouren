@@ -26,7 +26,10 @@ import org.springframework.amqp.core.ReturnedMessage;
 
 import tools.jackson.databind.json.JsonMapper;
 
-/** Der Publisher wird mit einem Attrappen-RabbitTemplate getestet, der Broker antwortet, wie wir es vorgeben. */
+/**
+ * Tests the publisher with a fake {@link RabbitTemplate} (a "mock" made with Mockito), so no real broker is needed.
+ * In every test we decide how the "broker" answers: confirm, reject, return the message, or not reachable.
+ */
 class StatusEventPublisherTest {
 
     private RabbitTemplate rabbit;
@@ -38,6 +41,7 @@ class StatusEventPublisherTest {
         publisher = new StatusEventPublisher(rabbit, JsonMapper.builder().build(), 1);
     }
 
+    /** Makes the fake template complete the confirmation future with the given answer when a message is sent. */
     private void brokerAnswers(CorrelationData.Confirm confirm) {
         doAnswer(call -> {
             call.<CorrelationData>getArgument(3).getFuture().complete(confirm);
@@ -46,14 +50,14 @@ class StatusEventPublisherTest {
     }
 
     @Test
-    void sendetEventAlsPersistentesJsonMitRoutingKey() {
+    void sendsEventAsPersistentJsonWithRoutingKey() {
         brokerAnswers(new CorrelationData.Confirm(true, null));
         StatusEvent event = StatusEvent.of("RET-1", ReturnStatus.NEW, ReturnStatus.APPROVED);
 
         publisher.publish(event);
 
         ArgumentCaptor<Message> sent = ArgumentCaptor.forClass(Message.class);
-        verify(rabbit).send(eq("retouren.status"), eq("retoure.status.APPROVED"), sent.capture(),
+        verify(rabbit).send(eq("returns.status"), eq("return.status.APPROVED"), sent.capture(),
                 any(CorrelationData.class));
         String body = new String(sent.getValue().getBody(), StandardCharsets.UTF_8);
         assertTrue(body.contains("\"eventId\":\"" + event.eventId() + "\""), body);
@@ -66,42 +70,42 @@ class StatusEventPublisherTest {
     }
 
     @Test
-    void brokerLehntAbDannFehler() {
-        brokerAnswers(new CorrelationData.Confirm(false, "kein Platz"));
+    void brokerRejectsThenError() {
+        brokerAnswers(new CorrelationData.Confirm(false, "no space"));
         EventNotDeliveredException e = assertThrows(EventNotDeliveredException.class,
                 () -> publisher.publish(StatusEvent.of("RET-1", ReturnStatus.NEW, ReturnStatus.APPROVED)));
-        assertTrue(e.getMessage().contains("kein Platz"));
+        assertTrue(e.getMessage().contains("no space"));
     }
 
     @Test
-    void keineQueueNimmtDieNachrichtAnDannFehler() {
+    void noQueueAcceptsTheMessageThenError() {
         doAnswer(call -> {
             Message message = call.getArgument(2);
             CorrelationData correlation = call.getArgument(3);
-            correlation.setReturned(new ReturnedMessage(message, 312, "NO_ROUTE", "retouren.status", "x"));
+            correlation.setReturned(new ReturnedMessage(message, 312, "NO_ROUTE", "returns.status", "x"));
             correlation.getFuture().complete(new CorrelationData.Confirm(true, null));
             return null;
         }).when(rabbit).send(any(String.class), any(String.class), any(Message.class), any(CorrelationData.class));
 
         EventNotDeliveredException e = assertThrows(EventNotDeliveredException.class,
                 () -> publisher.publish(StatusEvent.of("RET-1", ReturnStatus.NEW, ReturnStatus.APPROVED)));
-        assertTrue(e.getMessage().contains("Keine Queue"));
+        assertTrue(e.getMessage().contains("No queue"));
     }
 
     @Test
-    void brokerNichtErreichbarDannDreiVersucheUndFehler() {
+    void brokerNotReachableThenThreeAttemptsAndError() {
         doThrow(new AmqpConnectException(new ConnectException("Connection refused")))
                 .when(rabbit).send(any(String.class), any(String.class), any(Message.class), any(CorrelationData.class));
 
         EventNotDeliveredException e = assertThrows(EventNotDeliveredException.class,
                 () -> publisher.publish(StatusEvent.of("RET-1", ReturnStatus.NEW, ReturnStatus.APPROVED)));
-        assertTrue(e.getMessage().contains("3 Versuchen"));
+        assertTrue(e.getMessage().contains("3 attempts"));
         verify(rabbit, times(3)).send(any(String.class), any(String.class), any(Message.class),
                 any(CorrelationData.class));
     }
 
     @Test
-    void unterbrochenerThreadBrichtOhneWeitereVersucheAb() {
+    void interruptedThreadStopsWithoutMoreAttempts() {
         doThrow(new AmqpConnectException(new ConnectException("Connection refused")))
                 .when(rabbit).send(any(String.class), any(String.class), any(Message.class), any(CorrelationData.class));
 
@@ -109,17 +113,17 @@ class StatusEventPublisherTest {
         try {
             EventNotDeliveredException e = assertThrows(EventNotDeliveredException.class,
                     () -> publisher.publish(StatusEvent.of("RET-1", ReturnStatus.NEW, ReturnStatus.APPROVED)));
-            assertTrue(e.getMessage().contains("abgebrochen"));
-            assertTrue(Thread.currentThread().isInterrupted(), "Das Abbruch-Zeichen bleibt gesetzt");
+            assertTrue(e.getMessage().contains("interrupted"));
+            assertTrue(Thread.currentThread().isInterrupted(), "The interrupt flag stays set");
         } finally {
-            Thread.interrupted(); // Zeichen löschen, damit andere Tests nicht gestört werden
+            Thread.interrupted(); // clear the flag so other tests are not disturbed
         }
         verify(rabbit, times(1)).send(any(String.class), any(String.class), any(Message.class),
                 any(CorrelationData.class));
     }
 
     @Test
-    void zweiterVersuchKlapptDannKeinFehler() {
+    void secondAttemptWorksThenNoError() {
         brokerAnswers(new CorrelationData.Confirm(true, null));
         doThrow(new AmqpConnectException(new ConnectException("Connection refused")))
                 .doAnswer(call -> {

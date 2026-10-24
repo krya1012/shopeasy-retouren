@@ -8,11 +8,17 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Verbindet die Queues mit den Handlern. Gelingt die Verarbeitung, bestätigt Spring die Nachricht (ack).
- * Versteht ein Handler die Nachricht nicht, lehnen wir sie ohne erneute Zustellung ab (reject). Der Broker legt
- * sie dann in die Fehler-Queue, und der Consumer bleibt nicht an ihr hängen.
- * Aus der Fehler-Queue liest absichtlich niemand: Die Nachrichten bleiben liegen, bis eine Person sie prüft
- * (in der RabbitMQ-Oberfläche unter "Get messages").
+ * Connects the queues with the handlers. Spring starts a listener for every method marked with
+ * {@code @RabbitListener}; Spring calls the method for each message that arrives in the queue.
+ *
+ * <p><b>How acknowledging works:</b> if the method ends normally, Spring confirms the message (ack) and RabbitMQ
+ * removes it from the queue. If the method throws an exception, the message is not confirmed. We throw
+ * {@link AmqpRejectAndDontRequeueException}, which means "reject it and do not deliver it again". RabbitMQ then
+ * moves the message to the dead letter queue (configured in {@link RabbitConfig}), and the consumer does not get
+ * stuck on a message it can never understand.
+ *
+ * <p>Nobody reads from the dead letter queue on purpose: the messages stay there until a person checks them
+ * (RabbitMQ web page, "Get messages").
  */
 @Component
 public class StatusListeners {
@@ -27,22 +33,24 @@ public class StatusListeners {
         this.customerInfo = customerInfo;
     }
 
-    @RabbitListener(queues = RabbitConfig.QUEUE_VERWALTUNG)
+    /** Receives every status change from the management queue. */
+    @RabbitListener(queues = RabbitConfig.QUEUE_MANAGEMENT)
     void onStatusEvent(Message message) {
         try {
             statusUpdate.handle(message.getBody());
         } catch (InvalidEventException e) {
-            LOG.warn("Verwaltung lehnt Nachricht ab: {}", e.getMessage());
+            LOG.warn("Management rejects message: {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
         }
     }
 
-    @RabbitListener(queues = RabbitConfig.QUEUE_KUNDENINFO)
+    /** Receives only the status changes customers are informed about. */
+    @RabbitListener(queues = RabbitConfig.QUEUE_CUSTOMER_INFO)
     void onCustomerEvent(Message message) {
         try {
             customerInfo.handle(message.getBody());
         } catch (InvalidEventException e) {
-            LOG.warn("Kundeninfo lehnt Nachricht ab: {}", e.getMessage());
+            LOG.warn("Customer info rejects message: {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
         }
     }

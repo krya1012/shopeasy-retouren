@@ -1,6 +1,12 @@
 package de.shopeasy.messaging.consumer;
 
-/** Der Consumer versteht die Nachricht nicht oder sie ist fachlich falsch. Sie kommt in die Fehler-Queue. */
+/**
+ * The consumer does not understand a message, or the message is wrong from a business point of view
+ * (for example a forbidden status change). Such a message is rejected and goes to the dead letter queue.
+ *
+ * <p>It extends {@link RuntimeException}, an "unchecked" exception: methods do not have to declare it with
+ * {@code throws}.
+ */
 public class InvalidEventException extends RuntimeException {
 
     public InvalidEventException(String message) {

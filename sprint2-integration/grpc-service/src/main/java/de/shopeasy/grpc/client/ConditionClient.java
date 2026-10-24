@@ -16,13 +16,17 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
 /**
- * Client für den ArticleConditionService.
+ * Client for the ArticleConditionService.
  *
- * <p>Fehlerbehandlung: Jeder Aufruf hat eine Frist. Bei UNAVAILABLE (Service kurz nicht erreichbar) wird
- * bis zu dreimal wiederholt. Alle anderen Fehler wiederholt man nicht, weil sie beim nächsten Mal wieder
- * auftreten (falsche Daten), die Wiederholung etwas Falsches bewirken würde (Duplikat) oder die Prüfung beim
- * Service eventuell schon gespeichert ist (Frist überschritten).
- * Am Ende wird eine {@link ConditionClientException} mit verständlicher Meldung geworfen.
+ * <p><b>gRPC basics:</b> a {@link Channel} is the connection to the server. A <i>stub</i> is a generated object
+ * that has one Java method per service method; calling it sends the request over the channel. A <i>blocking</i>
+ * stub waits until the answer is there. A <i>deadline</i> is the latest time we wait for an answer; after that
+ * the call fails with {@code DEADLINE_EXCEEDED}.
+ *
+ * <p><b>Error handling:</b> every call has a deadline. On UNAVAILABLE (service briefly not reachable) the call is
+ * repeated up to three times. Other errors are not repeated: wrong data stays wrong, repeating could cause
+ * something wrong (a duplicate), and after a missed deadline the service may have stored the check already.
+ * In the end a {@link ConditionClientException} with a readable message is thrown.
  */
 public class ConditionClient {
 
@@ -38,7 +42,7 @@ public class ConditionClient {
         this(channel, DEFAULT_DEADLINE_MILLIS);
     }
 
-    /** Die Frist ist einstellbar, damit Tests schnell bleiben. */
+    /** The deadline can be set, so tests stay fast. */
     public ConditionClient(Channel channel, long deadlineMillis) {
         this.stub = ArticleConditionServiceGrpc.newBlockingStub(channel);
         this.deadlineMillis = deadlineMillis;
@@ -58,6 +62,10 @@ public class ConditionClient {
                 GetCheckResultRequest.newBuilder().setReturnId(returnId).setSku(sku).build()));
     }
 
+    /**
+     * Runs one remote call with a deadline and the retry rule. The call is passed in as a function
+     * ({@code s -> s.checkCondition(...)}), so retry and error handling exist only once for all three methods.
+     */
     private <T> T call(Function<ArticleConditionServiceBlockingStub, T> rpc) {
         for (int attempt = 1; ; attempt++) {
             try {
@@ -67,23 +75,24 @@ public class ConditionClient {
                 if (!retry) {
                     throw translate(e, attempt);
                 }
-                LOG.warning("Service nicht verfügbar, neuer Versuch " + (attempt + 1) + " von " + MAX_ATTEMPTS);
+                LOG.warning("Service unavailable, attempt " + (attempt + 1) + " of " + MAX_ATTEMPTS);
                 sleep(BACKOFF_MILLIS * attempt);
             }
         }
     }
 
+    /** Turns a gRPC error into an exception with a message a person can understand. */
     private ConditionClientException translate(StatusRuntimeException e, int attempts) {
         Status status = e.getStatus();
         String detail = status.getDescription() == null ? "" : status.getDescription();
         String message = switch (status.getCode()) {
-            case INVALID_ARGUMENT -> "Falsche Daten: " + detail;
-            case ALREADY_EXISTS -> "Doppelte Anfrage: " + detail;
-            case NOT_FOUND -> "Nicht gefunden: " + detail;
-            case UNAVAILABLE -> "Service nach " + attempts + " Versuchen nicht erreichbar: " + detail;
-            case DEADLINE_EXCEEDED -> "Zeitüberschreitung, keine Antwort innerhalb von " + deadlineMillis
-                    + " ms (die Prüfung kann beim Service trotzdem gespeichert sein, nicht blind wiederholen)";
-            default -> "Unerwarteter Fehler (" + status.getCode() + "): " + detail;
+            case INVALID_ARGUMENT -> "Invalid data: " + detail;
+            case ALREADY_EXISTS -> "Duplicate request: " + detail;
+            case NOT_FOUND -> "Not found: " + detail;
+            case UNAVAILABLE -> "Service not reachable after " + attempts + " attempts: " + detail;
+            case DEADLINE_EXCEEDED -> "Timeout, no answer within " + deadlineMillis
+                    + " ms (the service may have stored the check anyway, do not repeat blindly)";
+            default -> "Unexpected error (" + status.getCode() + "): " + detail;
         };
         return new ConditionClientException(status.getCode(), message, e);
     }
@@ -93,7 +102,7 @@ public class ConditionClient {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new ConditionClientException(Status.Code.CANCELLED, "Abgebrochen", e);
+            throw new ConditionClientException(Status.Code.CANCELLED, "Cancelled", e);
         }
     }
 }

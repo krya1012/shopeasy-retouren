@@ -2,13 +2,13 @@ package de.shopeasy.grpc;
 
 import java.time.Instant;
 
-/** Hilfsmethoden, damit die Tests kurz bleiben. */
+/** Helper methods that keep the tests short. */
 final class TestRequests {
 
     private TestRequests() {
     }
 
-    /** Standard: Originalverpackung vorhanden. */
+    /** Default: original packaging present. */
     static ConditionCheckRequest request(String returnId, String sku, ObservedCondition condition, boolean tags) {
         return request(returnId, sku, condition, tags, true);
     }
