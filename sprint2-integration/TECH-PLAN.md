@@ -1,13 +1,6 @@
 # Plan v2: Sprint 2 (ShopEasy Retouren) aligned with the FZI HiWi role — analysis and revision
 
 ## Context
-The FZI posting (Vacancy 382, IT Services) is a student-assistant role in web development. It covers:
-- the FZI SelfService System (PHP/Laravel backend, Vue.js frontend)
-- the Identity Management System (same stack)
-- bringing CI/CD into the development process
-
-Requirements: PHP, HTML/CSS/JS, good German and English, working independently and in a structured way. Nice to have: Laravel, Vue.js.
-
 Sprint 2 lives in `sprint2-integration/`: four Java 21 / Spring Boot 4 modules with 69 green tests.
 - Due: 3.11. 11:30, ILIAS.
 - Graded: messaging, gRPC and code quality. A UI is not graded.
