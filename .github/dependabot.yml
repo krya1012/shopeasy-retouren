@@ -13,6 +13,11 @@ updates:
     directory: /sprint2-integration/selfservice-portal
     schedule:
       interval: weekly
+    ignore:
+      # TypeScript 7 breaks the Vue SFC compiler (@vue/compiler-sfc 3.5.x cannot resolve imported
+      # types such as "interface Props extends PrimitiveProps"). Remove this when Vue supports it.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
