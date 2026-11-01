@@ -14,6 +14,7 @@ The code was written with Claude Code (co-author Yaraslau Krautsou). Yaraslau Kr
 
 ## Requirements
 
+- **Run every command in the folder `sprint2-integration`** (`cd ~/Documents/HKA/DVG_2026-WS/shopeasy-retouren/sprint2-integration`); `./gradlew` exists only there. Which window and browser tab each command needs is explained in [DEMO-SCRIPT.md](DEMO-SCRIPT.md), section "Where and what to run".
 - Java 21 or newer. Gradle is downloaded by `./gradlew`, no own installation needed.
 - For the messaging: a container program (Podman or Docker).
 - For the portal only: PHP 8.4 or newer with Composer, and Node.js 22 or newer.
