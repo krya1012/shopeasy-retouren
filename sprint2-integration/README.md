@@ -2,7 +2,7 @@
 
 Three small programs that will be used in the process later. Each has a client to try it out. A fourth part, a self-service portal (Laravel + Vue), applies the status events to the REST mock and shows the returns. The task is in `Aufgabe DvG WS26_Sprint 2.pdf`, the analysis is in [TASK-ANALYSIS.md](TASK-ANALYSIS.md). AI use: [AI-USAGE.md](AI-USAGE.md).
 
-The code was written with Claude Code (co-author Yaraslau Krautsou) and is **not yet reviewed by the team**. Yaraslau Krautsou chose the language (Java with Spring Boot) and the broker (RabbitMQ) on 22.10.2026; the team has not agreed yet. The portal in `selfservice-portal/` uses PHP (Laravel) and Vue, which the team has not agreed on either.
+The code was written with Claude Code (co-author Yaraslau Krautsou). Yaraslau Krautsou chose the language (Java with Spring Boot) and the broker (RabbitMQ) on 22.10.2026, and PHP (Laravel) and Vue for the portal in `selfservice-portal/`. No confirmation from the team is needed (decision of 01.11.2026).
 
 | Folder | Program | Link to the target process (Sprint 1, labels are German) |
 |---|---|---|
@@ -78,7 +78,7 @@ The client can also make single calls (the server must be running; use the envir
 
 The interface is the lecturer's `.proto` (`grpc-service/src/main/proto/article_condition_service.proto`). **Only change:** two `option java_...` lines, so the generated code is placed in a package. Service, messages and fields are unchanged. The lecturer confirmed this is fine. (The comments in the `.proto` are the lecturer's German originals.)
 
-Rules of the check (proposal, to be agreed by the team):
+Rules of the check (decided by Yaraslau Krautsou, 01.11.2026):
 
 | Condition | Other data | Decision | Score |
 |---|---|---|---|
@@ -156,7 +156,7 @@ Required fields are `eventId`, `returnId`, `oldStatus`, `newStatus` and `occurre
 
 The formal definition is the JSON Schema [`contracts/status-event.schema.json`](contracts/status-event.schema.json). It lists the allowed status values and has an optional `schemaVersion` for later changes. The PHP consumer of the self-service portal validates every message against this file.
 
-### Allowed status changes (proposal, to be agreed by the team)
+### Allowed status changes (decided by Yaraslau Krautsou, 01.11.2026)
 
 ```
 NEW → APPROVED | REJECTED | IN_REVIEW
@@ -280,7 +280,7 @@ Checked against `Aufgabe DvG WS26_Sprint 2.pdf`, slide by slide:
 | 12 | best practices, document AI | REST with version path, plural, status codes, ProblemDetail and OpenAPI; AI in `AI-USAGE.md` |
 
 Deliberate limits:
-- The Java consumer keeps the status in its own memory and does not call the REST mock. The PHP consumer of the portal does (section 4). A change that a clerk makes in the portal is not sent as an event, so the Java consumer does not see it. Joining all parts is the job of the workflow (Sprint 4).
+- The Java consumer keeps the status in its own memory and does not call the REST mock. The PHP consumer of the portal does (section 4). A change that a clerk makes in the portal is not sent as an event, so the Java consumer does not see it. This is deliberate (decision of 01.11.2026): each component works on its own and the workflow joins them in Sprint 4. If the lecturer wants the Java consumer to write the status, a `ReturnStatusGateway` (in-memory by default, REST behind a Spring profile) is the planned change, see [TASK-ANALYSIS.md](TASK-ANALYSIS.md) section 7, question 4.
 - The gRPC service does not use `image_urls` and `inspector_note`. The rules do not need them. `original_packaging` only lowers the score (no rejection, because the original packaging is no condition for taking a return back).
 
 ## Mapping to the grading aspects
