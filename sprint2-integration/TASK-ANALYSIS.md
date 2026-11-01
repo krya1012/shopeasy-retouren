@@ -2,7 +2,7 @@
 
 Sources: `Aufgabe DvG WS26_Sprint 2.pdf` (Prof. Heberle) and `article_condition_service.proto` (now in `grpc-service/src/main/proto/`, extended there by two Java options only). The implementation is described in the [README](README.md). Deadline: **3.11.2026, 11:30 in ILIAS**.
 
-Everything marked "proposal" is a proposal of the AI and must be agreed by the team (checklist in `AI-USAGE.md`). Names of process steps from Sprint 1 are in German, as in the models.
+Everything marked "proposal" was proposed by the AI and is decided by Yaraslau Krautsou (01.11.2026). No confirmation from the team is needed (checklist in `AI-USAGE.md`). Names of process steps from Sprint 1 are in German, as in the models.
 
 ## 1. What we build
 
@@ -121,14 +121,14 @@ Added during the implementation (also a proposal): `IN_REVIEW → APPROVED | REJ
 - The three decisions of the gRPC service match the three paths after the gateway "Ergebnis?" (`gw2`): acceptance, rejection, borderline case. A borderline case goes to "Grenzfall prüfen & Entscheidung dokumentieren" (`t_man2`).
 - The messaging steps (`t_notify`, `t_notify_in`, `t_end_notify`) send status messages.
 
-**Does not fit completely** (the models stay unchanged; they are our own work, the team decides and adapts them in Sprint 4 when the executable workflow is built):
+**Does not fit completely** (the models stay unchanged; they are our own work and are adapted in Sprint 4 when the executable workflow is built):
 - In `SOLL-PROZESS-REALISIERUNG.md` the gRPC service "books" the condition in the WMS (`t_gr_rec`) and delivers the message "Paket eingetroffen" (`ev_arrive`). According to the task it **judges** the condition and gives a recommendation. The decision is still made by the rule `t_decide`.
 - According to the task the REST mock is **polled** (the workflow fetches the reports). The model shows an incoming message.
 - Proposal: we change the models only in Sprint 4, when the executable workflow is built. Until then the difference is documented here.
 
 ## 7. Questions to the lecturer
 
-The lecturer answered questions 1 to 3; questions 4 to 6 are still open.
+The lecturer answered questions 1 to 3. Questions 4 to 6 are decided by us (01.11.2026, Yaraslau Krautsou); the lecturer can still object.
 
 1. The grading slide mentions "payment" and "invoices". May we transfer the aspects by meaning: an event for the status of a return instead of payment, the condition check of an article instead of invoice capture?
    **Answer: this is an old slide, just ignore it.**
@@ -137,12 +137,15 @@ The lecturer answered questions 1 to 3; questions 4 to 6 are still open.
 3. REST mock: the example only shows return reports. For the order data (call by `orderId`) we designed our own format. Are there requirements, or is it free?
    **Answer: we can choose our own sensible format.**
 4. Decoupling: the consumer keeps the status in its own memory and does not call the REST mock. The systems are connected only in the workflow (Sprint 4). Is this wanted, or should the consumer already update the status in the REST mock now?
+   **Our decision: yes, the Java consumer stays decoupled.** Reasons: (a) the task asks for three components that "can be used later in the process", so each must work on its own, and joining them is the job of the workflow in Sprint 4 (job workers); (b) a consumer that calls the REST API adds a failure mode (mock down, 404, 409) and a coupling the task did not ask for, and the grading aspect is "decoupling of the systems"; (c) the graded Java parts keep all their tested error handling without extra HTTP code; (d) the joined flow is still shown, by the optional PHP consumer of the portal (README section 4, demo scene 3b). Known weak point: the state of the Java consumer is in memory. **Fallback if the lecturer wants the consumer to write the status:** a small `ReturnStatusGateway` in `messaging-consumer` (in-memory by default, REST version behind a Spring profile), about half a day.
 5. Hand-in: we show the scenarios live in the 20-minute meeting (steps in `DEMO-SCRIPT.md`). What do we upload to ILIAS, is the link to the GitHub repository enough? Under which GitHub name do we invite the lecturer as a member?
+   **Our decision:** we upload `AI-USAGE.md` of Sprint 2 to ILIAS. It contains the link to the GitHub repository (block "Hand-in" at the top). The repository is **private**: before the meeting the lecturer must be invited as a collaborator (GitHub name still unknown) or the repository must be made public.
 6. From Sprint 1, still open: from when does the return period "8–12 days" count, and in calendar days or working days?
+   **Our decision:** not needed for Sprint 2. It is resolved in a future sprint.
 
-## 8. Open in the team
+## 8. Decisions and what we still do
 
-- Programming language and broker: **Java (Spring Boot) and RabbitMQ**, chosen by Yaraslau Krautsou on 22.10.2026. The team has not agreed yet. We must be able to explain the code.
-- Distribute the work: the code for all three programs exists (Claude Code, co-author Yaraslau Krautsou). Open is who reads it, tries it out and presents it later (see the checklist in `AI-USAGE.md`).
-- Check whether the status changes in 5.3 and the rules in 5.1 fit.
-- Presentation in the 20-minute meeting: who shows which part is still open (table in `DEMO-SCRIPT.md`). The team rehearses the demo once completely before.
+- Programming language and broker: **Java (Spring Boot) and RabbitMQ**, chosen by Yaraslau Krautsou on 22.10.2026. No confirmation from the team is needed. We must be able to explain the code.
+- The code for all three programs exists (Claude Code, co-author Yaraslau Krautsou). Everyone who presents reads and tries out their part (see the checklist in `AI-USAGE.md`).
+- The status changes in 5.3 and the rules in 5.1 are decided as proposed.
+- Presentation in the 20-minute meeting: the split is in the table in `DEMO-SCRIPT.md` (decided 01.11.2026). Rehearse the demo once completely before.

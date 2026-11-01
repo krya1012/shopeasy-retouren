@@ -16,7 +16,7 @@ The code was written with Claude Code (see `AI-USAGE.md`). Everyone reads their 
 | 4. Tests and code | 1 | Yaraslau Krautsou |
 | Questions and buffer | 6 (3 if 3b is shown) | everyone |
 
-Split proposed on 01.11.2026 (even split). The team confirms it or changes it here.
+Split decided on 01.11.2026 (even split). No confirmation from the team is needed.
 
 ## Intro (1 minute)
 
@@ -27,7 +27,7 @@ marketplace entry       condition check           status updates
  eingegangen (REST)"     entscheiden"
 ```
 
-**Say:** We show three small systems that come together in the workflow later (Sprint 4). Each has a client to try it out. Everything is Java with Spring Boot; the broker is RabbitMQ. In each part we first show the normal case and then the error cases.
+**Say:** We show three small systems that come together in the workflow later (Sprint 4). Each has a client to try it out. The three systems are Java with Spring Boot; the broker is RabbitMQ. The optional portal at the end (3b) is PHP with Laravel and Vue. In each part we first show the normal case and then the error cases.
 
 ## Preparation (before the meeting, about 10 minutes)
 
