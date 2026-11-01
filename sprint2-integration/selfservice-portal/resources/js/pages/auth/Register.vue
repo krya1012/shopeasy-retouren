@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Form, Head } from '@inertiajs/vue3';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
@@ -10,9 +10,9 @@ import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
 
-defineProps<{
-    passwordRules: string;
-}>();
+defineProps({
+    passwordRules: { type: String, required: true },
+});
 
 defineOptions({
     layout: {

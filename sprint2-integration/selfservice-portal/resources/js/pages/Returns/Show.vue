@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import {
@@ -18,19 +18,14 @@ import {
     statusLabels,
     statusVariant,
 } from '@/lib/returns';
-import type {
-    OrderDetail,
-    ReturnDetail,
-    StatusEventRow,
-} from '@/types/returns';
 
-const props = defineProps<{
-    return: ReturnDetail;
-    order: OrderDetail | null;
-    events: StatusEventRow[];
-    canChangeStatus: boolean;
-    nextStatuses: string[];
-}>();
+const props = defineProps({
+    return: { type: Object, required: true },
+    order: { type: [Object, null], required: true },
+    events: { type: Array, required: true },
+    canChangeStatus: { type: Boolean, required: true },
+    nextStatuses: { type: Array, required: true },
+});
 
 defineOptions({
     layout: { breadcrumbs: [{ title: 'Retouren', href: index() }] },

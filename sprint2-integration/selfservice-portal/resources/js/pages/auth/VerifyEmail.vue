@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Form, Head } from '@inertiajs/vue3';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
@@ -14,9 +14,9 @@ defineOptions({
     },
 });
 
-defineProps<{
-    status?: string;
-}>();
+defineProps({
+    status: { type: String, required: false },
+});
 </script>
 
 <template>

@@ -23,7 +23,7 @@ void createInertiaApp({
     },
     withApp: (app) => {
         app.directive('focus', {
-            mounted: (el: HTMLElement, shouldFocus) => {
+            mounted: (el, shouldFocus) => {
                 if (shouldFocus.value !== false) {
                     el.focus();
                 }

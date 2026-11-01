@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Form } from '@inertiajs/vue3';
 import { ShieldCheck } from '@lucide/vue';
 import { onUnmounted, ref } from 'vue';
@@ -9,20 +9,14 @@ import { Button } from '@/components/ui/button';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
 import { disable, enable } from '@/routes/two-factor';
 
-export type Props = {
-    canManageTwoFactor?: boolean;
-    requiresConfirmation?: boolean;
-    twoFactorEnabled?: boolean;
-};
-
-withDefaults(defineProps<Props>(), {
-    canManageTwoFactor: false,
-    requiresConfirmation: false,
-    twoFactorEnabled: false,
+defineProps({
+    canManageTwoFactor: { type: Boolean, required: false, default: false },
+    requiresConfirmation: { type: Boolean, required: false, default: false },
+    twoFactorEnabled: { type: Boolean, required: false, default: false },
 });
 
 const { hasSetupData, clearTwoFactorAuthData } = useTwoFactorAuth();
-const showSetupModal = ref<boolean>(false);
+const showSetupModal = ref(false);
 
 onUnmounted(() => clearTwoFactorAuthData());
 </script>

@@ -1,6 +1,6 @@
-<script setup lang="ts">
-import type { DialogContentEmits, DialogContentProps } from "reka-ui"
-import type { HTMLAttributes } from "vue"
+<script setup>
+
+
 import { X } from "@lucide/vue"
 import { reactiveOmit } from "@vueuse/core"
 import {
@@ -12,19 +12,24 @@ import {
 import { cn } from "@/lib/utils"
 import SheetOverlay from "./SheetOverlay.vue"
 
-interface SheetContentProps extends DialogContentProps {
-  class?: HTMLAttributes["class"]
-  side?: "top" | "right" | "bottom" | "left"
-}
+
+
+
+
 
 defineOptions({
   inheritAttrs: false,
 })
 
-const props = withDefaults(defineProps<SheetContentProps>(), {
-  side: "right",
-})
-const emits = defineEmits<DialogContentEmits>()
+const props = defineProps({
+    class: { type: [Boolean, null, String, Object, Array], required: false, skipCheck: true },
+    side: { type: String, required: false, default: "right" },
+    forceMount: { type: Boolean, required: false },
+    disableOutsidePointerEvents: { type: Boolean, required: false },
+    asChild: { type: Boolean, required: false },
+    as: { type: null, required: false }
+  })
+const emits = defineEmits(["escapeKeyDown", "pointerDownOutside", "focusOutside", "interactOutside", "openAutoFocus", "closeAutoFocus"])
 
 const delegatedProps = reactiveOmit(props, "class", "side")
 

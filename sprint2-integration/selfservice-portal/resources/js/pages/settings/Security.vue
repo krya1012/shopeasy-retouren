@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Form, Head } from '@inertiajs/vue3';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/Heading.vue';
@@ -7,18 +7,21 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/security';
-import type { Props as ManagePasskeysProps } from '@/components/ManagePasskeys.vue';
+
 import ManagePasskeys from '@/components/ManagePasskeys.vue';
-import type { Props as ManageTwoFactorProps } from '@/components/ManageTwoFactor.vue';
+
 import ManageTwoFactor from '@/components/ManageTwoFactor.vue';
 
 // oxfmt-ignore
-type Props = {
-    passwordRules: string;
-} & ManagePasskeysProps &
-    ManageTwoFactorProps;
 
-const props = defineProps<Props>();
+const props = defineProps({
+    passwordRules: { type: String, required: true },
+    canManagePasskeys: { type: Boolean, required: false },
+    passkeys: { type: Array, required: false },
+    canManageTwoFactor: { type: Boolean, required: false },
+    requiresConfirmation: { type: Boolean, required: false },
+    twoFactorEnabled: { type: Boolean, required: false }
+  });
 
 defineOptions({
     layout: {

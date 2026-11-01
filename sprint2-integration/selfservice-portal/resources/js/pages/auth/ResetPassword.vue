@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Form, Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import InputError from '@/components/InputError.vue';
@@ -16,11 +16,11 @@ defineOptions({
     },
 });
 
-const props = defineProps<{
-    token: string;
-    email: string;
-    passwordRules: string;
-}>();
+const props = defineProps({
+    token: { type: String, required: true },
+    email: { type: String, required: true },
+    passwordRules: { type: String, required: true },
+});
 
 const inputEmail = ref(props.email);
 </script>
