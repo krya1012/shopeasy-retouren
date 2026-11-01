@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shopeasy.example/schemas/return-status-changed.json",
+  "title": "ReturnStatusChanged",
+  "description": "Event: the status of a return has changed. Sent by the producer to the exchange 'returns.status' with the routing key 'return.status.<newStatus>'. Consumers (Java and PHP) validate against this file. Unknown extra fields are allowed (tolerant reader), so the event can be extended without breaking old consumers.",
+  "type": "object",
+  "required": ["eventId", "returnId", "oldStatus", "newStatus", "occurredAt"],
+  "properties": {
+    "schemaVersion": {
+      "description": "Optional, reserved for future changes of this schema. Missing means version 1.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "eventId": {
+      "description": "Unique id of this event. Consumers use it to detect duplicates (idempotent receiver).",
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "eventType": {
+      "type": "string",
+      "const": "ReturnStatusChanged"
+    },
+    "returnId": {
+      "description": "The return this event is about, e.g. RET-2026-00457.",
+      "type": "string",
+      "minLength": 1
+    },
+    "oldStatus": { "$ref": "#/$defs/returnStatus" },
+    "newStatus": { "$ref": "#/$defs/returnStatus" },
+    "occurredAt": {
+      "description": "When the change happened (UTC, ISO 8601).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "description": "The system that sent the event.",
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "returnStatus": {
+      "enum": [
+        "NEW", "APPROVED", "REJECTED", "IN_REVIEW", "LABEL_SENT", "RECEIVED", "EXPIRED",
+        "INSPECTED", "ACCEPTED", "MANUAL_REVIEW", "REFUNDED", "CLOSED"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "eventId": "3d70997d-0378-46d7-ae36-c9d8672865dc",
+      "eventType": "ReturnStatusChanged",
+      "returnId": "RET-2026-00457",
+      "oldStatus": "NEW",
+      "newStatus": "APPROVED",
+      "occurredAt": "2026-10-22T11:47:25.123Z",
+      "source": "ShopEasy-Returns-Management"
+    }
+  ]
+}

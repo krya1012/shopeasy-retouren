@@ -12,8 +12,9 @@ The code was written with Claude Code (see `AI-USAGE.md`). Everyone reads their 
 | 1. REST mock | 3 | ___ |
 | 2. gRPC service | 4 | ___ |
 | 3. Messaging | 5 | ___ |
+| 3b. Portal (optional) | 3 | ___ |
 | 4. Tests and code | 1 | ___ |
-| Questions and buffer | 6 | everyone |
+| Questions and buffer | 6 (3 if 3b is shown) | everyone |
 
 The team decides who presents what and writes it here.
 
@@ -144,17 +145,38 @@ podman start shopeasy-rabbitmq
 
 **Cannot be shown live:** "No queue accepts the message" (the broker returns it). In the live setup every routing key finds a queue. The test `StatusEventPublisherTest` shows it.
 
+## 3b. Self-service portal (optional, 3 minutes, only if time is left)
+
+**Say:** A second consumer, written in PHP, receives the same events from its own queue and updates the REST mock. The producer is not changed. The portal shows the result.
+
+**Preparation** (before the meeting; the first run of the portal needs `composer install && npm install && npm run build`, see README section 4):
+1. Restart the REST mock (terminal 1), so the statuses are as at the start.
+2. Empty the portal queue and the dead letter queue (RabbitMQ web page → "Purge Messages", or `docker exec shopeasy-rabbitmq rabbitmqctl purge_queue returns.status.portal`).
+3. In `selfservice-portal`: `php artisan migrate:fresh --seed`, `php artisan serve`, and in another terminal `php artisan returns:consume`.
+
+**Steps:**
+1. Log in as the customer (`j.mueller@example.com`). **You see:** only `RET-2026-00457`. Open it: status "Neu", empty history. Log out.
+2. Log in as the clerk (`clerk@shopeasy.test`). **You see:** all six returns and the link "Ereignisprotokoll".
+3. Send the events: `./gradlew :messaging-producer:bootRun --args='--scenario=portal' --console=plain`.
+4. **You see in the PHP consumer:** `processed` for the path of `RET-2026-00457` and `00458`, then `duplicate` (the late duplicate of APPROVED), then `rejected` (the unknown `RET-2026-99999`).
+5. Reload the list: `RET-2026-00457` is "Abgeschlossen", `RET-2026-00458` "Angenommen". The status in the **REST mock** really changed (`curl localhost:8080/api/v1/returns/RET-2026-00457`).
+6. Event log: counts "Verarbeitet 13", "Duplikat 1", "Abgelehnt 1" and the reason `Return RET-2026-99999 not found (404)`. The unknown event is also in `returns.status.dlq`.
+7. **Conflict:** open `RET-2026-00459` as the clerk, change it with `curl -X PATCH localhost:8080/api/v1/returns/RET-2026-00459 -H 'Content-Type: application/json' -d '{"status":"LABEL_SENT"}'` and again with `RECEIVED`, then choose "Retourenlabel versendet" in the page. **You see:** the refusal "Status is RECEIVED, not the expected APPROVED", and the page now shows the real status.
+
+**Say:** The change of the status uses the status the page was showing (`expectedStatus`). The mock refuses it if someone else was faster, so nobody overwrites a newer state.
+
 ## 4. Tests and code (1 minute)
 
 ```
 ./gradlew test --rerun --console=plain
 ```
-**You see:** every test with its name and `PASSED`, at the end `BUILD SUCCESSFUL` (69 tests, about 8 seconds). The test names describe the cases (`duplicateEventIsIgnored`, `slowServiceRunsIntoTheClientDeadline`).
+**You see:** every test with its name and `PASSED`, at the end `BUILD SUCCESSFUL` (74 tests, about 8 seconds). The test names describe the cases (`duplicateEventIsIgnored`, `slowServiceRunsIntoTheClientDeadline`).
 
 **Say:** Each module has small classes with one job each (every class has a Javadoc comment that explains it):
 - REST: `ReturnController` (endpoints), `ReturnStore` (data), `RestClientDemo` (client)
 - gRPC: `ConditionRules` (rules), `RequestValidator` (check of the input), `ArticleConditionServiceImpl` (service), `ConditionClient` (client with retry and deadline)
 - Messaging: `StatusEventPublisher` (sending with confirmation and retry), `StatusListeners` (queues), `StatusUpdateHandler` (logic), `StatusTransitions` (allowed changes), `EventParser` (check of the message)
+- Portal (PHP): `ConsumeStatusEvents` (broker), `StatusEventHandler` (logic), `ReturnsApiClient` (REST mock), `ReturnPolicy` (who may do what); the tests run with `composer ci:check` in `selfservice-portal`
 
 ## If something does not work
 

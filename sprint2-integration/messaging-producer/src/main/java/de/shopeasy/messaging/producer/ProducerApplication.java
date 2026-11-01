@@ -1,14 +1,18 @@
 package de.shopeasy.messaging.producer;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Producer for status events. Start: {@code ./gradlew :messaging-producer:bootRun} (broker and consumer must be
- * running). The program plays the demo scenario once and then ends.
+ * running). The program plays the demo scenario once and then ends. With {@code --args='--scenario=portal'} it
+ * plays the scenario for the self-service portal instead (see {@link DemoScenario#runPortal()}).
  *
  * <p><b>Spring Boot basics:</b>
  * <ul>
@@ -29,7 +33,13 @@ public class ProducerApplication {
         ConfigurableApplicationContext context = SpringApplication.run(ProducerApplication.class, args);
         int exitCode = 0;
         try {
-            context.getBean(DemoScenario.class).run();
+            DemoScenario scenario = context.getBean(DemoScenario.class);
+            List<String> chosen = context.getBean(ApplicationArguments.class).getOptionValues("scenario");
+            if (chosen != null && chosen.contains("portal")) {
+                scenario.runPortal();
+            } else {
+                scenario.run();
+            }
             LOG.info("Demo scenario sent completely.");
         } catch (EventNotDeliveredException e) {
             LOG.error("ERROR: event not delivered. {}", e.getMessage());
