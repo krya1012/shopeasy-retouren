@@ -6,15 +6,13 @@ The code was written with Claude Code (see `AI-USAGE.md`). Everyone reads their 
 
 ## Time plan
 
-| Part | Minutes | Who |
-|---|---|---|
-| Intro | 1 | Eduard Ede Moser |
-| 1. REST mock | 3 | Eduard Ede Moser |
-| 2. gRPC service | 4 | Christian Sticker |
-| 3. Messaging | 5 | Yaraslau Krautsou |
-| 3b. Portal (optional) | 3 | Yaraslau Krautsou |
-| 4. Tests and code | 1 | Yaraslau Krautsou |
-| Questions and buffer | 6 (3 if 3b is shown) | everyone |
+- Intro, 1 minute: Eduard Ede Moser
+- 1. REST mock, 3 minutes: Eduard Ede Moser
+- 2. gRPC service, 4 minutes: Christian Sticker
+- 3. Messaging, 5 minutes: Yaraslau Krautsou
+- 3b. Portal (optional), 3 minutes: Yaraslau Krautsou
+- 4. Tests and code, 1 minute: Yaraslau Krautsou
+- Questions and buffer, 6 minutes (3 if 3b is shown): everyone
 
 Split decided on 01.11.2026 (even split). No confirmation from the team is needed.
 
@@ -45,13 +43,13 @@ If you see `-bash: ./gradlew: No such file or directory` (or `zsh: no such file 
 
 ### Programs you need
 
-Check once in Terminal 4 (see below):
-
-| Program | Needed for | Check | You see |
-|---|---|---|---|
-| Java 21 or newer | everything | `java -version` | version 21 or higher |
-| Docker Desktop (the app must be **running**) or Podman | RabbitMQ (part 3) | `docker info` | server information, no error |
-| PHP 8.4+, Composer, Node.js 22+ | only the portal (3b) | `php -v`, `composer -V`, `node -v` | versions |
+Needed: Java 21 or newer, Docker Desktop (the app must be **running**) or Podman, and only for the portal (3b) PHP 8.4+, Composer and Node.js 22+. "Preparation" Step 2 checks Java and Docker. For 3b check:
+```
+php -v
+composer -V
+node -v
+```
+You see: three versions. If one says `command not found`, skip part 3b.
 
 Gradle itself is not needed: `./gradlew` downloads it the first time.
 
@@ -59,17 +57,15 @@ Gradle itself is not needed: `./gradlew` downloads it the first time.
 
 **Terminal** is the macOS app "Terminal" (Cmd+Space, type `Terminal`, Enter) or the terminal in VS Code. **Browser** is Chrome or Safari.
 
-| Window | Folder | What runs there | Ready when you see | Used in part |
-|---|---|---|---|---|
-| **Terminal 1** | `sprint2-integration` | `./gradlew :rest-mock:bootRun --console=plain` (REST mock, port 8080) | `Started RestMockApplication` | 1, 3b |
-| **Terminal 2** | `sprint2-integration` | `./gradlew :grpc-service:run --console=plain` (gRPC service, port 9090) | `is running on port 9090` | 2 |
-| **Terminal 3** | `sprint2-integration` | `./gradlew :messaging-consumer:bootRun --console=plain` (Java consumer) | `Started ConsumerApplication` | 3 |
-| **Terminal 4** | `sprint2-integration` | **Your command window:** clients, producer, tests, docker commands | (you type here) | 1, 2, 3, 4 |
-| Terminal 5 (3b) | `sprint2-integration/selfservice-portal` | `php artisan serve` (portal, port 8000) | `Server running on [http://127.0.0.1:8000]` | 3b |
-| Terminal 6 (3b) | `sprint2-integration/selfservice-portal` | `php artisan returns:consume` (PHP consumer) | `Waiting for events on queue returns.status.portal` | 3b |
-| **Browser tab A** | | http://localhost:8080/swagger-ui.html. **Works only while Terminal 1 runs** (Step 7 below). | the Swagger page "ShopEasy Return Reports (Mock)" | 1 |
-| **Browser tab B** | | http://localhost:15672 (RabbitMQ web page; user `guest`, password `guest`). **Works only while the Docker container runs** (Step 4 below). | login, then "Overview" | 3 |
-| Browser tab C (3b) | | http://localhost:8000. **Works only while Terminal 5 runs `php artisan serve`** (part 3b, not in the normal preparation). | the login page | 3b |
+- **Terminal 1:** REST mock server (port 8080), folder `sprint2-integration`. Parts 1 and 3b.
+- **Terminal 2:** gRPC server (port 9090), folder `sprint2-integration`. Part 2.
+- **Terminal 3:** Java consumer, folder `sprint2-integration`. Part 3.
+- **Terminal 4:** your command window for clients, producer, tests and docker commands, folder `sprint2-integration`. All parts.
+- **Terminal 5 (3b):** portal web server (port 8000), folder `sprint2-integration/selfservice-portal`. Not in `sprint2-integration`: there `php artisan serve` fails with `Could not open input file: artisan`.
+- **Terminal 6 (3b):** PHP consumer, folder `sprint2-integration/selfservice-portal`.
+- **Browser tab A:** http://localhost:8080/swagger-ui.html. Works only while Terminal 1 runs (Step 7).
+- **Browser tab B:** http://localhost:15672, user `guest`, password `guest`. Works only while the Docker container runs (Step 4).
+- **Browser tab C (3b):** http://localhost:8000. Works only while Terminal 5 runs `php artisan serve` (part 3b).
 
 **These web pages are not started by the browser.** Each one is served by a program that you start first. If the browser says "This site can't be reached" or `ERR_CONNECTION_REFUSED`, that program is not running. See "If something does not work".
 
@@ -285,7 +281,10 @@ podman stop shopeasy-rabbitmq
 podman start shopeasy-rabbitmq
 ```
 
-**You see in Terminal 4:** `Sending failed ... attempt 2 of 3`, `attempt 3 of 3` and `ERROR: event not delivered. Broker not reachable after 3 attempts`. Afterwards start the consumer in Terminal 3 again with its command from the table.
+**You see in Terminal 4:** `Sending failed ... attempt 2 of 3`, `attempt 3 of 3` and `ERROR: event not delivered. Broker not reachable after 3 attempts`. Afterwards start the consumer in Terminal 3 again:
+```
+./gradlew :messaging-consumer:bootRun --console=plain
+```
 
 **Cannot be shown live:** "No queue accepts the message" (the broker returns it). In the live setup every routing key finds a queue. The test `StatusEventPublisherTest` shows it.
 
@@ -394,6 +393,7 @@ After 3b stop Terminals 5 and 6 with Ctrl+C (the address http://localhost:8000 t
   docker compose up -d --wait
   ```
   `docker compose ps` lists nothing when the container does not exist (after `docker compose down` or on a new computer). `no configuration file provided: not found` means you are in the wrong folder. Wait for `Healthy`, then reload the page. A Java consumer (Terminal 3) that was started before the broker connects by itself within about 10 seconds; if its log still shows connection errors, stop it with Ctrl+C and start it again. With Podman: `podman machine start` and `podman start shopeasy-rabbitmq`.
+- **`Could not open input file: artisan`:** you are in `sprint2-integration`. `artisan` exists only in `sprint2-integration/selfservice-portal`. Run `cd selfservice-portal` (or the full `cd` line from part 3b) and repeat the command.
 - **http://localhost:8000 does not load:** the portal exists only in part 3b and only while Terminal 5 runs the web server. Start it:
   ```
   cd ~/Documents/HKA/DVG_2026-WS/shopeasy-retouren/sprint2-integration/selfservice-portal
