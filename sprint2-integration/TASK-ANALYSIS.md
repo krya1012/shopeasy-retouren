@@ -148,4 +148,4 @@ The lecturer answered questions 1 to 3. Questions 4 to 6 are decided by us (01.1
 - Programming language and broker: **Java (Spring Boot) and RabbitMQ**, chosen by Yaraslau Krautsou on 22.10.2026. No confirmation from the team is needed. We must be able to explain the code.
 - The code for all three programs exists (Claude Code, co-author Yaraslau Krautsou). Everyone who presents reads and tries out their part (see the checklist in `AI-USAGE.md`).
 - The status changes in 5.3 and the rules in 5.1 are decided as proposed.
-- Presentation in the 20-minute meeting: the split is in the table in `DEMO-SCRIPT.md` (decided 01.11.2026). Rehearse the demo once completely before.
+- Presentation in the 20-minute meeting: the split (decided 01.11.2026, even): Eduard Ede Moser intro and REST mock, Christian Sticker gRPC service, Yaraslau Krautsou messaging, portal and tests. Rehearse the demo once completely before.

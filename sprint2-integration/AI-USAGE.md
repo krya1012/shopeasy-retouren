@@ -34,7 +34,7 @@ Create entries immediately when AI is used, not only at hand-in.
 
 No confirmation from the team is needed (decision of Yaraslau Krautsou, 01.11.2026). The lecturer asks questions about the code, so everyone who presents can explain their part.
 
-1. Read your part and be able to explain it: `README.md`, section of your component, and the classes named in `DEMO-SCRIPT.md` (section "Tests and code"). For the optional portal scene: `StatusEventHandler.php` and `ReturnPolicy.php`.
+1. Read your part and be able to explain it: `README.md`, section of your component, and the classes named there. For the optional portal scene: `StatusEventHandler.php` and `ReturnPolicy.php`.
 2. Play the demo once completely against the running setup and measure the time (`DEMO-SCRIPT.md`).
 3. Check that the lecturer can open the repository (invite as collaborator or make it public) and that this file is uploaded to ILIAS before 3.11.2026, 11:30.
 4. Decided without asking the lecturer (details in `TASK-ANALYSIS.md`, section 7): question 4 (the Java consumer stays decoupled), question 5 (this file contains the GitHub link), question 6 (resolved in a future sprint).
