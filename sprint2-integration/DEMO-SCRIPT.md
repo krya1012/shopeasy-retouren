@@ -8,15 +8,15 @@ The code was written with Claude Code (see `AI-USAGE.md`). Everyone reads their 
 
 | Part | Minutes | Who |
 |---|---|---|
-| Intro | 1 | ___ |
-| 1. REST mock | 3 | ___ |
-| 2. gRPC service | 4 | ___ |
-| 3. Messaging | 5 | ___ |
-| 3b. Portal (optional) | 3 | ___ |
-| 4. Tests and code | 1 | ___ |
+| Intro | 1 | Eduard Ede Moser |
+| 1. REST mock | 3 | Eduard Ede Moser |
+| 2. gRPC service | 4 | Christian Sticker |
+| 3. Messaging | 5 | Yaraslau Krautsou |
+| 3b. Portal (optional) | 3 | Yaraslau Krautsou |
+| 4. Tests and code | 1 | Yaraslau Krautsou |
 | Questions and buffer | 6 (3 if 3b is shown) | everyone |
 
-The team decides who presents what and writes it here.
+Split proposed on 01.11.2026 (even split). The team confirms it or changes it here.
 
 ## Intro (1 minute)
 
