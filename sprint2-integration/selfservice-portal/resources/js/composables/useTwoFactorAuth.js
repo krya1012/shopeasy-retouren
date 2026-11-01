@@ -1,41 +1,23 @@
 import { useHttp } from '@inertiajs/vue3';
-import type { ComputedRef, Ref } from 'vue';
+
 import { computed, ref } from 'vue';
 import { qrCode, recoveryCodes, secretKey } from '@/routes/two-factor';
 
-export type UseTwoFactorAuthReturn = {
-    qrCodeSvg: Ref<string | null>;
-    manualSetupKey: Ref<string | null>;
-    recoveryCodesList: Ref<string[]>;
-    errors: Ref<string[]>;
-    hasSetupData: ComputedRef<boolean>;
-    clearSetupData: () => void;
-    clearErrors: () => void;
-    clearTwoFactorAuthData: () => void;
-    fetchQrCode: () => Promise<void>;
-    fetchSetupKey: () => Promise<void>;
-    fetchSetupData: () => Promise<void>;
-    fetchRecoveryCodes: () => Promise<void>;
-};
+const errors = ref([]);
+const manualSetupKey = ref(null);
+const qrCodeSvg = ref(null);
+const recoveryCodesList = ref([]);
 
-const errors = ref<string[]>([]);
-const manualSetupKey = ref<string | null>(null);
-const qrCodeSvg = ref<string | null>(null);
-const recoveryCodesList = ref<string[]>([]);
-
-const hasSetupData = computed<boolean>(
+const hasSetupData = computed(
     () => qrCodeSvg.value !== null && manualSetupKey.value !== null,
 );
 
-export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
+export const useTwoFactorAuth = () => {
     const http = useHttp();
 
-    const fetchQrCode = async (): Promise<void> => {
+    const fetchQrCode = async () => {
         try {
-            const { svg } = (await http.submit(qrCode())) as {
-                svg: string;
-                url: string;
-            };
+            const { svg } = await http.submit(qrCode());
 
             qrCodeSvg.value = svg;
         } catch {
@@ -44,11 +26,9 @@ export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
         }
     };
 
-    const fetchSetupKey = async (): Promise<void> => {
+    const fetchSetupKey = async () => {
         try {
-            const { secretKey: key } = (await http.submit(secretKey())) as {
-                secretKey: string;
-            };
+            const { secretKey: key } = await http.submit(secretKey());
 
             manualSetupKey.value = key;
         } catch {
@@ -57,35 +37,33 @@ export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
         }
     };
 
-    const clearSetupData = (): void => {
+    const clearSetupData = () => {
         manualSetupKey.value = null;
         qrCodeSvg.value = null;
         clearErrors();
     };
 
-    const clearErrors = (): void => {
+    const clearErrors = () => {
         errors.value = [];
     };
 
-    const clearTwoFactorAuthData = (): void => {
+    const clearTwoFactorAuthData = () => {
         clearSetupData();
         clearErrors();
         recoveryCodesList.value = [];
     };
 
-    const fetchRecoveryCodes = async (): Promise<void> => {
+    const fetchRecoveryCodes = async () => {
         try {
             clearErrors();
-            recoveryCodesList.value = (await http.submit(
-                recoveryCodes(),
-            )) as string[];
+            recoveryCodesList.value = await http.submit(recoveryCodes());
         } catch {
             errors.value.push('Failed to fetch recovery codes');
             recoveryCodesList.value = [];
         }
     };
 
-    const fetchSetupData = async (): Promise<void> => {
+    const fetchSetupData = async () => {
         try {
             clearErrors();
             await Promise.all([fetchQrCode(), fetchSetupKey()]);

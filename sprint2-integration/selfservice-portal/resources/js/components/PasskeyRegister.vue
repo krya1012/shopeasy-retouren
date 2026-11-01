@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { usePasskeyRegister } from '@laravel/passkeys/vue';
 import { ref } from 'vue';
 import InputError from '@/components/InputError.vue';
@@ -6,9 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const emit = defineEmits<{
-    success: [];
-}>();
+const emit = defineEmits(['success']);
 
 const getDefaultPasskeyName = () => {
     const ua = navigator.userAgent;
@@ -43,7 +41,7 @@ const { register, isLoading, error, isSupported } = usePasskeyRegister({
     },
 });
 
-const handleSubmit = async (event: Event) => {
+const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!name.value.trim()) {

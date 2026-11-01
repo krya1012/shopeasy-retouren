@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { Activity, BookOpen, FolderGit2, PackageOpen } from '@lucide/vue';
@@ -17,19 +17,18 @@ import {
 } from '@/components/ui/sidebar';
 import { index as eventsIndex } from '@/actions/App/Http/Controllers/EventLogController';
 import { index as returnsIndex } from '@/actions/App/Http/Controllers/ReturnController';
-import type { NavItem } from '@/types';
 
 const page = usePage();
 
 // Only clerks see the event log. The server checks this again, hiding the link is just for convenience.
-const mainNavItems = computed<NavItem[]>(() => [
+const mainNavItems = computed(() => [
     { title: 'Retouren', href: returnsIndex(), icon: PackageOpen },
     ...(page.props.auth.user.role === 'clerk'
         ? [{ title: 'Ereignisprotokoll', href: eventsIndex(), icon: Activity }]
         : []),
 ]);
 
-const footerNavItems: NavItem[] = [
+const footerNavItems = [
     {
         title: 'Repository',
         href: 'https://github.com/laravel/vue-starter-kit',

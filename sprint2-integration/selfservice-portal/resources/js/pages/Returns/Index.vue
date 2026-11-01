@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Head, Link, router } from '@inertiajs/vue3';
 import { reactive } from 'vue';
 import { index, show } from '@/actions/App/Http/Controllers/ReturnController';
@@ -11,15 +11,14 @@ import {
     statusLabels,
     statusVariant,
 } from '@/lib/returns';
-import type { ReturnSummary } from '@/types/returns';
 
-const props = defineProps<{
-    returns: ReturnSummary[];
-    filters: { status?: string; marketplace?: string };
-    statuses: string[];
-    marketplaces: string[];
-    apiError: string | null;
-}>();
+const props = defineProps({
+    returns: { type: Array, required: true },
+    filters: { type: Object, required: true },
+    statuses: { type: Array, required: true },
+    marketplaces: { type: Array, required: true },
+    apiError: { type: [String, null], required: true },
+});
 
 defineOptions({
     layout: { breadcrumbs: [{ title: 'Retouren', href: index() }] },

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Head, router } from '@inertiajs/vue3';
 import { onMounted, onUnmounted } from 'vue';
 import { index } from '@/actions/App/Http/Controllers/EventLogController';
@@ -10,19 +10,18 @@ import {
     outcomeVariant,
     statusLabels,
 } from '@/lib/returns';
-import type { StatusEventRow } from '@/types/returns';
 
-defineProps<{
-    events: StatusEventRow[];
-    counts: Record<string, number>;
-}>();
+defineProps({
+    events: { type: Array, required: true },
+    counts: { type: Object, required: true },
+});
 
 defineOptions({
     layout: { breadcrumbs: [{ title: 'Ereignisprotokoll', href: index() }] },
 });
 
 // The consumer runs in a separate process, so the page asks for news every 3 seconds.
-let timer: ReturnType<typeof setInterval>;
+let timer;
 onMounted(() => {
     timer = setInterval(
         () => router.reload({ only: ['events', 'counts'] }),
@@ -46,12 +45,9 @@ onUnmounted(() => clearInterval(timer));
             <Badge
                 v-for="(total, outcome) in counts"
                 :key="outcome"
-                :variant="outcomeVariant(outcome as StatusEventRow['outcome'])"
+                :variant="outcomeVariant(outcome)"
             >
-                {{
-                    outcomeLabels[outcome as StatusEventRow['outcome']] ??
-                    outcome
-                }}: {{ total }}
+                {{ outcomeLabels[outcome] ?? outcome }}: {{ total }}
             </Badge>
         </div>
 

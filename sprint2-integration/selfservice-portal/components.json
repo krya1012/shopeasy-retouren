@@ -15,5 +15,6 @@
         "ui": "@/components/ui",
         "lib": "@/lib"
     },
+    "typescript": false,
     "iconLibrary": "lucide"
 }

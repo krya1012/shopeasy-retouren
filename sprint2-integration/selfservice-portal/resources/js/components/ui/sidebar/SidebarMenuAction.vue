@@ -1,15 +1,15 @@
-<script setup lang="ts">
-import type { PrimitiveProps } from "reka-ui"
-import type { HTMLAttributes } from "vue"
+<script setup>
+
+
 import { Primitive } from "reka-ui"
 import { cn } from "@/lib/utils"
 
-const props = withDefaults(defineProps<PrimitiveProps & {
-  showOnHover?: boolean
-  class?: HTMLAttributes["class"]
-}>(), {
-  as: "button",
-})
+const props = defineProps({
+    asChild: { type: Boolean, required: false },
+    as: { type: null, required: false, default: "button" },
+    showOnHover: { type: Boolean, required: false },
+    class: { type: [Boolean, null, String, Object, Array], required: false, skipCheck: true }
+  })
 </script>
 
 <template>

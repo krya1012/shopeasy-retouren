@@ -1,6 +1,6 @@
-<script setup lang="ts">
-import type { NavigationMenuContentEmits, NavigationMenuContentProps } from "reka-ui"
-import type { HTMLAttributes } from "vue"
+<script setup>
+
+
 import { reactiveOmit } from "@vueuse/core"
 import {
   NavigationMenuContent,
@@ -8,8 +8,14 @@ import {
 } from "reka-ui"
 import { cn } from "@/lib/utils"
 
-const props = defineProps<NavigationMenuContentProps & { class?: HTMLAttributes["class"] }>()
-const emits = defineEmits<NavigationMenuContentEmits>()
+const props = defineProps({
+    forceMount: { type: Boolean, required: false },
+    disableOutsidePointerEvents: { type: Boolean, required: false },
+    asChild: { type: Boolean, required: false },
+    as: { type: null, required: false },
+    class: { type: [Boolean, null, String, Object, Array], required: false, skipCheck: true }
+  })
+const emits = defineEmits(["escapeKeyDown", "pointerDownOutside", "focusOutside", "interactOutside"])
 
 const delegatedProps = reactiveOmit(props, "class")
 

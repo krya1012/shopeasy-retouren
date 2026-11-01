@@ -1,11 +1,15 @@
-<script setup lang="ts">
-import type { NavigationMenuListProps } from "reka-ui"
-import type { HTMLAttributes } from "vue"
+<script setup>
+
+
 import { reactiveOmit } from "@vueuse/core"
 import { NavigationMenuList, useForwardProps } from "reka-ui"
 import { cn } from "@/lib/utils"
 
-const props = defineProps<NavigationMenuListProps & { class?: HTMLAttributes["class"] }>()
+const props = defineProps({
+    asChild: { type: Boolean, required: false },
+    as: { type: null, required: false },
+    class: { type: [Boolean, null, String, Object, Array], required: false, skipCheck: true }
+  })
 
 const delegatedProps = reactiveOmit(props, "class")
 

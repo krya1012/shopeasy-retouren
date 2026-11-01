@@ -1,16 +1,20 @@
-<script setup lang="ts">
+<script setup>
 import { Eye, EyeOff } from '@lucide/vue';
 import { ref, useTemplateRef } from 'vue';
-import type { HTMLAttributes } from 'vue';
+
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 defineOptions({ inheritAttrs: false });
 
-const props = defineProps<{
-    class?: HTMLAttributes['class'];
-    autofocus?: boolean;
-}>();
+const props = defineProps({
+    class: {
+        type: [Boolean, null, String, Object, Array],
+        required: false,
+        skipCheck: true,
+    },
+    autofocus: { type: Boolean, required: false },
+});
 
 const showPassword = ref(false);
 const inputRef = useTemplateRef('inputRef');

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { usePage } from '@inertiajs/vue3';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 

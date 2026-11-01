@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Form, Head, usePage } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';

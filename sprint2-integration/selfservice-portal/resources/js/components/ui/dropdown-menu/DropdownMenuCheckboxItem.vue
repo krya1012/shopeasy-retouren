@@ -1,6 +1,6 @@
-<script setup lang="ts">
-import type { DropdownMenuCheckboxItemEmits, DropdownMenuCheckboxItemProps } from "reka-ui"
-import type { HTMLAttributes } from "vue"
+<script setup>
+
+
 import { Check } from "@lucide/vue"
 import { reactiveOmit } from "@vueuse/core"
 import {
@@ -10,8 +10,15 @@ import {
 } from "reka-ui"
 import { cn } from "@/lib/utils"
 
-const props = defineProps<DropdownMenuCheckboxItemProps & { class?: HTMLAttributes["class"] }>()
-const emits = defineEmits<DropdownMenuCheckboxItemEmits>()
+const props = defineProps({
+    modelValue: { type: [Boolean, String], required: false },
+    disabled: { type: Boolean, required: false },
+    textValue: { type: String, required: false },
+    asChild: { type: Boolean, required: false },
+    as: { type: null, required: false },
+    class: { type: [Boolean, null, String, Object, Array], required: false, skipCheck: true }
+  })
+const emits = defineEmits(["select", "update:modelValue"])
 
 const delegatedProps = reactiveOmit(props, "class")
 

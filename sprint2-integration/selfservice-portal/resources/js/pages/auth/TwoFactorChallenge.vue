@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
 import { computed, ref, watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
@@ -10,12 +10,11 @@ import {
     InputOTPSlot,
 } from '@/components/ui/input-otp';
 import { store } from '@/routes/two-factor/login';
-import type { TwoFactorConfigContent } from '@/types';
 
-const showRecoveryInput = ref<boolean>(false);
-const code = ref<string>('');
+const showRecoveryInput = ref(false);
+const code = ref('');
 
-const authConfigContent = computed<TwoFactorConfigContent>(() => {
+const authConfigContent = computed(() => {
     if (showRecoveryInput.value) {
         return {
             title: 'Recovery code',
@@ -40,7 +39,7 @@ watchEffect(() => {
     });
 });
 
-const toggleRecoveryMode = (clearErrors: () => void): void => {
+const toggleRecoveryMode = (clearErrors) => {
     showRecoveryInput.value = !showRecoveryInput.value;
     clearErrors();
     code.value = '';

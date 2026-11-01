@@ -1,23 +1,18 @@
-<script setup lang="ts">
+<script setup>
 import { router } from '@inertiajs/vue3';
 import { KeyRound } from '@lucide/vue';
-import type { Passkey } from '@/types/auth';
+
 import Heading from '@/components/Heading.vue';
 import PasskeyItem from '@/components/PasskeyItem.vue';
 import PasskeyRegister from '@/components/PasskeyRegister.vue';
 import { destroy } from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyRegistrationController';
 
-export type Props = {
-    canManagePasskeys?: boolean;
-    passkeys?: Passkey[];
-};
-
-withDefaults(defineProps<Props>(), {
-    canManagePasskeys: false,
-    passkeys: () => [],
+defineProps({
+    canManagePasskeys: { type: Boolean, required: false, default: false },
+    passkeys: { type: Array, required: false, default: () => [] },
 });
 
-const handleDelete = (id: number, onError: () => void) => {
+const handleDelete = (id, onError) => {
     router.delete(destroy.url(id), {
         preserveScroll: true,
         onError,

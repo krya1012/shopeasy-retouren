@@ -186,7 +186,7 @@ The demo scenario shows: the complete path of a return (seven status changes), a
 
 ## 4. Self-service portal (Laravel + Vue)
 
-The portal in `selfservice-portal/` is a web application (PHP 8.4, Laravel 13, Vue 3 with TypeScript, SQLite). It does two jobs:
+The portal in `selfservice-portal/` is a web application (PHP 8.4, Laravel 13, Vue 3 with plain JavaScript, SQLite). It does two jobs:
 
 1. **Second consumer.** `php artisan returns:consume` has its own queue `returns.status.portal` on the same exchange. For each event it calls `PATCH` on the REST mock, so the status in the mock really changes. This answers open question 4 (the Java consumer still only keeps its own memory).
 2. **Pages.** Customers see their own returns and their history. Clerks see all returns, may change a status (only the allowed next statuses are offered) and see the event log.
@@ -250,7 +250,7 @@ The rules are in `app/Policies/ReturnPolicy.php` and are checked on the server. 
 
 - `contracts/status-transitions.json` is the one table of allowed status changes. The portal reads it; the Java tests `StatusTransitionsContractTest` (REST mock and Java consumer) fail if their own table differs.
 - The event is defined by `contracts/status-event.schema.json`.
-- Portal tests: `composer ci:check` in `selfservice-portal` (format, types, code style, PHPStan, 72 tests). They fake the REST mock, so neither the mock nor the broker has to run.
+- Portal tests: `composer ci:check` in `selfservice-portal` (format and lint, code style, PHPStan, 72 tests). They fake the REST mock, so neither the mock nor the broker has to run.
 - CI: `.github/workflows/ci.yml` runs the Java tests and `composer ci:check` on every push and pull request.
 
 ## Enterprise Integration Patterns used

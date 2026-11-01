@@ -1,10 +1,12 @@
-<script setup lang="ts">
-import type { HTMLAttributes } from "vue"
+<script setup>
+
 import { reactiveOmit } from "@vueuse/core"
 import { useForwardProps } from "reka-ui"
 import { cn } from "@/lib/utils"
 
-const props = defineProps<{ class?: HTMLAttributes["class"] }>()
+const props = defineProps({
+    class: { type: [Boolean, null, String, Object, Array], required: false, skipCheck: true }
+  })
 
 const delegatedProps = reactiveOmit(props, "class")
 
