@@ -18,6 +18,8 @@ Goal: concept and prototypes for the digitalised returns process of ShopEasy Gmb
 | 5 | 8.12.–12.1. | RPA (UiPath) & AI agent (n8n) | `sprint5-rpa-ai/` |
 | 6 | 12.–26.1. | Integration & documentation | `sprint6-abschluss/` |
 
+Commands of a sprint run inside its folder, for Sprint 2: `cd sprint2-integration` (the `./gradlew` starter is only there, not in this main folder).
+
 ## More documents
 
 - [Project charter](docs/00-PROJECT-CHARTER.md)
