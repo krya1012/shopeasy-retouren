@@ -55,7 +55,8 @@ public class ReturnController {
     /**
      * {@code PATCH /api/v1/returns/{returnId}} with {@code {"status":"APPROVED"}}: change the status.
      * 404 if the return is unknown, 400 if the status is missing or invalid, 409 if the change is not allowed.
-     * The same status again is fine (200): a repeated request does no harm.
+     * The same status again is fine (200): a repeated request does no harm. The optional field
+     * {@code expectedStatus} gives 409 if the return has a different status than the caller expects.
      */
     @PatchMapping("/{returnId}")
     public ReturnReport updateStatus(@PathVariable String returnId, @RequestBody StatusUpdate update) {
@@ -63,7 +64,8 @@ public class ReturnController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The field 'status' is missing.");
         }
         try {
-            return store.updateStatus(returnId, update.status()).orElseThrow(() -> notFound("Return", returnId));
+            return store.updateStatus(returnId, update.status(), update.expectedStatus())
+                    .orElseThrow(() -> notFound("Return", returnId));
         } catch (IllegalStateException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }

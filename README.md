@@ -1,5 +1,7 @@
 # ShopEasy – Digitalising the Returns Process
 
+[![CI](https://github.com/krya1012/shopeasy-retouren/actions/workflows/ci.yml/badge.svg)](https://github.com/krya1012/shopeasy-retouren/actions/workflows/ci.yml)
+
 Project in the module "Digitalisierung von Geschäftsprozessen" (HKA, WS 2026/27, Prof. Dr. Heberle).
 Goal: concept and prototypes for the digitalised returns process of ShopEasy GmbH.
 

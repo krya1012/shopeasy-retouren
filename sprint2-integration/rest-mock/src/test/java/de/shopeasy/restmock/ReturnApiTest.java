@@ -163,6 +163,37 @@ class ReturnApiTest {
     }
 
     @Test
+    void matchingExpectedStatusAllowsTheChange() throws Exception {
+        mvc.perform(patch("/api/v1/returns/RET-2026-00457")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"APPROVED\",\"expectedStatus\":\"NEW\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("APPROVED"));
+    }
+
+    @Test
+    void wrongExpectedStatusGives409AndChangesNothing() throws Exception {
+        // RET-2026-00459 is APPROVED. An old event says LABEL_SENT should follow NEW, so the caller is out of date.
+        mvc.perform(patch("/api/v1/returns/RET-2026-00459")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"LABEL_SENT\",\"expectedStatus\":\"NEW\"}"))
+                .andExpect(status().isConflict());
+
+        mvc.perform(get("/api/v1/returns/RET-2026-00459"))
+                .andExpect(jsonPath("$.status").value("APPROVED"));
+    }
+
+    @Test
+    void repeatedRequestIsStillOkWhenTheNewStatusIsAlreadySet() throws Exception {
+        // A retry after a lost response: the status is already the new one, so expectedStatus no longer matches.
+        mvc.perform(patch("/api/v1/returns/RET-2026-00459")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"APPROVED\",\"expectedStatus\":\"NEW\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("APPROVED"));
+    }
+
+    @Test
     void sameStatusIsAllowedAndChangesNothing() throws Exception {
         mvc.perform(patch("/api/v1/returns/RET-2026-00459")
                         .contentType(MediaType.APPLICATION_JSON)

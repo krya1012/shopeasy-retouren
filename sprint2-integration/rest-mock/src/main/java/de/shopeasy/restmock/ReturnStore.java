@@ -51,13 +51,19 @@ public class ReturnStore {
      * changes (so the same request may be repeated). {@code computeIfPresent} runs the check and the change as one
      * step inside the map, so no parallel call can slip a forbidden change in between.
      *
+     * @param expectedStatus optional (may be null): the status the caller thinks the return has. A different
+     *                       current status means the caller's information is old, so the change is refused.
      * @throws IllegalStateException if the change is not allowed (the message is meant for the caller)
      * @return empty if the return does not exist
      */
-    public Optional<ReturnReport> updateStatus(String returnId, ReturnStatus newStatus) {
+    public Optional<ReturnReport> updateStatus(String returnId, ReturnStatus newStatus, ReturnStatus expectedStatus) {
         return Optional.ofNullable(returns.computeIfPresent(returnId, (id, current) -> {
             if (current.status() == newStatus) {
                 return current;
+            }
+            if (expectedStatus != null && current.status() != expectedStatus) {
+                throw new IllegalStateException("Status is " + current.status() + ", not the expected "
+                        + expectedStatus);
             }
             if (!StatusTransitions.isAllowed(current.status(), newStatus)) {
                 throw new IllegalStateException("Status change not allowed: " + current.status() + " -> " + newStatus);

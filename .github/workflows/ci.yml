@@ -1,0 +1,77 @@
+name: CI
+
+# Runs on every push to main and on every pull request: build and test the Java modules and the Laravel/Vue portal.
+# The actions are pinned to a commit (the comment shows the version); Dependabot updates them.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  java:
+    name: Java modules (Gradle)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sprint2-integration
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Test (REST mock, gRPC service, producer, consumer)
+        run: ./gradlew test --console=plain
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-test-reports
+          path: sprint2-integration/*/build/reports/tests/test
+          if-no-files-found: ignore
+
+  portal:
+    name: Self-service portal (Laravel + Vue)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sprint2-integration/selfservice-portal
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+          ini-values: memory_limit=1G # PHPStan needs more than the default
+          coverage: none
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: sprint2-integration/selfservice-portal/package-lock.json
+      - name: Install dependencies
+        run: |
+          composer install --prefer-dist --no-progress --no-interaction
+          npm ci
+      - name: Prepare the environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      # The build also generates the route helpers (Wayfinder). The Inertia tests need the build output.
+      - name: Build the frontend
+        run: npm run build
+      # npm run check (format, lint), types (vue-tsc), Pint, PHPStan, Pest. Defined in composer.json.
+      - name: Run all checks
+        run: composer ci:check

@@ -25,6 +25,41 @@ public class DemoScenario {
         this.publisher = publisher;
     }
 
+    /**
+     * The scenario for the self-service portal. It uses return ids that exist in the REST mock, because the
+     * portal consumer applies every event to the mock with a PATCH (an unknown id gives 404). Both returns start
+     * in the status NEW in the mock. Start the mock new before running this, otherwise the statuses no longer fit.
+     * Start: {@code ./gradlew :messaging-producer:bootRun --args='--scenario=portal'}
+     */
+    public void runPortal() {
+        LOG.info("=== P1. Complete path of the seeded return RET-2026-00457 (ends in CLOSED in the REST mock)");
+        String id = "RET-2026-00457";
+        ReturnStatus[] path = {NEW, APPROVED, LABEL_SENT, RECEIVED, INSPECTED, ACCEPTED, REFUNDED, CLOSED};
+        StatusEvent approved = null;
+        for (int i = 0; i < path.length - 1; i++) {
+            StatusEvent event = StatusEvent.of(id, path[i], path[i + 1]);
+            publisher.publish(event);
+            if (event.newStatus() == APPROVED) {
+                approved = event;
+            }
+        }
+
+        LOG.info("=== P2. Late duplicate: the APPROVED event arrives again (same eventId, must be skipped)");
+        publisher.publish(approved);
+
+        LOG.info("=== P3. Borderline case on RET-2026-00458: MANUAL_REVIEW, then acceptance");
+        String id2 = "RET-2026-00458";
+        publisher.publish(StatusEvent.of(id2, NEW, APPROVED));
+        publisher.publish(StatusEvent.of(id2, APPROVED, LABEL_SENT));
+        publisher.publish(StatusEvent.of(id2, LABEL_SENT, RECEIVED));
+        publisher.publish(StatusEvent.of(id2, RECEIVED, INSPECTED));
+        publisher.publish(StatusEvent.of(id2, INSPECTED, MANUAL_REVIEW));
+        publisher.publish(StatusEvent.of(id2, MANUAL_REVIEW, ACCEPTED));
+
+        LOG.info("=== P4. Unknown return: the REST mock answers 404 (ends in the dead letter queue)");
+        publisher.publish(StatusEvent.of("RET-2026-99999", NEW, APPROVED));
+    }
+
     public void run() {
         LOG.info("=== 1. Complete path of a return (seven status changes)");
         String id = "RET-2026-" + (System.currentTimeMillis() % 100000);
