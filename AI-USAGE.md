@@ -17,7 +17,7 @@ According to the task, undocumented AI use leads to failing. Therefore there is 
 |---|---|---|---|
 | 1 | Business process management | [sprint1-bpm/AI-USAGE.md](sprint1-bpm/AI-USAGE.md) ([GitHub](https://github.com/krya1012/shopeasy-retouren/blob/main/sprint1-bpm/AI-USAGE.md)) | 18 entries, review open |
 | 2 | Integration techniques | [sprint2-integration/AI-USAGE.md](sprint2-integration/AI-USAGE.md) ([GitHub](https://github.com/krya1012/shopeasy-retouren/blob/main/sprint2-integration/AI-USAGE.md)) | 7 entries, review open |
-| 3 | Process mining | [sprint3-mining/AI-USAGE.md](sprint3-mining/AI-USAGE.md) ([GitHub](https://github.com/krya1012/shopeasy-retouren/blob/main/sprint3-mining/AI-USAGE.md)) | no entries yet |
+| 3 | Process mining | [sprint3-mining/AI-USAGE.md](sprint3-mining/AI-USAGE.md) ([GitHub](https://github.com/krya1012/shopeasy-retouren/blob/main/sprint3-mining/AI-USAGE.md)) | 1 entry, draft not yet reviewed |
 | 4 | Workflow | [sprint4-workflow/AI-USAGE.md](sprint4-workflow/AI-USAGE.md) ([GitHub](https://github.com/krya1012/shopeasy-retouren/blob/main/sprint4-workflow/AI-USAGE.md)) | no entries yet |
 | 5 | RPA and AI agent | [sprint5-rpa-ai/AI-USAGE.md](sprint5-rpa-ai/AI-USAGE.md) ([GitHub](https://github.com/krya1012/shopeasy-retouren/blob/main/sprint5-rpa-ai/AI-USAGE.md)) | no entries yet |
 | 6 | Wrap-up | [sprint6-abschluss/AI-USAGE.md](sprint6-abschluss/AI-USAGE.md) ([GitHub](https://github.com/krya1012/shopeasy-retouren/blob/main/sprint6-abschluss/AI-USAGE.md)) | no entries yet |

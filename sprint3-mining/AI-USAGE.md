@@ -10,4 +10,4 @@ Create entries immediately when AI is used, not only at hand-in.
 
 | Date | Tool | Co-author | Purpose / artifact | Review status (team) |
 |---|---|---|---|---|
-| – | – | – | No AI use entered for this sprint yet | – |
+| 03.11.2026 | Claude Code | Yaraslau Krautsou | Analysis of the Sprint 3 task (PDF) and of the two CSV files; `analysis/profile.py`; drafts of README, DATA-ANALYSIS, CELONIS-IMPORT, VARIANTS, KPI-RESULTS, WEAKNESSES | Drafted by AI. Script numbers run and shown in the output; Celonis values not yet checked; not yet read in full by Yaraslau Krautsou |
