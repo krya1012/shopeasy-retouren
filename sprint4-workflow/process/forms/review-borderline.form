@@ -1,0 +1,46 @@
+{
+  "components": [
+    {
+      "type": "text",
+      "text": "### Review borderline case\n\n**Return** {{returnId}} · **order** {{orderId}} · **customer** {{customerEmail}}\n\n**Rule result:** {{acceptanceDecision.result}}: {{acceptanceDecision.explanation}}\n\n**Condition check (gRPC):** {{conditionDecision}} · lowest confidence {{minConfidence}} · **fraud score:** {{fraudScore}} · **value:** {{returnValue}} EUR",
+      "id": "Text_25",
+      "layout": {
+        "row": "row_0",
+        "columns": null
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "Field_26",
+      "key": "accepted",
+      "label": "Accept the return (refund and stock booking)",
+      "defaultValue": false,
+      "layout": {
+        "row": "row_1",
+        "columns": null
+      }
+    },
+    {
+      "type": "textarea",
+      "id": "Field_27",
+      "key": "justification",
+      "label": "Justification (required, stored with the case)",
+      "layout": {
+        "row": "row_2",
+        "columns": null
+      },
+      "validate": {
+        "required": true
+      }
+    }
+  ],
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.34.0"
+  },
+  "schemaVersion": 18,
+  "id": "review-borderline",
+  "type": "default"
+}

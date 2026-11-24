@@ -1,0 +1,35 @@
+{
+  "components": [
+    {
+      "type": "text",
+      "text": "### Book stock in ERP\n\n**Return** {{returnId}} · **order** {{orderId}} · **customer** {{customerEmail}}\n\n1. Open the [ERP booking page]({{erpUrl}}) (data is prefilled).\n2. Check the items, enter warehouse, date and clerk, press **Buchen**.\n3. Copy the document number into the field below.",
+      "id": "Text_30",
+      "layout": {
+        "row": "row_0",
+        "columns": null
+      }
+    },
+    {
+      "type": "textfield",
+      "id": "Field_31",
+      "key": "erpDocumentNumber",
+      "label": "ERP document number",
+      "layout": {
+        "row": "row_1",
+        "columns": null
+      },
+      "validate": {
+        "required": true
+      }
+    }
+  ],
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.34.0"
+  },
+  "schemaVersion": 18,
+  "id": "book-stock-erp",
+  "type": "default"
+}

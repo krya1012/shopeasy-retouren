@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="AcceptanceDecisionDefinitions" name="Acceptance decision" namespace="http://camunda.org/schema/1.0/dmn" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.9.0">
+  <decision id="acceptance-decision" name="Acceptance decision">
+    <decisionTable id="DecisionTable_acceptance" hitPolicy="FIRST">
+      <input id="Input_condition" label="Condition check (gRPC)">
+        <inputExpression id="InputExpression_condition" typeRef="string">
+          <text>get or else(conditionDecision, "NONE")</text>
+        </inputExpression>
+      </input>
+      <input id="Input_confidence" label="Lowest confidence score">
+        <inputExpression id="InputExpression_confidence" typeRef="number">
+          <text>get or else(minConfidence, 0)</text>
+        </inputExpression>
+      </input>
+      <input id="Input_fraud" label="Fraud score (-1 = not assessed)">
+        <inputExpression id="InputExpression_fraud" typeRef="number">
+          <text>get or else(fraudScore, -1)</text>
+        </inputExpression>
+      </input>
+      <input id="Input_value" label="Return value (EUR)">
+        <inputExpression id="InputExpression_value" typeRef="number">
+          <text>get or else(returnValue, 0)</text>
+        </inputExpression>
+      </input>
+      <output id="Output_result" label="Result" name="result" typeRef="string" />
+      <output id="Output_explanation" label="Explanation" name="explanation" typeRef="string" />
+      <rule id="Rule_reject">
+        <inputEntry id="Rule_reject_1"><text>"REJECT"</text></inputEntry>
+        <inputEntry id="Rule_reject_2"><text>-</text></inputEntry>
+        <inputEntry id="Rule_reject_3"><text>-</text></inputEntry>
+        <inputEntry id="Rule_reject_4"><text>-</text></inputEntry>
+        <outputEntry id="Rule_reject_o1"><text>"REJECT"</text></outputEntry>
+        <outputEntry id="Rule_reject_o2"><text>"Condition check: item damaged, worn or incomplete"</text></outputEntry>
+      </rule>
+      <rule id="Rule_review">
+        <inputEntry id="Rule_review_1"><text>"MANUAL_REVIEW"</text></inputEntry>
+        <inputEntry id="Rule_review_2"><text>-</text></inputEntry>
+        <inputEntry id="Rule_review_3"><text>-</text></inputEntry>
+        <inputEntry id="Rule_review_4"><text>-</text></inputEntry>
+        <outputEntry id="Rule_review_o1"><text>"BORDERLINE"</text></outputEntry>
+        <outputEntry id="Rule_review_o2"><text>"Condition check recommends manual review"</text></outputEntry>
+      </rule>
+      <rule id="Rule_noResult">
+        <inputEntry id="Rule_noResult_1"><text>not("ACCEPT")</text></inputEntry>
+        <inputEntry id="Rule_noResult_2"><text>-</text></inputEntry>
+        <inputEntry id="Rule_noResult_3"><text>-</text></inputEntry>
+        <inputEntry id="Rule_noResult_4"><text>-</text></inputEntry>
+        <outputEntry id="Rule_noResult_o1"><text>"BORDERLINE"</text></outputEntry>
+        <outputEntry id="Rule_noResult_o2"><text>"No usable condition result"</text></outputEntry>
+      </rule>
+      <rule id="Rule_notAssessed">
+        <inputEntry id="Rule_notAssessed_1"><text>-</text></inputEntry>
+        <inputEntry id="Rule_notAssessed_2"><text>-</text></inputEntry>
+        <inputEntry id="Rule_notAssessed_3"><text>&lt; 0</text></inputEntry>
+        <inputEntry id="Rule_notAssessed_4"><text>-</text></inputEntry>
+        <outputEntry id="Rule_notAssessed_o1"><text>"BORDERLINE"</text></outputEntry>
+        <outputEntry id="Rule_notAssessed_o2"><text>"Fraud score not assessed"</text></outputEntry>
+      </rule>
+      <rule id="Rule_suspicion">
+        <inputEntry id="Rule_suspicion_1"><text>-</text></inputEntry>
+        <inputEntry id="Rule_suspicion_2"><text>-</text></inputEntry>
+        <inputEntry id="Rule_suspicion_3"><text>&gt;= 0.7</text></inputEntry>
+        <inputEntry id="Rule_suspicion_4"><text>-</text></inputEntry>
+        <outputEntry id="Rule_suspicion_o1"><text>"BORDERLINE"</text></outputEntry>
+        <outputEntry id="Rule_suspicion_o2"><text>"Fraud score high (suspicion)"</text></outputEntry>
+      </rule>
+      <rule id="Rule_highValue">
+        <inputEntry id="Rule_highValue_1"><text>-</text></inputEntry>
+        <inputEntry id="Rule_highValue_2"><text>&lt; 0.9</text></inputEntry>
+        <inputEntry id="Rule_highValue_3"><text>-</text></inputEntry>
+        <inputEntry id="Rule_highValue_4"><text>&gt; 300</text></inputEntry>
+        <outputEntry id="Rule_highValue_o1"><text>"BORDERLINE"</text></outputEntry>
+        <outputEntry id="Rule_highValue_o2"><text>"High value with low confidence"</text></outputEntry>
+      </rule>
+      <rule id="Rule_accept">
+        <inputEntry id="Rule_accept_1"><text>-</text></inputEntry>
+        <inputEntry id="Rule_accept_2"><text>-</text></inputEntry>
+        <inputEntry id="Rule_accept_3"><text>-</text></inputEntry>
+        <inputEntry id="Rule_accept_4"><text>-</text></inputEntry>
+        <outputEntry id="Rule_accept_o1"><text>"ACCEPT"</text></outputEntry>
+        <outputEntry id="Rule_accept_o2"><text>"Standard case: condition accepted"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="DMNDiagram_acceptance">
+      <dmndi:DMNShape id="DMNShape_acceptance" dmnElementRef="acceptance-decision">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

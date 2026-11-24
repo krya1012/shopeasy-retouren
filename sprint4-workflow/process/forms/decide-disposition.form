@@ -1,0 +1,49 @@
+{
+  "components": [
+    {
+      "type": "text",
+      "text": "### Decide further use of the goods\n\n**Return** {{returnId}} · **order** {{orderId}} · **customer** {{customerEmail}}\n\nThe return was rejected: {{acceptanceDecision.explanation}}",
+      "id": "Text_28",
+      "layout": {
+        "row": "row_0",
+        "columns": null
+      }
+    },
+    {
+      "type": "select",
+      "id": "Field_29",
+      "key": "disposition",
+      "label": "Further use",
+      "layout": {
+        "row": "row_1",
+        "columns": null
+      },
+      "values": [
+        {
+          "label": "RETURN_TO_CUSTOMER",
+          "value": "RETURN_TO_CUSTOMER"
+        },
+        {
+          "label": "DONATE",
+          "value": "DONATE"
+        },
+        {
+          "label": "DISPOSE",
+          "value": "DISPOSE"
+        }
+      ],
+      "validate": {
+        "required": true
+      }
+    }
+  ],
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.34.0"
+  },
+  "schemaVersion": 18,
+  "id": "decide-disposition",
+  "type": "default"
+}

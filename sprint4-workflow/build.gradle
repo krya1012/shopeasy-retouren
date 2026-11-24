@@ -1,0 +1,50 @@
+// Sprint 4: job workers and process tests for the executable returns process (Camunda 8).
+// The model files (BPMN, DMN, forms) live in the folder "process" and are put on the classpath
+// under "processes/", so the tests and the application deploy exactly the files that are in the repository.
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.0.5'
+}
+
+group = 'de.shopeasy'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+def camundaVersion = '8.9.0'
+
+dependencies {
+    implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation "io.camunda:camunda-spring-boot-starter:${camundaVersion}"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation "io.camunda:camunda-process-test-spring:${camundaVersion}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+processResources {
+    from('process') {
+        into 'processes'
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    // Print every test with its name (good for the demo): ./gradlew test --rerun
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+        exceptionFormat 'full'
+    }
+}

@@ -1,0 +1,35 @@
+{
+  "components": [
+    {
+      "type": "text",
+      "text": "### Resolve refund manually\n\nThe automatic refund failed (missing IBAN, expired card or payment provider not reachable). **Return** {{returnId}} · **order** {{orderId}} · **customer** {{customerEmail}}\n\nClarify with the customer or the payment provider and enter the reference of the refund or voucher.",
+      "id": "Text_32",
+      "layout": {
+        "row": "row_0",
+        "columns": null
+      }
+    },
+    {
+      "type": "textfield",
+      "id": "Field_33",
+      "key": "refundReference",
+      "label": "Refund / voucher reference",
+      "layout": {
+        "row": "row_1",
+        "columns": null
+      },
+      "validate": {
+        "required": true
+      }
+    }
+  ],
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.34.0"
+  },
+  "schemaVersion": 18,
+  "id": "resolve-refund",
+  "type": "default"
+}

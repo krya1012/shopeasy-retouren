@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="RegistrationCheckDefinitions" name="Registration check" namespace="http://camunda.org/schema/1.0/dmn" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.9.0">
+  <decision id="registration-check" name="Registration check">
+    <decisionTable id="DecisionTable_registration" hitPolicy="FIRST">
+      <input id="Input_orderFound" label="Order found">
+        <inputExpression id="InputExpression_orderFound" typeRef="boolean">
+          <text>get or else(orderFound, false)</text>
+        </inputExpression>
+      </input>
+      <input id="Input_days" label="Days from delivery to registration">
+        <inputExpression id="InputExpression_days" typeRef="number">
+          <text>get or else(daysSinceDelivery, 0)</text>
+        </inputExpression>
+      </input>
+      <input id="Input_dataComplete" label="Data complete (reason known)">
+        <inputExpression id="InputExpression_dataComplete" typeRef="boolean">
+          <text>get or else(dataComplete, false)</text>
+        </inputExpression>
+      </input>
+      <input id="Input_itemsInOrder" label="All items are in the order">
+        <inputExpression id="InputExpression_itemsInOrder" typeRef="boolean">
+          <text>get or else(itemsInOrder, false)</text>
+        </inputExpression>
+      </input>
+      <input id="Input_fraud" label="Fraud score (-1 = not assessed)">
+        <inputExpression id="InputExpression_fraud" typeRef="number">
+          <text>get or else(fraudScore, -1)</text>
+        </inputExpression>
+      </input>
+      <output id="Output_result" label="Result" name="result" typeRef="string" />
+      <output id="Output_explanation" label="Explanation" name="explanation" typeRef="string" />
+      <rule id="Rule_noOrder">
+        <inputEntry id="Rule_noOrder_1"><text>false</text></inputEntry>
+        <inputEntry id="Rule_noOrder_2"><text>-</text></inputEntry>
+        <inputEntry id="Rule_noOrder_3"><text>-</text></inputEntry>
+        <inputEntry id="Rule_noOrder_4"><text>-</text></inputEntry>
+        <inputEntry id="Rule_noOrder_5"><text>-</text></inputEntry>
+        <outputEntry id="Rule_noOrder_o1"><text>"UNCLEAR"</text></outputEntry>
+        <outputEntry id="Rule_noOrder_o2"><text>"Order not found"</text></outputEntry>
+      </rule>
+      <rule id="Rule_period">
+        <inputEntry id="Rule_period_1"><text>-</text></inputEntry>
+        <inputEntry id="Rule_period_2"><text>&gt; 14</text></inputEntry>
+        <inputEntry id="Rule_period_3"><text>-</text></inputEntry>
+        <inputEntry id="Rule_period_4"><text>-</text></inputEntry>
+        <inputEntry id="Rule_period_5"><text>-</text></inputEntry>
+        <outputEntry id="Rule_period_o1"><text>"NOT_ELIGIBLE"</text></outputEntry>
+        <outputEntry id="Rule_period_o2"><text>"Return period of 14 days after delivery exceeded"</text></outputEntry>
+      </rule>
+      <rule id="Rule_incomplete">
+        <inputEntry id="Rule_incomplete_1"><text>-</text></inputEntry>
+        <inputEntry id="Rule_incomplete_2"><text>-</text></inputEntry>
+        <inputEntry id="Rule_incomplete_3"><text>false</text></inputEntry>
+        <inputEntry id="Rule_incomplete_4"><text>-</text></inputEntry>
+        <inputEntry id="Rule_incomplete_5"><text>-</text></inputEntry>
+        <outputEntry id="Rule_incomplete_o1"><text>"UNCLEAR"</text></outputEntry>
+        <outputEntry id="Rule_incomplete_o2"><text>"Registration data incomplete (reason missing)"</text></outputEntry>
+      </rule>
+      <rule id="Rule_item">
+        <inputEntry id="Rule_item_1"><text>-</text></inputEntry>
+        <inputEntry id="Rule_item_2"><text>-</text></inputEntry>
+        <inputEntry id="Rule_item_3"><text>-</text></inputEntry>
+        <inputEntry id="Rule_item_4"><text>false</text></inputEntry>
+        <inputEntry id="Rule_item_5"><text>-</text></inputEntry>
+        <outputEntry id="Rule_item_o1"><text>"UNCLEAR"</text></outputEntry>
+        <outputEntry id="Rule_item_o2"><text>"Item is not part of the order"</text></outputEntry>
+      </rule>
+      <rule id="Rule_notAssessed">
+        <inputEntry id="Rule_notAssessed_1"><text>-</text></inputEntry>
+        <inputEntry id="Rule_notAssessed_2"><text>-</text></inputEntry>
+        <inputEntry id="Rule_notAssessed_3"><text>-</text></inputEntry>
+        <inputEntry id="Rule_notAssessed_4"><text>-</text></inputEntry>
+        <inputEntry id="Rule_notAssessed_5"><text>&lt; 0</text></inputEntry>
+        <outputEntry id="Rule_notAssessed_o1"><text>"UNCLEAR"</text></outputEntry>
+        <outputEntry id="Rule_notAssessed_o2"><text>"Fraud score not assessed"</text></outputEntry>
+      </rule>
+      <rule id="Rule_suspicion">
+        <inputEntry id="Rule_suspicion_1"><text>-</text></inputEntry>
+        <inputEntry id="Rule_suspicion_2"><text>-</text></inputEntry>
+        <inputEntry id="Rule_suspicion_3"><text>-</text></inputEntry>
+        <inputEntry id="Rule_suspicion_4"><text>-</text></inputEntry>
+        <inputEntry id="Rule_suspicion_5"><text>&gt;= 0.7</text></inputEntry>
+        <outputEntry id="Rule_suspicion_o1"><text>"UNCLEAR"</text></outputEntry>
+        <outputEntry id="Rule_suspicion_o2"><text>"Fraud score high (suspicion)"</text></outputEntry>
+      </rule>
+      <rule id="Rule_eligible">
+        <inputEntry id="Rule_eligible_1"><text>-</text></inputEntry>
+        <inputEntry id="Rule_eligible_2"><text>-</text></inputEntry>
+        <inputEntry id="Rule_eligible_3"><text>-</text></inputEntry>
+        <inputEntry id="Rule_eligible_4"><text>-</text></inputEntry>
+        <inputEntry id="Rule_eligible_5"><text>-</text></inputEntry>
+        <outputEntry id="Rule_eligible_o1"><text>"ELIGIBLE"</text></outputEntry>
+        <outputEntry id="Rule_eligible_o2"><text>"Registration is valid"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="DMNDiagram_registration">
+      <dmndi:DMNShape id="DMNShape_registration" dmnElementRef="registration-check">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

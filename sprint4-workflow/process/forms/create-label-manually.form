@@ -1,0 +1,37 @@
+{
+  "components": [
+    {
+      "type": "text",
+      "text": "### Create label manually\n\nThe shipping API is not reachable. Create the label in the carrier portal for Return {{returnId}} · order {{orderId}} · customer {{customerEmail}} and paste the label URL.",
+      "id": "Text_15",
+      "layout": {
+        "row": "row_0",
+        "columns": null
+      }
+    },
+    {
+      "type": "textfield",
+      "id": "Field_16",
+      "key": "labelUrl",
+      "label": "Label URL",
+      "layout": {
+        "row": "row_1",
+        "columns": null
+      },
+      "validate": {
+        "required": true,
+        "pattern": "^https?://\\S+$",
+        "patternErrorMessage": "Enter a URL that starts with http:// or https://"
+      }
+    }
+  ],
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.34.0"
+  },
+  "schemaVersion": 18,
+  "id": "create-label-manually",
+  "type": "default"
+}

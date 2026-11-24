@@ -1,0 +1,46 @@
+{
+  "components": [
+    {
+      "type": "text",
+      "text": "### Review registration\n\n**Return** {{returnId}} · **order** {{orderId}} · **customer** {{customerEmail}}\n\n**Rule result:** {{registrationCheck.result}}: {{registrationCheck.explanation}}\n\n**Days from delivery to registration:** {{daysSinceDelivery}} · **fraud score:** {{fraudScore}} · **reason:** {{reason}}",
+      "id": "Text_12",
+      "layout": {
+        "row": "row_0",
+        "columns": null
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "Field_13",
+      "key": "rejectRegistration",
+      "label": "Reject this registration",
+      "defaultValue": false,
+      "layout": {
+        "row": "row_1",
+        "columns": null
+      }
+    },
+    {
+      "type": "textarea",
+      "id": "Field_14",
+      "key": "reviewNote",
+      "label": "Reason for the decision (required)",
+      "layout": {
+        "row": "row_2",
+        "columns": null
+      },
+      "validate": {
+        "required": true
+      }
+    }
+  ],
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.34.0"
+  },
+  "schemaVersion": 18,
+  "id": "review-registration",
+  "type": "default"
+}

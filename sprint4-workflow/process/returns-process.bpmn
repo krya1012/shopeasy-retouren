@@ -1,0 +1,1063 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_Returns" targetNamespace="http://bpmn.io/schema/bpmn" modeler:exporter="Camunda Modeler" modeler:exporterVersion="5.x">
+  <bpmn:message id="Message_Marketplace" name="marketplace-return-received" />
+  <bpmn:message id="Message_Webshop" name="webshop-return-registered" />
+  <bpmn:message id="Message_Email" name="email-return-received" />
+  <bpmn:message id="Message_Arrived" name="parcel-arrived">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=returnId" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:error id="Error_Label" name="Label service unavailable" errorCode="LABEL_SERVICE_UNAVAILABLE" />
+  <bpmn:error id="Error_Refund" name="Refund failed" errorCode="REFUND_FAILED" />
+  <bpmn:collaboration id="Collab_Soll">
+    <bpmn:participant id="Participant_Soll" name="ShopEasy GmbH – returns process (executable)" processRef="shopeasy-returns" />
+    <bpmn:participant id="Ext_Markt" name="Marketplace (Amazon, Zalando)" />
+    <bpmn:participant id="Ext_Kunde" name="Customer" />
+    <bpmn:messageFlow id="m1" sourceRef="Ext_Markt" targetRef="s_mkt" />
+    <bpmn:messageFlow id="m2" sourceRef="Ext_Kunde" targetRef="s_web" />
+    <bpmn:messageFlow id="m3" sourceRef="Ext_Kunde" targetRef="s_mail" />
+    <bpmn:messageFlow id="m4" sourceRef="t_deny" targetRef="Ext_Kunde" />
+    <bpmn:messageFlow id="m5" sourceRef="t_deny2" targetRef="Ext_Kunde" />
+    <bpmn:messageFlow id="m6" sourceRef="t_notify" targetRef="Ext_Kunde" />
+    <bpmn:messageFlow id="m7" sourceRef="Ext_Kunde" targetRef="ev_arrive" />
+    <bpmn:messageFlow id="m8" sourceRef="t_expired" targetRef="Ext_Kunde" />
+    <bpmn:messageFlow id="m9" sourceRef="t_end_notify" targetRef="Ext_Kunde" />
+    <bpmn:messageFlow id="m10" sourceRef="t_notify_in" targetRef="Ext_Kunde" />
+  </bpmn:collaboration>
+  <bpmn:process id="shopeasy-returns" name="ShopEasy returns process" isExecutable="true" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.9.0">
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_WF" name="Returns workflow (automated)">
+        <bpmn:flowNodeRef>s_mkt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_web</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_mail</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_parse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_cr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_create</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_ai</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_rule</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_deny</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_deny</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_join</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_label</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>b_label</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_nt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_notify</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_evt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ev_arrive</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ev_timeout</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_expired</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_expired</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_notify_in</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_gr_rec</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_decide</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_acc</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_par</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_stock</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_refund</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>b_refund</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_rm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_pj</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_en</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_end_notify</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_inrev</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Lager" name="Warehouse">
+        <bpmn:flowNodeRef>t_gr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_rj</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_reject</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_SB" name="Customer service">
+        <bpmn:flowNodeRef>t_man1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_m1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_deny2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_deny2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_label_man</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_man2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_m2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_refund_man</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>t_mrev</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="s_mkt" name="Marketplace return received (REST)">
+      <bpmn:documentation>Started by the marketplace poller (job worker app) with the message "marketplace-return-received". Variable: returnId (return in the REST mock). The poller sets the message ID to the returnId, so a return starts only one instance.</bpmn:documentation>
+      <bpmn:outgoing>f2</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_s_mkt" messageRef="Message_Marketplace" />
+    </bpmn:startEvent>
+    <bpmn:startEvent id="s_web" name="Return registered in web shop">
+      <bpmn:documentation>Message "webshop-return-registered". Variables: orderId, customerEmail, items [{sku, quantity}], reason, reasonText. Demo: published with c8ctl.</bpmn:documentation>
+      <bpmn:outgoing>f1</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_s_web" messageRef="Message_Webshop" />
+    </bpmn:startEvent>
+    <bpmn:startEvent id="s_mail" name="Return reported by e-mail">
+      <bpmn:documentation>Message "email-return-received". Variables: emailFrom, emailSubject, emailBody. Sprint 4: the e-mail is simulated (published with c8ctl). Sprint 5 reads a real mailbox.</bpmn:documentation>
+      <bpmn:outgoing>f3</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_s_mail" messageRef="Message_Email" />
+    </bpmn:startEvent>
+    <bpmn:userTask id="t_parse" name="Capture return from e-mail&#10;«Human (AI in Sprint 5)»">
+      <bpmn:documentation>Sprint 4: a clerk reads the e-mail and types order, customer, items and reason into the form. Sprint 5 replaces this task by the n8n AI agent (same output variables). Missing reason: the case is created without reason and the rule sends it to manual review.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="capture-email-return" />
+        <zeebe:assignmentDefinition candidateGroups="customer-service" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f4</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="gw_cr">
+      <bpmn:documentation>Joins the three entry channels.</bpmn:documentation>
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:incoming>f4</bpmn:incoming>
+      <bpmn:outgoing>f45</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="t_create" name="Create return case&#10;«System»">
+      <bpmn:documentation>Job worker "create-return-case". With returnId (marketplace): GET the return and order from the REST mock. Without returnId (web shop, e-mail): POST the return, then GET the order. Output: returnId, orderId, customerEmail, items, reason, reasonText, orderFound, daysSinceDelivery, itemsInOrder, dataComplete, returnValue.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="create-return-case" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>f45</bpmn:incoming>
+      <bpmn:outgoing>f5</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="Assoc_DS_case">
+        <bpmn:targetRef>DS_case</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="t_ai" name="Classify reason &#38; compute fraud score&#10;«AI agent (stub in Sprint 4)»">
+      <bpmn:documentation>Job worker "assess-return". Sprint 4: stub with fixed test values (fraudScore by the return ID). Sprint 5: n8n AI agent. Output: reasonCategory, fraudScore. If the assessment fails, the worker completes with fraudScore = null; the rule then sends the case to manual review.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="assess-return" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>f5</bpmn:incoming>
+      <bpmn:outgoing>f6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:businessRuleTask id="t_rule" name="Check registration (period, item, customer history)&#10;«Rules (DMN)»">
+      <bpmn:documentation>DMN "registration-check" (process/registration-check.dmn). Result: registrationCheck.result = ELIGIBLE | NOT_ELIGIBLE | UNCLEAR, registrationCheck.explanation.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:calledDecision decisionId="registration-check" resultVariable="registrationCheck" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>f6</bpmn:incoming>
+      <bpmn:outgoing>f7</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:exclusiveGateway id="gw1" name="Check result?" default="f10">
+      <bpmn:documentation>UNCLEAR is the default flow: an unexpected result goes to a person, never to an automatic decision.</bpmn:documentation>
+      <bpmn:incoming>f7</bpmn:incoming>
+      <bpmn:outgoing>f8</bpmn:outgoing>
+      <bpmn:outgoing>f9</bpmn:outgoing>
+      <bpmn:outgoing>f10</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="t_deny" name="Notify rejection&#10;«System»">
+      <bpmn:documentation>Job worker "update-return-status": for each status in newStatuses it sends PATCH to the REST mock (skips statuses already set, so a retry is safe) and publishes a ReturnStatusChanged event to RabbitMQ (exchange returns.status). The customer-info consumer informs the customer. Statuses: REJECTED, CLOSED.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-return-status" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=[&#34;REJECTED&#34;,&#34;CLOSED&#34;]" target="newStatuses" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f9</bpmn:incoming>
+      <bpmn:outgoing>f11</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="end_deny" name="Return rejected">
+      <bpmn:incoming>f11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="gw_join">
+      <bpmn:incoming>f8</bpmn:incoming>
+      <bpmn:incoming>f13</bpmn:incoming>
+      <bpmn:outgoing>f16</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="t_label" name="Create return label&#10;«System»">
+      <bpmn:documentation>Job worker "create-return-label" (simulated shipping API). Output: labelUrl. Transient errors: 3 retries, then the worker throws BPMN error LABEL_SERVICE_UNAVAILABLE (boundary event b_label).</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="create-return-label" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>f16</bpmn:incoming>
+      <bpmn:outgoing>f19</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="b_label" name="Shipping API unavailable" attachedToRef="t_label">
+      <bpmn:outgoing>f17</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_b_label" errorRef="Error_Label" />
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="gw_nt">
+      <bpmn:documentation>Joins the automatic and the manual label.</bpmn:documentation>
+      <bpmn:incoming>f18</bpmn:incoming>
+      <bpmn:incoming>f19</bpmn:incoming>
+      <bpmn:outgoing>f46</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="t_notify" name="Send label &#38; status “approved”&#10;«Messaging»">
+      <bpmn:documentation>Job worker "update-return-status": for each status in newStatuses it sends PATCH to the REST mock (skips statuses already set, so a retry is safe) and publishes a ReturnStatusChanged event to RabbitMQ (exchange returns.status). The customer-info consumer informs the customer. Statuses: APPROVED, LABEL_SENT (the label URL comes from the label step).</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-return-status" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=[&#34;APPROVED&#34;,&#34;LABEL_SENT&#34;]" target="newStatuses" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f46</bpmn:incoming>
+      <bpmn:outgoing>f20</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:eventBasedGateway id="gw_evt">
+      <bpmn:incoming>f20</bpmn:incoming>
+      <bpmn:outgoing>f21</bpmn:outgoing>
+      <bpmn:outgoing>f22</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="ev_arrive" name="Parcel arrived at warehouse">
+      <bpmn:documentation>Message "parcel-arrived", correlation key returnId. Sprint 4: published with c8ctl (warehouse scan). Variable arrivalNote is optional.</bpmn:documentation>
+      <bpmn:incoming>f21</bpmn:incoming>
+      <bpmn:outgoing>f25</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_ev_arrive" messageRef="Message_Arrived" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="ev_timeout" name="21 days without arrival">
+      <bpmn:documentation>Default 21 days. For the demo start the instance with the variable arrivalTimeout = "PT2M".</bpmn:documentation>
+      <bpmn:incoming>f22</bpmn:incoming>
+      <bpmn:outgoing>f23</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_ev_timeout">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">=if is defined(arrivalTimeout) then arrivalTimeout else "P21D"</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sendTask id="t_expired" name="Close return as not received&#10;«System»">
+      <bpmn:documentation>Job worker "update-return-status": for each status in newStatuses it sends PATCH to the REST mock (skips statuses already set, so a retry is safe) and publishes a ReturnStatusChanged event to RabbitMQ (exchange returns.status). The customer-info consumer informs the customer. Statuses: EXPIRED, CLOSED.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-return-status" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=[&#34;EXPIRED&#34;,&#34;CLOSED&#34;]" target="newStatuses" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f23</bpmn:incoming>
+      <bpmn:outgoing>f24</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="end_expired" name="Case closed (period expired)">
+      <bpmn:incoming>f24</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="t_notify_in" name="Confirm goods receipt&#10;«Messaging»">
+      <bpmn:documentation>Job worker "update-return-status": for each status in newStatuses it sends PATCH to the REST mock (skips statuses already set, so a retry is safe) and publishes a ReturnStatusChanged event to RabbitMQ (exchange returns.status). The customer-info consumer informs the customer. Statuses: RECEIVED.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-return-status" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=[&#34;RECEIVED&#34;]" target="newStatuses" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f25</bpmn:incoming>
+      <bpmn:outgoing>f50</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="t_gr_rec" name="Check condition (gRPC)&#10;«System»">
+      <bpmn:documentation>Job worker "check-condition": gRPC CheckConditionBatch (Sprint 2, port 9090), then status INSPECTED. Retries: the gRPC client retries UNAVAILABLE 3 times, the job has 3 more retries; then an incident. ALREADY_EXISTS (job repeated) is answered with GetCheckResult. Output: conditionDecision (worst item: REJECT &gt; MANUAL_REVIEW &gt; ACCEPT), minConfidence, conditionResults.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="check-condition" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>f26</bpmn:incoming>
+      <bpmn:outgoing>f51</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="Assoc_DS_wms">
+        <bpmn:targetRef>DS_wms</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:businessRuleTask id="t_decide" name="Decide acceptance / rejection&#10;«Rules (DMN)»">
+      <bpmn:documentation>DMN "acceptance-decision" (process/acceptance-decision.dmn). Result: acceptanceDecision.result = ACCEPT | REJECT | BORDERLINE, acceptanceDecision.explanation.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:calledDecision decisionId="acceptance-decision" resultVariable="acceptanceDecision" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>f51</bpmn:incoming>
+      <bpmn:outgoing>f27</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:exclusiveGateway id="gw2" name="Result?" default="f30">
+      <bpmn:documentation>BORDERLINE is the default flow: an unexpected result goes to a person.</bpmn:documentation>
+      <bpmn:incoming>f27</bpmn:incoming>
+      <bpmn:outgoing>f28</bpmn:outgoing>
+      <bpmn:outgoing>f29</bpmn:outgoing>
+      <bpmn:outgoing>f30</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="gw_acc">
+      <bpmn:incoming>f28</bpmn:incoming>
+      <bpmn:incoming>f32</bpmn:incoming>
+      <bpmn:outgoing>f34</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:parallelGateway id="gw_par">
+      <bpmn:incoming>f34</bpmn:incoming>
+      <bpmn:outgoing>f35</bpmn:outgoing>
+      <bpmn:outgoing>f36</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="t_stock" name="Book stock in ERP&#10;«Human (RPA in Sprint 5)»">
+      <bpmn:documentation>Sprint 4: a person books the stock in the simulated ERP page (link with prefilled data in the form) and enters the document number. Stock type: FREI if the item is AS_NEW, otherwise BWARE. Sprint 5: UiPath bot. If the ERP page reports an error, book again or ask the lecturer's simulation to turn off random errors.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="book-stock-erp" />
+        <zeebe:assignmentDefinition candidateGroups="warehouse" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;https://anhe0003.github.io/this-and-that/ERP_Bestandsbuchung.html?returnId=&#34; + returnId + &#34;&#38;orderId=&#34; + orderId + &#34;&#38;items=&#34; + string join(for i in items return i.sku + &#34;:&#34; + string(i.quantity) + &#34;:&#34; + (if some x in inspections satisfies x.sku = i.sku and x.condition = &#34;AS_NEW&#34; then &#34;FREI&#34; else &#34;BWARE&#34;), &#34;;&#34;)" target="erpUrl" />
+          <zeebe:output source="=erpDocumentNumber" target="erpDocumentNumber" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f35</bpmn:incoming>
+      <bpmn:outgoing>f37</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="Assoc_DS_erp">
+        <bpmn:targetRef>DS_erp</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="t_refund" name="Issue refund / voucher&#10;«System»">
+      <bpmn:documentation>Job worker "issue-refund" (simulated payment provider; money or voucher by payment method). Output: refundMethod, refundAmount, refundReference. Business errors (IBAN missing, card expired) are thrown at once as BPMN error REFUND_FAILED; a payment-provider timeout is retried 3 times first (Sprint 3: 64 failed refunds).</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="issue-refund" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>f36</bpmn:incoming>
+      <bpmn:outgoing>f38</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="b_refund" name="Payment failed" attachedToRef="t_refund">
+      <bpmn:outgoing>f39</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_b_refund" errorRef="Error_Refund" />
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="gw_rm">
+      <bpmn:documentation>Joins refund and manual refund so only one token reaches the parallel join.</bpmn:documentation>
+      <bpmn:incoming>f38</bpmn:incoming>
+      <bpmn:incoming>f40</bpmn:incoming>
+      <bpmn:outgoing>f41</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:parallelGateway id="gw_pj">
+      <bpmn:incoming>f37</bpmn:incoming>
+      <bpmn:incoming>f41</bpmn:incoming>
+      <bpmn:outgoing>f42</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="gw_en">
+      <bpmn:documentation>Joins acceptance (after stock booking and refund) and rejection before the final customer message.</bpmn:documentation>
+      <bpmn:incoming>f42</bpmn:incoming>
+      <bpmn:incoming>f43</bpmn:incoming>
+      <bpmn:outgoing>f47</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="t_end_notify" name="Inform customer of result&#10;«Messaging»">
+      <bpmn:documentation>Job worker "update-return-status": for each status in newStatuses it sends PATCH to the REST mock (skips statuses already set, so a retry is safe) and publishes a ReturnStatusChanged event to RabbitMQ (exchange returns.status). The customer-info consumer informs the customer. Statuses: accepted: ACCEPTED, REFUNDED, CLOSED; rejected: REJECTED, CLOSED. Sent only after refund and stock booking (Sprint 3 finding: customer was informed before the refund).</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-return-status" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=if acceptanceDecision.result = &#34;ACCEPT&#34; or get or else(accepted, false) = true then [&#34;ACCEPTED&#34;,&#34;REFUNDED&#34;,&#34;CLOSED&#34;] else [&#34;REJECTED&#34;,&#34;CLOSED&#34;]" target="newStatuses" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f47</bpmn:incoming>
+      <bpmn:outgoing>f44</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="end" name="Return completed">
+      <bpmn:incoming>f44</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="t_gr" name="Inspect and record condition&#10;«Human»">
+      <bpmn:documentation>Warehouse opens the parcel and records, per item, the condition (AS_NEW, MINOR_WEAR, VISIBLY_WORN, DAMAGED, MISSING_TAGS, MISSING_PARTS), tag, original packaging and a note. Fixed scale = same values as the gRPC service.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="inspect-condition" />
+        <zeebe:assignmentDefinition candidateGroups="warehouse" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=for i in items return {sku: i.sku, quantity: i.quantity}" target="inspections" />
+          <zeebe:output source="=inspections" target="inspections" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f50</bpmn:incoming>
+      <bpmn:outgoing>f26</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="gw_rj">
+      <bpmn:documentation>Joins rejection after inspection and rejected borderline cases.</bpmn:documentation>
+      <bpmn:incoming>f29</bpmn:incoming>
+      <bpmn:incoming>f33</bpmn:incoming>
+      <bpmn:outgoing>f48</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="t_reject" name="Decide further use (return / donate / dispose)&#10;«Human»">
+      <bpmn:documentation>Warehouse decides what happens to the rejected goods: RETURN_TO_CUSTOMER, DONATE or DISPOSE (disposition).</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="decide-disposition" />
+        <zeebe:assignmentDefinition candidateGroups="warehouse" />
+        <zeebe:ioMapping>
+          <zeebe:output source="=disposition" target="disposition" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f48</bpmn:incoming>
+      <bpmn:outgoing>f43</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="t_inrev" name="Mark return as in review&#10;«System»">
+      <bpmn:documentation>Job worker "update-return-status": for each status in newStatuses it sends PATCH to the REST mock (skips statuses already set, so a retry is safe) and publishes a ReturnStatusChanged event to RabbitMQ (exchange returns.status). The customer-info consumer informs the customer. Statuses: IN_REVIEW.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-return-status" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=[&#34;IN_REVIEW&#34;]" target="newStatuses" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f10</bpmn:incoming>
+      <bpmn:outgoing>f54</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="t_man1" name="Review registration manually (suspicion or unclear data)&#10;«Human»">
+      <bpmn:documentation>Clerk checks the registration (suspicion or unclear data), may correct data, and decides: reject or continue. The decision and a reason are written to the case (rejectRegistration, reviewNote).</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="review-registration" />
+        <zeebe:assignmentDefinition candidateGroups="customer-service" />
+        <zeebe:ioMapping>
+          <zeebe:output source="=rejectRegistration" target="rejectRegistration" />
+          <zeebe:output source="=reviewNote" target="reviewNote" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f54</bpmn:incoming>
+      <bpmn:outgoing>f12</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="gw_m1" name="Reject registration?" default="f13">
+      <bpmn:incoming>f12</bpmn:incoming>
+      <bpmn:outgoing>f13</bpmn:outgoing>
+      <bpmn:outgoing>f14</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="t_deny2" name="Notify rejection&#10;«System»">
+      <bpmn:documentation>Job worker "update-return-status": for each status in newStatuses it sends PATCH to the REST mock (skips statuses already set, so a retry is safe) and publishes a ReturnStatusChanged event to RabbitMQ (exchange returns.status). The customer-info consumer informs the customer. Statuses: REJECTED, CLOSED.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-return-status" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=[&#34;REJECTED&#34;,&#34;CLOSED&#34;]" target="newStatuses" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f14</bpmn:incoming>
+      <bpmn:outgoing>f15</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="end_deny2" name="Return rejected">
+      <bpmn:incoming>f15</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="t_label_man" name="Create label manually&#10;«Human»">
+      <bpmn:documentation>Error handling: the shipping API is down. A clerk creates the label in the carrier portal and enters the label URL (labelUrl).</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="create-label-manually" />
+        <zeebe:assignmentDefinition candidateGroups="customer-service" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>f17</bpmn:incoming>
+      <bpmn:outgoing>f18</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="t_mrev" name="Mark return as manual review&#10;«System»">
+      <bpmn:documentation>Job worker "update-return-status": for each status in newStatuses it sends PATCH to the REST mock (skips statuses already set, so a retry is safe) and publishes a ReturnStatusChanged event to RabbitMQ (exchange returns.status). The customer-info consumer informs the customer. Statuses: MANUAL_REVIEW.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-return-status" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=[&#34;MANUAL_REVIEW&#34;]" target="newStatuses" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f30</bpmn:incoming>
+      <bpmn:outgoing>f55</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="t_man2" name="Review borderline case &#38; document decision&#10;«Human»">
+      <bpmn:documentation>Clerk decides the borderline case (gRPC recommendation and rule result are shown) and must document the justification (required field).</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="review-borderline" />
+        <zeebe:assignmentDefinition candidateGroups="customer-service" />
+        <zeebe:ioMapping>
+          <zeebe:output source="=accepted" target="accepted" />
+          <zeebe:output source="=justification" target="justification" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f55</bpmn:incoming>
+      <bpmn:outgoing>f31</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="gw_m2" name="Accepted?" default="f33">
+      <bpmn:incoming>f31</bpmn:incoming>
+      <bpmn:outgoing>f32</bpmn:outgoing>
+      <bpmn:outgoing>f33</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="t_refund_man" name="Resolve refund manually&#10;«Human»">
+      <bpmn:documentation>Error handling: the refund failed. A clerk clarifies with the customer or the payment provider and records the reference (refundReference).</bpmn:documentation>
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="resolve-refund" />
+        <zeebe:assignmentDefinition candidateGroups="customer-service" />
+        <zeebe:ioMapping>
+          <zeebe:output source="=refundReference" target="refundReference" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f39</bpmn:incoming>
+      <bpmn:outgoing>f40</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:dataStoreReference id="DS_case" name="Return store (REST mock)" />
+    <bpmn:dataStoreReference id="DS_wms" name="Condition results (gRPC service)" />
+    <bpmn:dataStoreReference id="DS_erp" name="ERP (simulated page)" />
+    <bpmn:sequenceFlow id="f1" sourceRef="s_web" targetRef="gw_cr" />
+    <bpmn:sequenceFlow id="f2" sourceRef="s_mkt" targetRef="gw_cr" />
+    <bpmn:sequenceFlow id="f3" sourceRef="s_mail" targetRef="t_parse" />
+    <bpmn:sequenceFlow id="f4" sourceRef="t_parse" targetRef="gw_cr" />
+    <bpmn:sequenceFlow id="f45" sourceRef="gw_cr" targetRef="t_create" />
+    <bpmn:sequenceFlow id="f5" sourceRef="t_create" targetRef="t_ai" />
+    <bpmn:sequenceFlow id="f6" sourceRef="t_ai" targetRef="t_rule" />
+    <bpmn:sequenceFlow id="f7" sourceRef="t_rule" targetRef="gw1" />
+    <bpmn:sequenceFlow id="f8" name="eligible" sourceRef="gw1" targetRef="gw_join">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=registrationCheck.result = "ELIGIBLE"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="f9" name="not eligible" sourceRef="gw1" targetRef="t_deny">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=registrationCheck.result = "NOT_ELIGIBLE"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="f10" name="unclear / suspicion" sourceRef="gw1" targetRef="t_inrev" />
+    <bpmn:sequenceFlow id="f11" sourceRef="t_deny" targetRef="end_deny" />
+    <bpmn:sequenceFlow id="f12" sourceRef="t_man1" targetRef="gw_m1" />
+    <bpmn:sequenceFlow id="f13" name="no" sourceRef="gw_m1" targetRef="gw_join" />
+    <bpmn:sequenceFlow id="f14" name="yes" sourceRef="gw_m1" targetRef="t_deny2">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=rejectRegistration = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="f15" sourceRef="t_deny2" targetRef="end_deny2" />
+    <bpmn:sequenceFlow id="f16" sourceRef="gw_join" targetRef="t_label" />
+    <bpmn:sequenceFlow id="f17" sourceRef="b_label" targetRef="t_label_man" />
+    <bpmn:sequenceFlow id="f18" sourceRef="t_label_man" targetRef="gw_nt" />
+    <bpmn:sequenceFlow id="f19" sourceRef="t_label" targetRef="gw_nt" />
+    <bpmn:sequenceFlow id="f46" sourceRef="gw_nt" targetRef="t_notify" />
+    <bpmn:sequenceFlow id="f20" sourceRef="t_notify" targetRef="gw_evt" />
+    <bpmn:sequenceFlow id="f21" sourceRef="gw_evt" targetRef="ev_arrive" />
+    <bpmn:sequenceFlow id="f22" sourceRef="gw_evt" targetRef="ev_timeout" />
+    <bpmn:sequenceFlow id="f23" sourceRef="ev_timeout" targetRef="t_expired" />
+    <bpmn:sequenceFlow id="f24" sourceRef="t_expired" targetRef="end_expired" />
+    <bpmn:sequenceFlow id="f25" sourceRef="ev_arrive" targetRef="t_notify_in" />
+    <bpmn:sequenceFlow id="f54" sourceRef="t_inrev" targetRef="t_man1" />
+    <bpmn:sequenceFlow id="f55" sourceRef="t_mrev" targetRef="t_man2" />
+    <bpmn:sequenceFlow id="f50" sourceRef="t_notify_in" targetRef="t_gr" />
+    <bpmn:sequenceFlow id="f26" sourceRef="t_gr" targetRef="t_gr_rec" />
+    <bpmn:sequenceFlow id="f51" sourceRef="t_gr_rec" targetRef="t_decide" />
+    <bpmn:sequenceFlow id="f27" sourceRef="t_decide" targetRef="gw2" />
+    <bpmn:sequenceFlow id="f28" name="accept" sourceRef="gw2" targetRef="gw_acc">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=acceptanceDecision.result = "ACCEPT"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="f29" name="reject" sourceRef="gw2" targetRef="gw_rj">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=acceptanceDecision.result = "REJECT"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="f30" name="borderline" sourceRef="gw2" targetRef="t_mrev" />
+    <bpmn:sequenceFlow id="f31" sourceRef="t_man2" targetRef="gw_m2" />
+    <bpmn:sequenceFlow id="f32" name="yes" sourceRef="gw_m2" targetRef="gw_acc">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=accepted = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="f33" name="no" sourceRef="gw_m2" targetRef="gw_rj" />
+    <bpmn:sequenceFlow id="f48" sourceRef="gw_rj" targetRef="t_reject" />
+    <bpmn:sequenceFlow id="f34" sourceRef="gw_acc" targetRef="gw_par" />
+    <bpmn:sequenceFlow id="f35" sourceRef="gw_par" targetRef="t_stock" />
+    <bpmn:sequenceFlow id="f36" sourceRef="gw_par" targetRef="t_refund" />
+    <bpmn:sequenceFlow id="f37" sourceRef="t_stock" targetRef="gw_pj" />
+    <bpmn:sequenceFlow id="f38" sourceRef="t_refund" targetRef="gw_rm" />
+    <bpmn:sequenceFlow id="f39" sourceRef="b_refund" targetRef="t_refund_man" />
+    <bpmn:sequenceFlow id="f40" sourceRef="t_refund_man" targetRef="gw_rm" />
+    <bpmn:sequenceFlow id="f41" sourceRef="gw_rm" targetRef="gw_pj" />
+    <bpmn:sequenceFlow id="f42" sourceRef="gw_pj" targetRef="gw_en" />
+    <bpmn:sequenceFlow id="f43" sourceRef="t_reject" targetRef="gw_en" />
+    <bpmn:sequenceFlow id="f47" sourceRef="gw_en" targetRef="t_end_notify" />
+    <bpmn:sequenceFlow id="f44" sourceRef="t_end_notify" targetRef="end" />
+    <bpmn:textAnnotation id="Ann_2">
+      <bpmn:text>W15: tracking events and expected daily return volume feed the warehouse shift planning. Weigh the cost of shipment tracking against the benefit.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:textAnnotation id="Ann_3">
+      <bpmn:text>W13: status message to the customer for label, goods receipt and result; every status change is also an event (RabbitMQ, Sprint 2).</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:textAnnotation id="Ann_Leg">
+      <bpmn:text>Colour = target implementation: blue = system/service/messaging · green = rules (DMN) · orange = human · purple = software robot (RPA, Sprint 5) · red = AI (Sprint 5). In Sprint 4 the red and purple steps run as user tasks or stubs.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_2" sourceRef="Ann_2" targetRef="t_notify" />
+    <bpmn:association id="Assoc_3" sourceRef="Ann_3" targetRef="t_notify" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_Soll">
+    <bpmndi:BPMNPlane id="Plane_Soll" bpmnElement="Collab_Soll">
+      <bpmndi:BPMNShape id="Participant_Soll_di" bpmnElement="Participant_Soll" isHorizontal="true">
+        <dc:Bounds x="0" y="140" width="3200" height="1180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Ext_Markt_di" bpmnElement="Ext_Markt" isHorizontal="true">
+        <dc:Bounds x="30" y="0" width="260" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Ext_Kunde_di" bpmnElement="Ext_Kunde" isHorizontal="true">
+        <dc:Bounds x="300" y="0" width="2900" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_WF_di" bpmnElement="Lane_WF" isHorizontal="true">
+        <dc:Bounds x="30" y="140" width="3170" height="620" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Lager_di" bpmnElement="Lane_Lager" isHorizontal="true">
+        <dc:Bounds x="30" y="760" width="3170" height="230" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_SB_di" bpmnElement="Lane_SB" isHorizontal="true">
+        <dc:Bounds x="30" y="990" width="3170" height="330" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_mkt_di" bpmnElement="s_mkt">
+        <dc:Bounds x="172" y="167" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="214" y="162" width="100" height="46" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_web_di" bpmnElement="s_web">
+        <dc:Bounds x="332" y="167" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="374" y="162" width="100" height="46" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_mail_di" bpmnElement="s_mail">
+        <dc:Bounds x="492" y="167" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="534" y="162" width="100" height="46" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_parse_di" bpmnElement="t_parse" bioc:stroke="#831311" bioc:fill="#ffcdd2">
+        <dc:Bounds x="455" y="290" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_cr_di" bpmnElement="gw_cr" isMarkerVisible="true">
+        <dc:Bounds x="235" y="445" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_create_di" bpmnElement="t_create" bioc:stroke="#0d4372" bioc:fill="#bbdefb">
+        <dc:Bounds x="335" y="430" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_ai_di" bpmnElement="t_ai" bioc:stroke="#831311" bioc:fill="#ffcdd2">
+        <dc:Bounds x="505" y="430" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_rule_di" bpmnElement="t_rule" bioc:stroke="#205022" bioc:fill="#c8e6c9">
+        <dc:Bounds x="685" y="430" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw1_di" bpmnElement="gw1" isMarkerVisible="true">
+        <dc:Bounds x="875" y="445" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="802" y="442" width="72" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_deny_di" bpmnElement="t_deny" bioc:stroke="#0d4372" bioc:fill="#bbdefb">
+        <dc:Bounds x="1005" y="340" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_deny_di" bpmnElement="end_deny">
+        <dc:Bounds x="1212" y="362" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_join_di" bpmnElement="gw_join" isMarkerVisible="true">
+        <dc:Bounds x="985" y="445" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_label_di" bpmnElement="t_label" bioc:stroke="#0d4372" bioc:fill="#bbdefb">
+        <dc:Bounds x="1075" y="430" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="b_label_di" bpmnElement="b_label">
+        <dc:Bounds x="1147" y="492" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1035" y="514" width="110" height="30" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_nt_di" bpmnElement="gw_nt" isMarkerVisible="true">
+        <dc:Bounds x="1210" y="445" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_notify_di" bpmnElement="t_notify" bioc:stroke="#0d4372" bioc:fill="#bbdefb">
+        <dc:Bounds x="1305" y="430" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_evt_di" bpmnElement="gw_evt">
+        <dc:Bounds x="1475" y="445" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ev_arrive_di" bpmnElement="ev_arrive">
+        <dc:Bounds x="1602" y="452" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ev_timeout_di" bpmnElement="ev_timeout">
+        <dc:Bounds x="1682" y="362" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_expired_di" bpmnElement="t_expired" bioc:stroke="#0d4372" bioc:fill="#bbdefb">
+        <dc:Bounds x="1805" y="340" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_expired_di" bpmnElement="end_expired">
+        <dc:Bounds x="2002" y="362" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_notify_in_di" bpmnElement="t_notify_in" bioc:stroke="#0d4372" bioc:fill="#bbdefb">
+        <dc:Bounds x="1725" y="430" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_gr_rec_di" bpmnElement="t_gr_rec" bioc:stroke="#0d4372" bioc:fill="#bbdefb">
+        <dc:Bounds x="1885" y="580" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_decide_di" bpmnElement="t_decide" bioc:stroke="#205022" bioc:fill="#c8e6c9">
+        <dc:Bounds x="1885" y="430" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw2_di" bpmnElement="gw2" isMarkerVisible="true">
+        <dc:Bounds x="2075" y="445" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2062" y="420" width="76" height="22" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_acc_di" bpmnElement="gw_acc" isMarkerVisible="true">
+        <dc:Bounds x="2235" y="445" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_par_di" bpmnElement="gw_par">
+        <dc:Bounds x="2375" y="445" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_stock_di" bpmnElement="t_stock" bioc:stroke="#5b176d" bioc:fill="#e1bee7">
+        <dc:Bounds x="2505" y="360" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_refund_di" bpmnElement="t_refund" bioc:stroke="#0d4372" bioc:fill="#bbdefb">
+        <dc:Bounds x="2505" y="500" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="b_refund_di" bpmnElement="b_refund">
+        <dc:Bounds x="2512" y="562" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2550" y="583" width="100" height="30" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_rm_di" bpmnElement="gw_rm" isMarkerVisible="true">
+        <dc:Bounds x="2655" y="515" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_pj_di" bpmnElement="gw_pj">
+        <dc:Bounds x="2755" y="445" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_en_di" bpmnElement="gw_en" isMarkerVisible="true">
+        <dc:Bounds x="2830" y="445" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_end_notify_di" bpmnElement="t_end_notify" bioc:stroke="#0d4372" bioc:fill="#bbdefb">
+        <dc:Bounds x="2905" y="430" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_di" bpmnElement="end">
+        <dc:Bounds x="3062" y="452" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_gr_di" bpmnElement="t_gr" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2">
+        <dc:Bounds x="1725" y="800" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_rj_di" bpmnElement="gw_rj" isMarkerVisible="true">
+        <dc:Bounds x="2125" y="815" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_reject_di" bpmnElement="t_reject" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2">
+        <dc:Bounds x="2205" y="800" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_inrev_di" bpmnElement="t_inrev" bioc:stroke="#0d4372" bioc:fill="#bbdefb">
+        <dc:Bounds x="845" y="560" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_mrev_di" bpmnElement="t_mrev" bioc:stroke="#0d4372" bioc:fill="#bbdefb">
+        <dc:Bounds x="2045" y="1050" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_man1_di" bpmnElement="t_man1" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2">
+        <dc:Bounds x="1005" y="1050" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_m1_di" bpmnElement="gw_m1" isMarkerVisible="true">
+        <dc:Bounds x="1165" y="1065" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1118" y="1118" width="68" height="30" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_deny2_di" bpmnElement="t_deny2" bioc:stroke="#0d4372" bioc:fill="#bbdefb">
+        <dc:Bounds x="1225" y="1150" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_deny2_di" bpmnElement="end_deny2">
+        <dc:Bounds x="1422" y="1172" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_label_man_di" bpmnElement="t_label_man" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2">
+        <dc:Bounds x="1305" y="1050" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_man2_di" bpmnElement="t_man2" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2">
+        <dc:Bounds x="2205" y="1050" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_m2_di" bpmnElement="gw_m2" isMarkerVisible="true">
+        <dc:Bounds x="2375" y="1065" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_refund_man_di" bpmnElement="t_refund_man" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2">
+        <dc:Bounds x="2625" y="1050" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DS_case_di" bpmnElement="DS_case">
+        <dc:Bounds x="365" y="540" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="330" y="591" width="120" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DS_wms_di" bpmnElement="DS_wms">
+        <dc:Bounds x="2025" y="595" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2005" y="646" width="90" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DS_erp_di" bpmnElement="DS_erp">
+        <dc:Bounds x="2535" y="285" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2500" y="257" width="120" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Ann_2_di" bpmnElement="Ann_2">
+        <dc:Bounds x="1390" y="650" width="270" height="100" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Ann_3_di" bpmnElement="Ann_3">
+        <dc:Bounds x="1085" y="155" width="180" height="95" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Ann_Leg_di" bpmnElement="Ann_Leg">
+        <dc:Bounds x="660" y="150" width="360" height="70" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="f1_di" bpmnElement="f1">
+        <di:waypoint x="350" y="203" />
+        <di:waypoint x="350" y="290" />
+        <di:waypoint x="260" y="290" />
+        <di:waypoint x="260" y="445" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f2_di" bpmnElement="f2">
+        <di:waypoint x="190" y="203" />
+        <di:waypoint x="190" y="290" />
+        <di:waypoint x="260" y="290" />
+        <di:waypoint x="260" y="445" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f3_di" bpmnElement="f3">
+        <di:waypoint x="510" y="203" />
+        <di:waypoint x="510" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f4_di" bpmnElement="f4">
+        <di:waypoint x="455" y="330" />
+        <di:waypoint x="260" y="330" />
+        <di:waypoint x="260" y="445" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f45_di" bpmnElement="f45">
+        <di:waypoint x="285" y="470" />
+        <di:waypoint x="335" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f5_di" bpmnElement="f5">
+        <di:waypoint x="445" y="470" />
+        <di:waypoint x="505" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f6_di" bpmnElement="f6">
+        <di:waypoint x="615" y="470" />
+        <di:waypoint x="685" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f7_di" bpmnElement="f7">
+        <di:waypoint x="795" y="470" />
+        <di:waypoint x="875" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f8_di" bpmnElement="f8">
+        <di:waypoint x="925" y="470" />
+        <di:waypoint x="985" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f9_di" bpmnElement="f9">
+        <di:waypoint x="900" y="445" />
+        <di:waypoint x="900" y="380" />
+        <di:waypoint x="1005" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f10_di" bpmnElement="f10">
+        <di:waypoint x="900" y="495" />
+        <di:waypoint x="900" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f54_di" bpmnElement="f54">
+        <di:waypoint x="900" y="640" />
+        <di:waypoint x="900" y="1090" />
+        <di:waypoint x="1005" y="1090" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f55_di" bpmnElement="f55">
+        <di:waypoint x="2155" y="1090" />
+        <di:waypoint x="2205" y="1090" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f11_di" bpmnElement="f11">
+        <di:waypoint x="1115" y="380" />
+        <di:waypoint x="1212" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f12_di" bpmnElement="f12">
+        <di:waypoint x="1115" y="1090" />
+        <di:waypoint x="1165" y="1090" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f13_di" bpmnElement="f13">
+        <di:waypoint x="1190" y="1065" />
+        <di:waypoint x="1190" y="575" />
+        <di:waypoint x="1010" y="575" />
+        <di:waypoint x="1010" y="495" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f14_di" bpmnElement="f14">
+        <di:waypoint x="1190" y="1115" />
+        <di:waypoint x="1190" y="1190" />
+        <di:waypoint x="1225" y="1190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f15_di" bpmnElement="f15">
+        <di:waypoint x="1335" y="1190" />
+        <di:waypoint x="1422" y="1190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f16_di" bpmnElement="f16">
+        <di:waypoint x="1035" y="470" />
+        <di:waypoint x="1075" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f17_di" bpmnElement="f17">
+        <di:waypoint x="1165" y="528" />
+        <di:waypoint x="1165" y="1000" />
+        <di:waypoint x="1360" y="1000" />
+        <di:waypoint x="1360" y="1050" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f18_di" bpmnElement="f18">
+        <di:waypoint x="1305" y="1090" />
+        <di:waypoint x="1235" y="1090" />
+        <di:waypoint x="1235" y="495" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f19_di" bpmnElement="f19">
+        <di:waypoint x="1185" y="470" />
+        <di:waypoint x="1210" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f46_di" bpmnElement="f46">
+        <di:waypoint x="1260" y="470" />
+        <di:waypoint x="1305" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f20_di" bpmnElement="f20">
+        <di:waypoint x="1415" y="470" />
+        <di:waypoint x="1475" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f21_di" bpmnElement="f21">
+        <di:waypoint x="1525" y="470" />
+        <di:waypoint x="1602" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f22_di" bpmnElement="f22">
+        <di:waypoint x="1500" y="445" />
+        <di:waypoint x="1500" y="380" />
+        <di:waypoint x="1682" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f23_di" bpmnElement="f23">
+        <di:waypoint x="1718" y="380" />
+        <di:waypoint x="1805" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f24_di" bpmnElement="f24">
+        <di:waypoint x="1915" y="380" />
+        <di:waypoint x="2002" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f25_di" bpmnElement="f25">
+        <di:waypoint x="1638" y="470" />
+        <di:waypoint x="1725" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f50_di" bpmnElement="f50">
+        <di:waypoint x="1780" y="510" />
+        <di:waypoint x="1780" y="800" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f26_di" bpmnElement="f26">
+        <di:waypoint x="1835" y="840" />
+        <di:waypoint x="1940" y="840" />
+        <di:waypoint x="1940" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f51_di" bpmnElement="f51">
+        <di:waypoint x="1940" y="580" />
+        <di:waypoint x="1940" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f27_di" bpmnElement="f27">
+        <di:waypoint x="1995" y="470" />
+        <di:waypoint x="2075" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f28_di" bpmnElement="f28">
+        <di:waypoint x="2125" y="470" />
+        <di:waypoint x="2235" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f29_di" bpmnElement="f29">
+        <di:waypoint x="2100" y="495" />
+        <di:waypoint x="2100" y="840" />
+        <di:waypoint x="2125" y="840" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f30_di" bpmnElement="f30">
+        <di:waypoint x="2100" y="495" />
+        <di:waypoint x="2100" y="1050" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f31_di" bpmnElement="f31">
+        <di:waypoint x="2315" y="1090" />
+        <di:waypoint x="2375" y="1090" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f32_di" bpmnElement="f32">
+        <di:waypoint x="2425" y="1090" />
+        <di:waypoint x="2490" y="1090" />
+        <di:waypoint x="2490" y="560" />
+        <di:waypoint x="2260" y="560" />
+        <di:waypoint x="2260" y="495" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f33_di" bpmnElement="f33">
+        <di:waypoint x="2400" y="1065" />
+        <di:waypoint x="2400" y="935" />
+        <di:waypoint x="2150" y="935" />
+        <di:waypoint x="2150" y="865" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f48_di" bpmnElement="f48">
+        <di:waypoint x="2175" y="840" />
+        <di:waypoint x="2205" y="840" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f34_di" bpmnElement="f34">
+        <di:waypoint x="2285" y="470" />
+        <di:waypoint x="2375" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f35_di" bpmnElement="f35">
+        <di:waypoint x="2425" y="470" />
+        <di:waypoint x="2467" y="470" />
+        <di:waypoint x="2467" y="400" />
+        <di:waypoint x="2505" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f36_di" bpmnElement="f36">
+        <di:waypoint x="2425" y="470" />
+        <di:waypoint x="2467" y="470" />
+        <di:waypoint x="2467" y="540" />
+        <di:waypoint x="2505" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f37_di" bpmnElement="f37">
+        <di:waypoint x="2615" y="400" />
+        <di:waypoint x="2717" y="400" />
+        <di:waypoint x="2717" y="470" />
+        <di:waypoint x="2755" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f38_di" bpmnElement="f38">
+        <di:waypoint x="2615" y="540" />
+        <di:waypoint x="2655" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f39_di" bpmnElement="f39">
+        <di:waypoint x="2530" y="598" />
+        <di:waypoint x="2530" y="1090" />
+        <di:waypoint x="2625" y="1090" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f40_di" bpmnElement="f40">
+        <di:waypoint x="2680" y="1050" />
+        <di:waypoint x="2680" y="565" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f41_di" bpmnElement="f41">
+        <di:waypoint x="2680" y="515" />
+        <di:waypoint x="2680" y="470" />
+        <di:waypoint x="2755" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f42_di" bpmnElement="f42">
+        <di:waypoint x="2805" y="470" />
+        <di:waypoint x="2830" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f43_di" bpmnElement="f43">
+        <di:waypoint x="2315" y="840" />
+        <di:waypoint x="2855" y="840" />
+        <di:waypoint x="2855" y="495" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f47_di" bpmnElement="f47">
+        <di:waypoint x="2880" y="470" />
+        <di:waypoint x="2905" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f44_di" bpmnElement="f44">
+        <di:waypoint x="3015" y="470" />
+        <di:waypoint x="3062" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="m1_di" bpmnElement="m1">
+        <di:waypoint x="190" y="60" />
+        <di:waypoint x="190" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="m2_di" bpmnElement="m2">
+        <di:waypoint x="350" y="60" />
+        <di:waypoint x="350" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="m3_di" bpmnElement="m3">
+        <di:waypoint x="510" y="60" />
+        <di:waypoint x="510" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="m4_di" bpmnElement="m4">
+        <di:waypoint x="1060" y="340" />
+        <di:waypoint x="1060" y="60" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="m5_di" bpmnElement="m5">
+        <di:waypoint x="1280" y="1150" />
+        <di:waypoint x="1280" y="60" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="m6_di" bpmnElement="m6">
+        <di:waypoint x="1360" y="430" />
+        <di:waypoint x="1360" y="60" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="m7_di" bpmnElement="m7">
+        <di:waypoint x="1620" y="60" />
+        <di:waypoint x="1620" y="452" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="m8_di" bpmnElement="m8">
+        <di:waypoint x="1860" y="340" />
+        <di:waypoint x="1860" y="60" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="m9_di" bpmnElement="m9">
+        <di:waypoint x="2960" y="430" />
+        <di:waypoint x="2960" y="60" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="m10_di" bpmnElement="m10">
+        <di:waypoint x="1780" y="430" />
+        <di:waypoint x="1780" y="60" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_DS_case_di" bpmnElement="Assoc_DS_case">
+        <di:waypoint x="390" y="510" />
+        <di:waypoint x="390" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_DS_wms_di" bpmnElement="Assoc_DS_wms">
+        <di:waypoint x="1995" y="620" />
+        <di:waypoint x="2025" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_DS_erp_di" bpmnElement="Assoc_DS_erp">
+        <di:waypoint x="2560" y="360" />
+        <di:waypoint x="2560" y="335" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_2_di" bpmnElement="Assoc_2">
+        <di:waypoint x="1525" y="650" />
+        <di:waypoint x="1360" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_3_di" bpmnElement="Assoc_3">
+        <di:waypoint x="1200" y="250" />
+        <di:waypoint x="1320" y="430" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

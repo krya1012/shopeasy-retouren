@@ -1,0 +1,177 @@
+{
+  "components": [
+    {
+      "type": "text",
+      "text": "### Capture return from e-mail\n\nRead the e-mail and enter the data. Leave the reason empty if the e-mail does not state one: the rules then send the case to a manual review.",
+      "id": "Text_1",
+      "layout": {
+        "row": "row_0",
+        "columns": null
+      }
+    },
+    {
+      "type": "textfield",
+      "id": "Field_2",
+      "key": "emailFrom",
+      "label": "E-mail from",
+      "layout": {
+        "row": "row_1",
+        "columns": null
+      },
+      "readonly": true
+    },
+    {
+      "type": "textfield",
+      "id": "Field_3",
+      "key": "emailSubject",
+      "label": "Subject",
+      "layout": {
+        "row": "row_2",
+        "columns": null
+      },
+      "readonly": true
+    },
+    {
+      "type": "textarea",
+      "id": "Field_4",
+      "key": "emailBody",
+      "label": "E-mail text",
+      "layout": {
+        "row": "row_3",
+        "columns": null
+      },
+      "readonly": true
+    },
+    {
+      "type": "textfield",
+      "id": "Field_5",
+      "key": "orderId",
+      "label": "Order number",
+      "layout": {
+        "row": "row_4",
+        "columns": null
+      },
+      "validate": {
+        "required": true,
+        "pattern": "^ORD-\\d{4}-\\d{6}$",
+        "patternErrorMessage": "Format: ORD-2026-118932"
+      },
+      "description": "Example: ORD-2026-118932"
+    },
+    {
+      "type": "textfield",
+      "id": "Field_6",
+      "key": "customerEmail",
+      "label": "Customer e-mail",
+      "layout": {
+        "row": "row_5",
+        "columns": null
+      },
+      "validate": {
+        "required": true,
+        "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+        "patternErrorMessage": "Enter a valid e-mail address"
+      }
+    },
+    {
+      "type": "dynamiclist",
+      "id": "List_9",
+      "path": "items",
+      "label": "Items to return",
+      "components": [
+        {
+          "type": "textfield",
+          "id": "Field_7",
+          "key": "sku",
+          "label": "Article number (SKU)",
+          "layout": {
+            "row": "row_0",
+            "columns": null
+          },
+          "validate": {
+            "required": true,
+            "pattern": "^SH-[A-Z]{3}-\\d{3}-[A-Z0-9]+$",
+            "patternErrorMessage": "Format: SH-BLZ-042-M"
+          }
+        },
+        {
+          "type": "number",
+          "id": "Field_8",
+          "key": "quantity",
+          "label": "Quantity",
+          "layout": {
+            "row": "row_0",
+            "columns": null
+          },
+          "validate": {
+            "required": true,
+            "min": 1
+          }
+        }
+      ],
+      "isRepeating": true,
+      "allowAddRemove": true,
+      "defaultRepetitions": 1,
+      "showOutline": true,
+      "layout": {
+        "row": "row_6",
+        "columns": null
+      }
+    },
+    {
+      "type": "select",
+      "id": "Field_10",
+      "key": "reason",
+      "label": "Return reason (optional)",
+      "layout": {
+        "row": "row_7",
+        "columns": null
+      },
+      "values": [
+        {
+          "label": "SIZE_TOO_SMALL",
+          "value": "SIZE_TOO_SMALL"
+        },
+        {
+          "label": "SIZE_TOO_LARGE",
+          "value": "SIZE_TOO_LARGE"
+        },
+        {
+          "label": "NOT_AS_DESCRIBED",
+          "value": "NOT_AS_DESCRIBED"
+        },
+        {
+          "label": "DEFECTIVE",
+          "value": "DEFECTIVE"
+        },
+        {
+          "label": "CHANGED_MIND",
+          "value": "CHANGED_MIND"
+        },
+        {
+          "label": "WRONG_ITEM",
+          "value": "WRONG_ITEM"
+        }
+      ]
+    },
+    {
+      "type": "textarea",
+      "id": "Field_11",
+      "key": "reasonText",
+      "label": "Reason in the customer's words",
+      "layout": {
+        "row": "row_8",
+        "columns": null
+      }
+    }
+  ],
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.34.0"
+  },
+  "schemaVersion": 18,
+  "id": "capture-email-return",
+  "type": "default"
+}

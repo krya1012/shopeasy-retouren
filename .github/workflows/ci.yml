@@ -40,6 +40,32 @@ jobs:
           path: sprint2-integration/*/build/reports/tests/test
           if-no-files-found: ignore
 
+  workflow:
+    name: Workflow model (Camunda Process Test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sprint4-workflow
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v5
+      # The tests start Camunda in a Testcontainers container; the runner has Docker.
+      - name: Test (BPMN model, DMN rules, forms)
+        run: ./gradlew test --console=plain
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: workflow-test-reports
+          path: sprint4-workflow/build/reports/tests/test
+          if-no-files-found: ignore
+
   portal:
     name: Self-service portal (Laravel + Vue)
     runs-on: ubuntu-latest

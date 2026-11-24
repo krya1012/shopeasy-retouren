@@ -1,0 +1,131 @@
+{
+  "components": [
+    {
+      "type": "text",
+      "text": "### Inspect and record condition\n\n**Return** {{returnId}} · **order** {{orderId}} · **customer** {{customerEmail}}\n\nOpen the parcel and record the condition of every item. The values are the same as in the gRPC condition service.",
+      "id": "Text_17",
+      "layout": {
+        "row": "row_0",
+        "columns": null
+      }
+    },
+    {
+      "type": "dynamiclist",
+      "id": "List_24",
+      "path": "inspections",
+      "label": "Items",
+      "components": [
+        {
+          "type": "textfield",
+          "id": "Field_18",
+          "key": "sku",
+          "label": "SKU",
+          "layout": {
+            "row": "row_0",
+            "columns": null
+          },
+          "readonly": true
+        },
+        {
+          "type": "number",
+          "id": "Field_19",
+          "key": "quantity",
+          "label": "Quantity",
+          "layout": {
+            "row": "row_0",
+            "columns": null
+          },
+          "readonly": true
+        },
+        {
+          "type": "select",
+          "id": "Field_20",
+          "key": "condition",
+          "label": "Condition",
+          "layout": {
+            "row": "row_0",
+            "columns": null
+          },
+          "values": [
+            {
+              "label": "AS_NEW",
+              "value": "AS_NEW"
+            },
+            {
+              "label": "MINOR_WEAR",
+              "value": "MINOR_WEAR"
+            },
+            {
+              "label": "VISIBLY_WORN",
+              "value": "VISIBLY_WORN"
+            },
+            {
+              "label": "DAMAGED",
+              "value": "DAMAGED"
+            },
+            {
+              "label": "MISSING_TAGS",
+              "value": "MISSING_TAGS"
+            },
+            {
+              "label": "MISSING_PARTS",
+              "value": "MISSING_PARTS"
+            }
+          ],
+          "validate": {
+            "required": true
+          }
+        },
+        {
+          "type": "checkbox",
+          "id": "Field_21",
+          "key": "tagsPresent",
+          "label": "Tag present",
+          "defaultValue": true,
+          "layout": {
+            "row": "row_0",
+            "columns": null
+          }
+        },
+        {
+          "type": "checkbox",
+          "id": "Field_22",
+          "key": "originalPackaging",
+          "label": "Original packaging",
+          "defaultValue": true,
+          "layout": {
+            "row": "row_0",
+            "columns": null
+          }
+        },
+        {
+          "type": "textfield",
+          "id": "Field_23",
+          "key": "inspectorNote",
+          "label": "Note",
+          "layout": {
+            "row": "row_0",
+            "columns": null
+          }
+        }
+      ],
+      "isRepeating": true,
+      "allowAddRemove": false,
+      "defaultRepetitions": 1,
+      "showOutline": true,
+      "layout": {
+        "row": "row_1",
+        "columns": null
+      }
+    }
+  ],
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.34.0"
+  },
+  "schemaVersion": 18,
+  "id": "inspect-condition",
+  "type": "default"
+}
