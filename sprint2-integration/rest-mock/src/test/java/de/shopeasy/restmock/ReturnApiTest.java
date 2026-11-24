@@ -2,6 +2,8 @@ package de.shopeasy.restmock;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -201,6 +203,113 @@ class ReturnApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("APPROVED"))
                 .andExpect(jsonPath("$.updatedAt").value("2026-09-20T14:05:00Z"));
+    }
+
+    // ---- POST: returns of the web shop and e-mail channel (no marketplace)
+
+    private static final String NEW_RETURN = "{\"orderId\":\"ORD-2026-119001\",\"customerEmail\":\"j.mueller@example.com\","
+            + "\"items\":[{\"sku\":\"SH-BLZ-042-M\",\"quantity\":1}],\"reason\":\"SIZE_TOO_SMALL\","
+            + "\"reasonText\":\"Zu klein\"}";
+
+    @Test
+    void createReturnGives201WithLocationAndTakesNameAndPriceFromTheOrder() throws Exception {
+        mvc.perform(post("/api/v1/returns").contentType(MediaType.APPLICATION_JSON).content(NEW_RETURN))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/api/v1/returns/RET-2026-00463"))
+                .andExpect(jsonPath("$.returnId").value("RET-2026-00463"))
+                .andExpect(jsonPath("$.orderId").value("ORD-2026-119001"))
+                .andExpect(jsonPath("$.status").value("NEW"))
+                .andExpect(jsonPath("$.marketplace").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.reason").value("SIZE_TOO_SMALL"))
+                .andExpect(jsonPath("$.items[0].productName").value("Blazer Slim Fit"))
+                .andExpect(jsonPath("$.items[0].unitPrice").value(89.9))
+                .andExpect(jsonPath("$.customer.customerId").value("CUST-90001"))
+                .andExpect(jsonPath("$.customer.email").value("j.mueller@example.com"));
+    }
+
+    @Test
+    void createdReturnCanBeReadAndItsStatusChanged() throws Exception {
+        mvc.perform(post("/api/v1/returns").contentType(MediaType.APPLICATION_JSON).content(NEW_RETURN))
+                .andExpect(status().isCreated());
+
+        mvc.perform(get("/api/v1/returns/RET-2026-00463"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("NEW"));
+        mvc.perform(patch("/api/v1/returns/RET-2026-00463")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"APPROVED\",\"expectedStatus\":\"NEW\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("APPROVED"));
+        mvc.perform(get("/api/v1/returns").param("status", "NEW"))
+                .andExpect(jsonPath("$.data.length()").value(2));
+    }
+
+    @Test
+    void createWithTheSameIdempotencyKeyGivesTheFirstReturnAgain() throws Exception {
+        mvc.perform(post("/api/v1/returns").header("Idempotency-Key", "case-1")
+                        .contentType(MediaType.APPLICATION_JSON).content(NEW_RETURN))
+                .andExpect(status().isCreated());
+
+        mvc.perform(post("/api/v1/returns").header("Idempotency-Key", "case-1")
+                        .contentType(MediaType.APPLICATION_JSON).content(NEW_RETURN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.returnId").value("RET-2026-00463"));
+
+        mvc.perform(get("/api/v1/returns"))
+                .andExpect(jsonPath("$.data.length()").value(7));
+    }
+
+    @Test
+    void createWithAnotherIdempotencyKeyCreatesAnotherReturn() throws Exception {
+        mvc.perform(post("/api/v1/returns").header("Idempotency-Key", "case-1")
+                .contentType(MediaType.APPLICATION_JSON).content(NEW_RETURN));
+
+        mvc.perform(post("/api/v1/returns").header("Idempotency-Key", "case-2")
+                        .contentType(MediaType.APPLICATION_JSON).content(NEW_RETURN))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.returnId").value("RET-2026-00464"));
+    }
+
+    @Test
+    void createForAnUnknownOrderStillCreatesTheReturnWithUnknownPrices() throws Exception {
+        mvc.perform(post("/api/v1/returns").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"orderId\":\"ORD-UNKNOWN\",\"customerEmail\":\"a@example.com\","
+                                + "\"items\":[{\"sku\":\"SH-XXX-001-M\",\"quantity\":2}]}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.reason").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.items[0].productName").value("SH-XXX-001-M"))
+                .andExpect(jsonPath("$.items[0].quantity").value(2))
+                .andExpect(jsonPath("$.items[0].unitPrice").value(0));
+    }
+
+    @Test
+    void createWithInvalidDataGives400() throws Exception {
+        String[] bodies = {
+                "{}",
+                "{\"orderId\":\"ORD-2026-119001\",\"customerEmail\":\"no-email\",\"items\":[{\"sku\":\"A\",\"quantity\":1}]}",
+                "{\"orderId\":\"ORD-2026-119001\",\"customerEmail\":\"a@example.com\",\"items\":[]}",
+                "{\"orderId\":\"ORD-2026-119001\",\"customerEmail\":\"a@example.com\",\"items\":[{\"sku\":\"\",\"quantity\":1}]}",
+                "{\"orderId\":\"ORD-2026-119001\",\"customerEmail\":\"a@example.com\",\"items\":[{\"sku\":\"A\",\"quantity\":0}]}",
+                "{\"orderId\":\"ORD-2026-119001\",\"customerEmail\":\"a@example.com\",\"items\":[{\"sku\":\"A\",\"quantity\":1}],"
+                        + "\"reason\":\"NONSENSE\"}",
+                "not json"};
+        for (String body : bodies) {
+            mvc.perform(post("/api/v1/returns").contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isBadRequest());
+        }
+        mvc.perform(get("/api/v1/returns"))
+                .andExpect(jsonPath("$.data.length()").value(6));
+    }
+
+    @Test
+    void ordersOfTheWebShopAreAvailableWithRelativeDeliveryDates() throws Exception {
+        mvc.perform(get("/api/v1/orders/ORD-2026-119002"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.marketplace").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.items[0].sku").value("SH-JKT-088-L"))
+                .andExpect(jsonPath("$.deliveredAt").exists());
+        mvc.perform(get("/api/v1/orders/ORD-2026-119004"))
+                .andExpect(jsonPath("$.totalAmount").value(347.9));
     }
 
     @Test

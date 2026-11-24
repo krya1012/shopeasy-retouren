@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,14 @@ public class ReturnStore {
 
     private final Map<String, ReturnReport> returns = new ConcurrentHashMap<>();
     private final Map<String, Order> orders = new ConcurrentHashMap<>();
+    /** Idempotency key of a POST -> id of the return it created, so a repeated POST creates nothing new. */
+    private final Map<String, String> createdByKey = new ConcurrentHashMap<>();
+    /** Number of the next created return; the test returns use 00457 to 00462. */
+    private final AtomicInteger nextNumber = new AtomicInteger(463);
+
+    /** The result of {@link #create}: the return and whether this call created it (false: repeated call). */
+    public record Created(ReturnReport report, boolean isNew) {
+    }
 
     public ReturnStore() {
         loadTestData();
@@ -72,6 +81,39 @@ public class ReturnStore {
         }));
     }
 
+    /**
+     * Creates a return for the web shop or e-mail channel (status NEW, no marketplace). The articles get name and
+     * price from the order if the order and the article exist; otherwise the name is the article number and the
+     * price is 0.00 (price unknown). The method is {@code synchronized}: the check of the idempotency key and the
+     * creation are one step, so two parallel calls with the same key cannot create two returns.
+     *
+     * @param idempotencyKey optional: the same key again returns the first return and creates nothing
+     */
+    public synchronized Created create(CreateReturn request, String idempotencyKey) {
+        if (idempotencyKey != null && createdByKey.containsKey(idempotencyKey)) {
+            return new Created(returns.get(createdByKey.get(idempotencyKey)), false);
+        }
+        Optional<Order> order = findOrder(request.orderId());
+        List<Item> items = request.items().stream().map(line -> toItem(line, order)).toList();
+        int number = nextNumber.getAndIncrement();
+        String returnId = String.format("RET-2026-%05d", number);
+        String customerId = order.map(o -> o.customer().customerId()).orElse("CUST-" + (90000 + number));
+        Instant now = Instant.now();
+        ReturnReport report = new ReturnReport(returnId, request.orderId(), null, ReturnStatus.NEW, request.reason(),
+                request.reasonText(), now, now, items, new Customer(customerId, request.customerEmail()), null);
+        returns.put(returnId, report);
+        if (idempotencyKey != null) {
+            createdByKey.put(idempotencyKey, returnId);
+        }
+        return new Created(report, true);
+    }
+
+    private static Item toItem(CreateReturn.Line line, Optional<Order> order) {
+        return order.flatMap(o -> o.items().stream().filter(i -> i.sku().equals(line.sku())).findFirst())
+                .map(i -> new Item(i.sku(), i.productName(), line.quantity(), i.unitPrice(), i.currency()))
+                .orElseGet(() -> new Item(line.sku(), line.sku(), line.quantity(), BigDecimal.ZERO, "EUR"));
+    }
+
     private void loadTestData() {
         // The first return is the example from slide 9 of the task (kept exactly as the lecturer wrote it).
         add("RET-2026-00457", "ORD-2026-118932", Marketplace.ZALANDO, ReturnStatus.NEW,
@@ -99,6 +141,31 @@ public class ReturnStore {
                 ReasonCode.WRONG_ITEM, "Falscher Artikel geliefert", "2026-09-23T11:20:00Z",
                 null, "CUST-88260", "f.becker@example.com",
                 item("SH-SHT-009-M", "Leinenhemd", 1, "39.9"));
+
+        // Orders of the web shop (no return yet) for returns reported by the web shop or by e-mail (POST). The
+        // return date of such a return is "now", so the delivery dates are relative to the start of the mock.
+        Instant now = Instant.now();
+        addShopOrder("ORD-2026-119001", now, 5, "CUST-90001", "j.mueller@example.com",
+                item("SH-BLZ-042-M", "Blazer Slim Fit", 1, "89.9"));
+        addShopOrder("ORD-2026-119002", now, 40, "CUST-90002", "k.hoffmann@example.com",
+                item("SH-JKT-088-L", "Winterjacke", 1, "129.0"));
+        addShopOrder("ORD-2026-119003", now, 3, "CUST-90003", "l.neumann@example.com",
+                item("SH-SNK-120-42", "Sneaker Urban", 1, "74.5"),
+                item("SH-PNT-031-32", "Chino Hose", 1, "49.9"));
+        addShopOrder("ORD-2026-119004", now, 4, "CUST-90004", "m.richter@example.com",
+                item("SH-JKT-088-L", "Winterjacke", 2, "129.0"),
+                item("SH-BLZ-042-M", "Blazer Slim Fit", 1, "89.9"));
+    }
+
+    /** Adds an order of the web shop that was delivered {@code deliveredDaysAgo} days before {@code now}. */
+    private void addShopOrder(String orderId, Instant now, int deliveredDaysAgo, String customerId, String email,
+                              Item... items) {
+        BigDecimal total = Arrays.stream(items)
+                .map(i -> i.unitPrice().multiply(BigDecimal.valueOf(i.quantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Instant delivered = now.minusSeconds(deliveredDaysAgo * 24L * 3600);
+        orders.put(orderId, new Order(orderId, null, delivered.minusSeconds(4L * 24 * 3600), delivered,
+                List.of(items), new Customer(customerId, email), total, "EUR"));
     }
 
     /** Short helper for the test data: an item in EUR. */

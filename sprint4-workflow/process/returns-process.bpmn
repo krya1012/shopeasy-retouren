@@ -241,7 +241,7 @@
       <bpmn:outgoing>f50</bpmn:outgoing>
     </bpmn:sendTask>
     <bpmn:serviceTask id="t_gr_rec" name="Check condition (gRPC)&#10;«System»">
-      <bpmn:documentation>Job worker "check-condition": gRPC CheckConditionBatch (Sprint 2, port 9090), then status INSPECTED. Retries: the gRPC client retries UNAVAILABLE 3 times, the job has 3 more retries; then an incident. ALREADY_EXISTS (job repeated) is answered with GetCheckResult. Output: conditionDecision (worst item: REJECT &gt; MANUAL_REVIEW &gt; ACCEPT), minConfidence, conditionResults.</bpmn:documentation>
+      <bpmn:documentation>Job worker "check-condition": gRPC CheckCondition per item (Sprint 2, port 9090), then status INSPECTED. One call per item and not the batch call: a batch is all or nothing, so a repeated job would get ALREADY_EXISTS for all items; per item the worker answers ALREADY_EXISTS with GetCheckResult. Retries: the gRPC client retries UNAVAILABLE 3 times, the job has 3 more attempts; then an incident. Output: conditionDecision (worst item: REJECT &gt; MANUAL_REVIEW &gt; ACCEPT), minConfidence, conditionResults.</bpmn:documentation>
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="check-condition" retries="3" />
       </bpmn:extensionElements>

@@ -26,7 +26,7 @@ Commands of a sprint run inside its folder, for Sprint 2: `cd sprint2-integratio
 - [Sprint 1 report](sprint1-bpm/SPRINT1-BERICHT.md) with diagrams: [as-is process](sprint1-bpm/ist-prozess.png), [target process](sprint1-bpm/soll-prozess.png)
 - The models in `sprint1-bpm/` are maintained in the Camunda Modeler; the diagrams (PNG) are exported there (File → Export as Image).
 - [Sprint 2: README](sprint2-integration/README.md), [task analysis](sprint2-integration/TASK-ANALYSIS.md), [demo script](sprint2-integration/DEMO-SCRIPT.md)
-- [Sprint 4: README](sprint4-workflow/README.md), [architecture and workflow model](sprint4-workflow/ARCHITECTURE.md)
+- [Sprint 4: README](sprint4-workflow/README.md), [architecture and workflow model](sprint4-workflow/ARCHITECTURE.md), [demo script](sprint4-workflow/DEMO-SCRIPT.md)
 - [AI use (mandatory documentation)](AI-USAGE.md): overview, one `AI-USAGE.md` file per sprint folder
 
 ## Note

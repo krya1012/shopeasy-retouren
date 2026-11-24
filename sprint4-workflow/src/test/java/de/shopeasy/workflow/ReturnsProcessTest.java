@@ -36,7 +36,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * <p>Each test is one demo case of the task: marketplace/e-mail entry, accepted, rejected, manual review, a service
  * that is not reachable.
  */
-@SpringBootTest(classes = WorkflowApplication.class)
+@SpringBootTest(classes = ProcessTestApplication.class)
 @CamundaSpringProcessTest
 @TestDeployment(resources = {
         "processes/returns-process.bpmn",

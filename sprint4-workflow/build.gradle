@@ -19,14 +19,25 @@ java {
 }
 
 def camundaVersion = '8.9.0'
+// Same versions as in sprint2-integration/grpc-service/build.gradle (that module hands them on only at runtime).
+def grpcVersion = '1.85.1'
+def protobufVersion = '4.36.2'
 
 dependencies {
     implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation "io.camunda:camunda-spring-boot-starter:${camundaVersion}"
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'org.springframework.boot:spring-boot-starter-restclient'
+    implementation 'tools.jackson.core:jackson-databind'
+    implementation 'de.shopeasy:grpc-service'
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+    implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation "io.camunda:camunda-process-test-spring:${camundaVersion}"
+    testImplementation "io.grpc:grpc-inprocess:${grpcVersion}"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

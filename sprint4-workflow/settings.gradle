@@ -1,1 +1,5 @@
 rootProject.name = 'shopeasy-workflow'
+
+// The gRPC module of Sprint 2 (client, generated classes) is used as a library, without copying the .proto file.
+// Gradle builds it on demand and replaces the dependency de.shopeasy:grpc-service by this project.
+includeBuild('../sprint2-integration')

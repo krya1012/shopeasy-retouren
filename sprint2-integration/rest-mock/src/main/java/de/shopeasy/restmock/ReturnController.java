@@ -1,19 +1,23 @@
 package de.shopeasy.restmock;
 
+import java.net.URI;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Return reports: list with filter, single call and status change.
+ * Return reports: list with filter, single call, creation (web shop / e-mail channel) and status change.
  *
  * <p><b>Spring Boot basics:</b>
  * <ul>
@@ -27,7 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
  *       {@code spring.mvc.problemdetails.enabled=true} the answer has the standard error format
  *       "ProblemDetail" (RFC 9457): {@code {"title":..., "status":404, "detail":...}}.</li>
  * </ul>
- * Status codes used: 200 ok, 400 bad request, 404 not found, 409 conflict (status change not allowed).
+ * Status codes used: 200 ok, 201 created, 400 bad request, 404 not found, 409 conflict (status change not allowed).
  */
 @RestController
 @RequestMapping("/api/v1/returns")
@@ -50,6 +54,48 @@ public class ReturnController {
     @GetMapping("/{returnId}")
     public ReturnReport get(@PathVariable String returnId) {
         return store.findReturn(returnId).orElseThrow(() -> notFound("Return", returnId));
+    }
+
+    /**
+     * {@code POST /api/v1/returns}: creates a return for the web shop or e-mail channel (status NEW, no marketplace).
+     * Answer 201 with the header {@code Location}. The optional header {@code Idempotency-Key} makes the call safe
+     * to repeat: the same key again answers 200 with the first return and creates nothing. 400 if the order, the
+     * e-mail or the articles are missing or invalid.
+     */
+    @PostMapping
+    public ResponseEntity<ReturnReport> create(@RequestBody CreateReturn request,
+                                               @RequestHeader(name = "Idempotency-Key", required = false) String key) {
+        validate(request);
+        ReturnStore.Created created = store.create(request, key);
+        if (!created.isNew()) {
+            return ResponseEntity.ok(created.report());
+        }
+        return ResponseEntity.created(URI.create("/api/v1/returns/" + created.report().returnId()))
+                .body(created.report());
+    }
+
+    private static void validate(CreateReturn request) {
+        if (request.orderId() == null || request.orderId().isBlank()) {
+            throw badRequest("The field 'orderId' is missing.");
+        }
+        if (request.customerEmail() == null || !request.customerEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw badRequest("The field 'customerEmail' is missing or not an e-mail address.");
+        }
+        if (request.items() == null || request.items().isEmpty()) {
+            throw badRequest("The field 'items' needs at least one article.");
+        }
+        for (CreateReturn.Line line : request.items()) {
+            if (line == null || line.sku() == null || line.sku().isBlank()) {
+                throw badRequest("Every article needs a 'sku'.");
+            }
+            if (line.quantity() < 1) {
+                throw badRequest("The quantity of article " + line.sku() + " must be at least 1.");
+            }
+        }
+    }
+
+    private static ResponseStatusException badRequest(String message) {
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
     }
 
     /**

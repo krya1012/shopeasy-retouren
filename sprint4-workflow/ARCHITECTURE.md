@@ -2,7 +2,7 @@
 
 Task: `Aufgabe DvG WS26_Sprint 4.pdf` (hand-in 8.12.2026, 11:30, ILIAS). Three parts: (1) system architecture with a workflow engine, (2) the target process as an executable Camunda model that uses the Sprint 2 services, has human tasks, gateways and rules, and handles errors, (3) a demo of the test cases.
 
-**State of this document (24.11.2026):** the model is complete and tested (part 1 and the model of part 2). The job workers that call the Sprint 2 services are the next step (section 9); until then the tests replace them with mocks.
+**State of this document (24.11.2026):** all three parts are implemented and tested: the model, the job workers that call the Sprint 2 services, and the demo ([DEMO-SCRIPT.md](DEMO-SCRIPT.md), every case was run live against the real services). Open: PNG export of the diagram (section 9).
 
 ## 1. Architecture
 
@@ -13,7 +13,7 @@ flowchart LR
         OPS["Operate<br/>(incidents, instances)"]
         TASK["Tasklist<br/>(user tasks with forms)"]
     end
-    subgraph WORK["workflow-workers (Spring Boot, Java) - next step"]
+    subgraph WORK["workflow-workers (Spring Boot, Java)"]
         POLL["marketplace poller"]
         JW["job workers<br/>create-return-case, assess-return,<br/>update-return-status, create-return-label,<br/>check-condition, issue-refund"]
     end
@@ -32,7 +32,7 @@ flowchart LR
     POLL --> ENG
     ENG <-- "jobs (gRPC, long polling)" --> JW
     JW -- "GET / POST / PATCH" --> REST
-    JW -- "CheckConditionBatch" --> GRPC
+    JW -- "CheckCondition per item" --> GRPC
     JW -- "ReturnStatusChanged" --> MQ
     MQ --> CONS
     CLERK -- "complete forms" --> TASK
@@ -75,7 +75,7 @@ File: [`process/returns-process.bpmn`](process/returns-process.bpmn), process ID
 | `t_expired` | close, parcel not received | job `update-return-status` | RabbitMQ, REST | `EXPIRED`, `CLOSED` |
 | `t_notify_in` | confirm goods receipt | job `update-return-status` | RabbitMQ, REST | `RECEIVED` |
 | `t_gr` | inspect and record condition | **user task** `inspect-condition` (warehouse) | – | – |
-| `t_gr_rec` | check condition | job `check-condition` | **gRPC** `CheckConditionBatch` | `INSPECTED` |
+| `t_gr_rec` | check condition | job `check-condition` | **gRPC** `CheckCondition` per item | `INSPECTED` |
 | `t_decide` | decide acceptance | **DMN** `acceptance-decision` | – | – |
 | `t_mrev`, `t_man2` | borderline case | job `update-return-status`, user task `review-borderline` | RabbitMQ, REST | `MANUAL_REVIEW` |
 | `t_reject` | decide further use of rejected goods | user task `decide-disposition` | – | – |
@@ -132,6 +132,35 @@ Both tables use the hit policy `FIRST`; the last rule is the catch-all. Every mi
 
 The exclusive gateways `gw1`, `gw_m1`, `gw2` and `gw_m2` each have a default flow that leads to a person (or to the rejection that a person decided), so an unexpected value cannot stop the process with a `CONDITION_ERROR`.
 
+### Workers and simulation
+
+The workers are in `src/main/java/de/shopeasy/workflow/` (package `workers`); start with `WorkflowApplication`, then `CreateReturnCaseWorker`.
+
+| Job type | Worker | What it does |
+|---|---|---|
+| `create-return-case` | `CreateReturnCaseWorker` | reads the marketplace return (`returnId`) or creates the web shop / e-mail return (`POST` with an idempotency key); collects order, days since delivery, items check, value |
+| `assess-return` | `AssessReturnWorker` | stub: reason category, fraud score |
+| `update-return-status` | `UpdateReturnStatusWorker` + `StatusService` | event to RabbitMQ first, then status in the REST mock, for each status of the list |
+| `create-return-label` | `CreateReturnLabelWorker` | simulated shipping API |
+| `check-condition` | `CheckConditionWorker` | gRPC `CheckCondition` per item (repeat-safe), then status `INSPECTED` |
+| `issue-refund` | `IssueRefundWorker` | simulated payment provider |
+| (start message) | `MarketplacePoller` | polls the REST mock every 10 seconds for new marketplace returns |
+
+The REST mock and RabbitMQ are used through `ReturnsApi` / `StatusEventSink` (own copies of the formats, as in Sprint 2: no shared code); the gRPC client and the generated classes come from `sprint2-integration/grpc-service` through a Gradle composite build. Why one `CheckCondition` call per item and not the batch: the batch is all or nothing, so a repeated job would get `ALREADY_EXISTS` for every item.
+
+The simulated systems are switched by the **e-mail address of the customer** (like the prefix `RET-FAIL` in Sprint 2):
+
+| E-mail | Effect |
+|---|---|
+| any other | normal: fraud score 0.1, label created, refund done |
+| `suspect@example.com` | fraud score 0.85: rule `UNCLEAR`, manual review |
+| `ai-down@example.com` | no fraud score: rule `UNCLEAR`, manual review |
+| `label-down@example.com` | shipping API down: 3 attempts, then BPMN error `LABEL_SERVICE_UNAVAILABLE`, manual label |
+| `no-iban@example.com`, `card-expired@example.com` | refund fails at once: BPMN error `REFUND_FAILED`, manual clarification |
+| `psp-timeout@example.com` | payment provider does not answer: 3 attempts, then `REFUND_FAILED` |
+
+Test data in the REST mock for the demo: marketplace returns `RET-2026-00457` and `RET-2026-00458` (status `NEW`); orders of the web shop `ORD-2026-119001` (delivered 5 days ago), `…119002` (40 days ago: too late), `…119003` (two items), `…119004` (value 347.90 EUR: over the limit of 300 EUR).
+
 ## 3. Changes compared with the Sprint 1 model
 
 | Change | Reason |
@@ -150,29 +179,39 @@ The exclusive gateways `gw1`, `gw_m1`, `gw2` and `gw_m2` each have a default flo
 | Level | Case | Behaviour | Test |
 |---|---|---|---|
 | Transient | gRPC `UNAVAILABLE` | the Sprint 2 `ConditionClient` retries three times | Sprint 2 tests |
-| Technical | REST mock, gRPC service or RabbitMQ not reachable | the job fails; the engine retries (`retries="3"` in the model, back-off set by the worker); at 0 retries an **incident** appears in Operate; after the service is back, an operator presses "Retry" and the case continues | `conditionServiceDownCreatesIncidentAndContinuesAfterRetry` |
+| Technical | REST mock, gRPC service or RabbitMQ not reachable | the job fails; the engine retries (`retries="3"` in the model, back-off set by the worker); at 0 retries an **incident** appears in Operate; after the service is back, an operator presses "Retry" and the case continues | `conditionServiceDownCreatesIncidentAndContinuesAfterRetry`, with the real workers `WorkersEndToEndTest.returnStoreDown...`, `brokerDown...` |
 | Business fallback | shipping API down | after the retries the worker throws the BPMN error `LABEL_SERVICE_UNAVAILABLE`; boundary event `b_label`; a clerk creates the label (`t_label_man`) | `labelServiceDownLeadsToManualLabel` |
 | Business fallback | refund fails (IBAN missing and card expired at once; payment timeout after retries) | BPMN error `REFUND_FAILED`; boundary event `b_refund`; a clerk clarifies (`t_refund_man`) | `failedRefundLeadsToManualClarification` |
 | Missing data | AI assessment fails, reason or order missing | the DMN returns `UNCLEAR`; manual review (`t_man1`) | `registrationCheckDecides` (8 rows) |
 | Timeout | parcel never arrives | timer after 21 days; `t_expired` closes the case | `parcelThatNeverArrivesClosesTheCase` |
-| Duplicate | job repeated after a partial success; same return reported twice | status updates skip statuses that are set; the events carry a fixed `eventId` per return and status, so the consumer ignores duplicates; the poller sets the message ID to the `returnId` | worker tests (next step) |
+| Duplicate | job repeated after a failure; same return started twice | `StatusService` first sends the event, then changes the status, and skips statuses the return already has; the `eventId` is derived from return and new status, so the receiver ignores a repeated event; `create-return-case` sends an `Idempotency-Key` (process instance), so no second return is created; the poller sends the return ID as correlation key, so Zeebe starts only one instance | `StatusServiceTest`, `CreateReturnCaseWorkerTest.repeatedJob...`, `WorkersEndToEndTest.pollerStartsOnlyOneInstance...` |
 
 ## 5. Demo test cases of the task
 
-| Task item | Case | Automated test (`ReturnsProcessTest`) | Live demo (next step) |
+| Task item | Case | Automated test (`ReturnsProcessTest`, mocked workers) | Live demo ([DEMO-SCRIPT.md](DEMO-SCRIPT.md)) |
 |---|---|---|---|
-| return by REST service | marketplace return, accepted, refund | `marketplaceReturnIsAcceptedAndRefunded` | poller + `RET-2026-00457` |
-| return by mail | e-mail, unclear, two manual reviews, accepted | `unclearEmailReturnGoesToManualReviewTwiceAndIsAccepted` | `c8ctl publish msg email-return-received` |
-| rejected | after the period (registration) | `returnAfterThePeriodIsRejectedAtRegistration` | seeded return, delivered 40 days ago |
-| rejected | after inspection, damaged | `returnIsRejectedAfterInspection` | – |
+| return by REST service | marketplace return, accepted, refund | `marketplaceReturnIsAcceptedAndRefunded` | case A: poller + `RET-2026-00457` |
+| return by mail | e-mail, unclear, two manual reviews, accepted | `unclearEmailReturnGoesToManualReviewTwiceAndIsAccepted` | case C: `c8ctl publish msg email-return-received` |
+| rejected | after the period (registration) | `returnAfterThePeriodIsRejectedAtRegistration` | case B: order `ORD-2026-119002`, delivered 40 days ago |
+| rejected | after inspection, damaged | `returnIsRejectedAfterInspection` | case F: `RET-2026-00458`, dress damaged |
 | rejected | clerk rejects an unclear registration | `clerkRejectsAnUnclearRegistration` | – |
-| manual review required | borderline condition | `unclearEmailReturn...` (second review `t_man2`) | – |
-| a service is not reachable | gRPC service down | `conditionServiceDownCreatesIncidentAndContinuesAfterRetry` | stop the gRPC service during `t_gr_rec` |
-| a service is not reachable | shipping API or payment | `labelServiceDown...`, `failedRefund...` | – |
+| manual review required | borderline condition | `unclearEmailReturn...` (second review `t_man2`) | case C: minor wear, `MANUAL_REVIEW` |
+| a service is not reachable | gRPC service down | `conditionServiceDownCreatesIncidentAndContinuesAfterRetry` | case D: stop the gRPC service during `t_gr_rec` |
+| a service is not reachable | shipping API or payment | `labelServiceDown...`, `failedRefund...` | case E: `label-down@example.com`, `psp-timeout@example.com` |
 
 ## 6. Tests
 
-`./gradlew test` in this folder runs **24 tests** (9 process tests, 8 + 7 table rows for the two DMN decisions) against an embedded Camunda engine (Camunda Process Test 8.9, Testcontainers, needs Docker). The tests deploy the files of the folder `process/` (the build puts them on the classpath) and replace the workers with mocks. They prove the routing, not the worker code. Checks without a cluster: `c8ctl bpmn lint process/returns-process.bpmn` (clean), `npx dmnlint` (clean), form files against the official Camunda form schema (valid).
+`./gradlew test` in this folder runs **91 tests** (about 1.5 minutes, needs Docker for Camunda Process Test):
+
+| Class | Tests | What it proves |
+|---|---|---|
+| `ReturnsProcessTest` | 24 | the model with **mocked workers**: routing of every gateway, both rule tables row by row, user tasks, timer, error boundary events, incident and retry |
+| `WorkersEndToEndTest` | 7 | the model with the **real workers** and the **real gRPC service** of Sprint 2 (in-process); return store and broker in memory: marketplace case started by the poller to `CLOSED` with all seven events, rejected after the period, AI outage to a person, return store down (incident, repair, no second return), broker down, shipping API down, one instance per return |
+| `StatusServiceTest`, `RabbitStatusEventSinkTest`, `StatusTransitionsContractTest` | 17 | status changes, repeat after a failure, sender with confirms, nack, returned message, retries; the table of allowed changes equals the shared contract of Sprint 2 |
+| `CreateReturnCaseWorkerTest`, `SimulatedWorkersTest`, `UpdateReturnStatusWorkerTest`, `CheckConditionWorkerTest` | 33 | every worker, including the simulation triggers and how each error is reported (temporary, permanent, BPMN error); the check runs against the real gRPC service |
+| `RestReturnsApiTest` | 10 | the HTTP calls and the translation of 404, 409, 5xx and "no answer" |
+
+The tests deploy the files of the folder `process/` (the build puts them on the classpath), so they test exactly what is in the repository. Checks without a cluster: `c8ctl bpmn lint process/returns-process.bpmn` (clean), `npx dmnlint` (clean), form files against the official Camunda form schema (valid). The Sprint 2 REST mock has its own tests (`./gradlew :rest-mock:test` in `sprint2-integration`, now with the new POST).
 
 ## 7. Assumptions
 
@@ -182,7 +221,7 @@ The exclusive gateways `gw1`, `gw_m1`, `gw2` and `gw_m2` each have a default flo
 | Fraud score 0.7 and value 300 EUR are the limits for a manual check | both DMNs | team / lecturer |
 | Label API, payment provider and AI assessment are simulated | workers | lecturer: is a simulation enough for the demo? |
 | Mail intake is simulated (message with the mail text, a clerk types the data) | `s_mail`, `t_parse` | the task keeps this step manual in Sprint 4 |
-| The REST mock gets `POST /api/v1/returns` | next step | lecturer: change of a Sprint 2 component is fine? |
+| The REST mock got `POST /api/v1/returns` and four orders of the web shop (delivery dates relative to the start) | `sprint2-integration/rest-mock` | lecturer: change of a Sprint 2 component is fine? |
 | Camunda 8.9 model, run on the local c8run (installed: 8.10.4) | `executionPlatformVersion` 8.9.0 | the model deploys and runs on both |
 
 ## 8. Questions for the lecturer (the task asks to agree on the implementation)
@@ -191,9 +230,8 @@ The exclusive gateways `gw1`, `gw_m1`, `gw2` and `gw_m2` each have a default flo
 2. May we add `POST /api/v1/returns` to the REST mock so that web shop and e-mail returns also live in the central store?
 3. Is a clerk typing the e-mail data into a form the intended Sprint 4 variant for `t_parse`?
 
-## 9. Next step
+## 9. Open
 
-1. REST mock: `POST /api/v1/returns` (201, `Idempotency-Key`), seeded return for the "too late" case; tests.
-2. Worker application in `src/main/java/de/shopeasy/workflow/`: the six job workers and the marketplace poller; the `ConditionClient` and the generated gRPC classes come from `../sprint2-integration` (Gradle composite build); unit tests per worker.
-3. Demo script (one command per step, like Sprint 2) and an ERP check with the real page.
-4. Export of the diagram as PNG from the Camunda Modeler (`File → Export as Image`) into `process/returns-process.png`.
+1. Export of the diagram as PNG from the Camunda Modeler (`File → Export as Image`) into `process/returns-process.png`.
+2. Answers of the lecturer to the questions in section 8 and the assumptions in section 7.
+3. Sprint 5 replaces `t_parse` (AI agent, n8n), `t_ai` (AI agent) and `t_stock` (UiPath bot); the job types, IDs and variables stay.

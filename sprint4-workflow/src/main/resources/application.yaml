@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: shopeasy-workflow
+  main:
+    banner-mode: off
+  # RabbitMQ as in sprint2-integration/messaging-producer: wait for the broker's answer (confirm) and get the
+  # message back if no queue takes it (returns, mandatory)
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    connection-timeout: 3s
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+
+# Camunda cluster: the defaults of the starter are the local cluster (gRPC 26500, REST 8080)
+camunda:
+  client:
+    mode: self-managed
+
+workflow:
+  # the Sprint 2 REST mock runs on 8081, because Camunda uses 8080 (./gradlew :rest-mock:bootRun --args='--server.port=8081')
+  rest-mock-url: http://localhost:8081
+  grpc-target: localhost:9090
+  # pause before the engine hands a failed job to the worker again (the model allows 3 attempts)
+  retry-backoff: PT5S
+  poller:
+    enabled: true
+    interval: PT10S
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss} %-5level %msg%n"
+  level:
+    io.camunda.client.impl.CamundaCallCredentials: ERROR
